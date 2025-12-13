@@ -1,9 +1,6 @@
-import { prisma } from '@/lib/prisma'
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { ArrowLeft, Download, Printer, Pencil } from 'lucide-react'
-// import { QuoteDocument } from '@/lib/pdf'
-// import dynamic from 'next/dynamic'
 
 // We need a client component to render the PDF download link because @react-pdf/renderer works on client
 import QuotePDFClient from './pdf-client'
@@ -23,6 +20,7 @@ export const dynamic = 'force-dynamic'
 
 
 export default async function QuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { prisma } = await import('@/lib/prisma')
     const { id } = await params
     const quote = await prisma.quote.findUnique({
         where: { id },

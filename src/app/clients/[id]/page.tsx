@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, FileText, Pencil } from "lucide-react"
 import Link from "next/link"
@@ -8,6 +7,7 @@ import { ClientFormDialog } from "@/components/client-form-dialog"
 export const dynamic = 'force-dynamic'
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
+    const { prisma } = await import('@/lib/prisma')
     const { id } = params
     const client = await prisma.client.findUnique({
         where: { id },

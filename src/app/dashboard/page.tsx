@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { Plus, FileText } from 'lucide-react'
@@ -7,6 +6,7 @@ import { DashboardClient } from '@/components/dashboard-client'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+    const { prisma } = await import('@/lib/prisma')
     const quotes = await prisma.quote.findMany({
         include: { client: true },
         orderBy: { updatedAt: 'desc' }
