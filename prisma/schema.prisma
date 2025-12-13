@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("staff")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+}
+
+model Quote {
+  id           String      @id @default(cuid())
+  project_name String
+  date         DateTime    @default(now())
+  status       String      @default("DRAFT") // DRAFT, SAVED, EXPORTED
+  
+  // Financials
+  subtotal     Float       @default(0)
+  iva_rate     Float       @default(0.16)
+  iva_amount   Float       @default(0)
+  isr_rate     Float       @default(0)
+  isr_amount   Float       @default(0)
+  profit_rate  Float       @default(0) // Margin percentage
+  profit_amount Float      @default(0)
+  total        Float       @default(0)
+
+  // Relations
+  clientId     String
+  client       Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
+  
+  items        QuoteItem[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model QuoteItem {
+  id                String   @id @default(cuid())
+  quoteId           String
+  quote             Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  concept           String
+  quantity          Float    @default(1)
+  
+  // Cost Analysis
+  internal_unit_cost Float   @default(0)
+  
+  // Breakdown
+  cost_article      Float    @default(0)
+  cost_workforce    Float    @default(0) // Personalización / Mano de obra
+  cost_packaging    Float    @default(0)
+  cost_transport    Float    @default(0)
+  cost_equipment    Float    @default(0) // Equipos / Insumos
+  cost_other        Float    @default(0)
+
+  profit_margin     Float    @default(0) // Percentage (e.g., 0.30 for 30%)
+  
+  unit_cost         Float    @default(0) // Client facing price (Calculated)
+  subtotal          Float    @default(0) // quantity * unit_cost
+}
+
+
