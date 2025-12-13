@@ -1,10 +1,10 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function saveQuote(data: any) {
+    const { prisma } = await import('@/lib/prisma')
     // data is the JSON payload from the client state
     // In a real app we should validate this with Zod again
 
@@ -77,6 +77,7 @@ export async function saveQuote(data: any) {
 }
 
 export async function updateQuote(id: string, data: any) {
+    const { prisma } = await import('@/lib/prisma')
     // 1. Update/Find Client (Assumption: Update the client associated with the quote)
     // Actually, modifying the client here might affect other quotes if we reused clients.
     // For now, let's just update the client info because in this MVP clients are likely 1:1 or we want to update the master record.
@@ -149,6 +150,7 @@ export async function updateQuote(id: string, data: any) {
 }
 
 export async function updateQuoteStatus(id: string, status: string) {
+    const { prisma } = await import('@/lib/prisma')
     try {
         await prisma.quote.update({
             where: { id },
@@ -163,6 +165,7 @@ export async function updateQuoteStatus(id: string, status: string) {
 }
 
 export async function deleteQuote(id: string) {
+    const { prisma } = await import('@/lib/prisma')
     try {
         await prisma.quote.delete({
             where: { id }

@@ -1,6 +1,5 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
@@ -11,6 +10,7 @@ const LoginSchema = z.object({
 })
 
 export async function login(prevState: any, formData: FormData) {
+    const { prisma } = await import('@/lib/prisma')
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 

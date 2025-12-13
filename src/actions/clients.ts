@@ -1,6 +1,5 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export type ClientState = {
@@ -14,6 +13,7 @@ export type ClientState = {
 }
 
 export async function getClients() {
+    const { prisma } = await import('@/lib/prisma')
     return await prisma.client.findMany({
         orderBy: { name: 'asc' },
         include: {
@@ -25,6 +25,7 @@ export async function getClients() {
 }
 
 export async function createClient(prevState: ClientState, formData: FormData) {
+    const { prisma } = await import('@/lib/prisma')
     const name = formData.get('name') as string
     const company = formData.get('company') as string
     const email = formData.get('email') as string
@@ -59,6 +60,7 @@ export async function createClient(prevState: ClientState, formData: FormData) {
 }
 
 export async function updateClient(id: string, prevState: ClientState, formData: FormData) {
+    const { prisma } = await import('@/lib/prisma')
     const name = formData.get('name') as string
     const company = formData.get('company') as string
     const email = formData.get('email') as string
@@ -86,6 +88,7 @@ export async function updateClient(id: string, prevState: ClientState, formData:
 }
 
 export async function deleteClient(id: string) {
+    const { prisma } = await import('@/lib/prisma')
     try {
         await prisma.client.delete({
             where: { id }
