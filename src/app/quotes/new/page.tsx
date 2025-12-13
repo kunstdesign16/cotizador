@@ -2,8 +2,10 @@ import { saveQuote } from '@/actions/quotes'
 import { getClients } from '@/actions/clients'
 import QuoteForm from '@/components/quote-form'
 
-export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ clientId?: string }> }) {
-    const { clientId } = await searchParams
+export const dynamic = 'force-dynamic'
+
+export default async function NewQuotePage({ searchParams }: { searchParams: { client?: string } }) {
+    const { client: clientId } = searchParams
     const clients = await getClients()
 
     // Pre-fill data if clientId is present
