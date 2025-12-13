@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { Plus, FileText } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
     const quotes = await prisma.quote.findMany({
         include: { client: true },

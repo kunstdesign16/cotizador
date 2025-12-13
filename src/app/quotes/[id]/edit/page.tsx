@@ -2,10 +2,12 @@ import { updateQuote } from '@/actions/quotes'
 import { getClients } from '@/actions/clients'
 import QuoteForm, { QuoteFormData } from '@/components/quote-form'
 import { prisma } from '@/lib/prisma'
-import { notFound } from 'next/navigation'
+import { notFound } from "next/navigation"
 
-export default async function EditQuotePage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params
+export const dynamic = 'force-dynamic'
+
+export default async function EditQuotePage({ params }: { params: { id: string } }) {
+    const { id } = params
     const [quote, clients] = await Promise.all([
         prisma.quote.findUnique({
             where: { id },

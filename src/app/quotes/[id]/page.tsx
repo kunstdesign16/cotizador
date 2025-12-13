@@ -11,6 +11,11 @@ import PrintButton from './print-button'
 import { QuoteStatusSelector } from '@/components/quote-status-selector'
 import DeleteQuoteButton from '@/components/delete-quote-button'
 
+export const dynamic = 'force-dynamic'
+
+// Force dynamic rendering for this page since it relies on DB data that changes 
+// and we want fresh data on every request.
+
 // Ensure we are passing only what is needed. The QuotePDFClient takes the whole quote object.
 // The PDF generation inside QuoteDocument uses item.unit_cost.
 // In our schema, item.unit_cost is the CLIENT price. item.internal_unit_cost is internal.

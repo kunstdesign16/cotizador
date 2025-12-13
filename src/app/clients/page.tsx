@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import { ClientExportButton } from "@/components/client-export-button"
 import { ClientImportButton } from "@/components/client-import-button"
 
+export const dynamic = 'force-dynamic'
+
 export default async function ClientsPage() {
     const clients = await getClients()
 
