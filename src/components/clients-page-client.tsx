@@ -117,11 +117,13 @@ export function ClientsPageClient({ clients }: { clients: any[] }) {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className="text-right">
+                                                            <div className="text-right flex flex-col gap-1">
                                                                 <p className="font-semibold text-sm">
                                                                     ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                                                 </p>
-                                                                <p className="text-xs text-muted-foreground">{quote.status}</p>
+                                                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                                                                    {quote.status}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </Link>

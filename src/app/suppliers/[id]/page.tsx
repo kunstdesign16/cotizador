@@ -1,10 +1,10 @@
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
-import { ProductImportForm } from "@/components/product-import-form"
+import { ProductImportDialog } from "@/components/product-import-dialog"
 import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Plus, Pencil, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, Plus, Pencil, Trash2, Download } from 'lucide-react'
 import Link from "next/link"
 import { notFound } from 'next/navigation'
 
@@ -53,24 +53,24 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                     </form>
                 </header>
 
-                {/* Import Section */}
-                <section className="bg-card border rounded-xl p-6 shadow-sm">
-                    <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                        <Upload className="h-5 w-5 text-primary" />
-                        Importar Lista de Precios
-                    </h2>
-                    <ProductImportForm supplierId={id} supplierName={supplier.name} />
-                </section>
-
                 {/* Products Table */}
                 <section className="bg-card border rounded-xl shadow-sm overflow-hidden">
                     <div className="p-6 border-b flex justify-between items-center">
                         <h2 className="font-semibold text-lg">Catálogo de Productos</h2>
-                        <ProductFormDialog supplierId={id}>
-                            <Button size="sm" className="gap-2">
-                                <Plus className="h-4 w-4" /> Agregar Producto
-                            </Button>
-                        </ProductFormDialog>
+                        <div className="flex gap-2">
+                            <Link href={`/api/suppliers/${supplier.id}/products/export`}>
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    <Download className="h-4 w-4" />
+                                    Exportar Excel
+                                </Button>
+                            </Link>
+                            <ProductImportDialog supplierId={supplier.id} />
+                            <ProductFormDialog supplierId={id}>
+                                <Button size="sm" className="gap-2">
+                                    <Plus className="h-4 w-4" /> Agregar Producto
+                                </Button>
+                            </ProductFormDialog>
+                        </div>
                     </div>
 
                     <div className="p-6">
