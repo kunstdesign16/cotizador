@@ -323,13 +323,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                 <tr>
                                     <th className="px-4 py-3 min-w-[200px]">Concepto</th>
                                     <th className="px-4 py-3 w-20 text-center">Cant.</th>
-                                    {/* Cost Breakdown Fields */}
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900 border-l">Artículo</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Mano Obra</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Empaque</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Transporte</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Equipo</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Otros</th>
+                                    <th className="px-4 py-3 w-40 text-right bg-blue-50/50 text-blue-900 border-l">Costo Int.</th>
                                     <th className="px-4 py-3 w-24 text-right bg-blue-50/50 text-blue-900">% Margen</th>
                                     <th className="px-4 py-3 w-32 text-right border-l font-semibold">P. Unitario</th>
                                     <th className="px-4 py-3 w-32 text-right font-semibold">Total</th>
@@ -356,69 +350,22 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                             />
                                         </td>
 
-                                        {/* Cost Breakdown - Each with Product Search */}
+                                        {/* Internal Inputs (With Dialog Trigger) */}
                                         <td className="p-2 bg-blue-50/30 border-l border-blue-100">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_article.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_article', val)}
-                                                onSelect={(product) => {
-                                                    handleItemChange(item.id, 'cost_article', product.price.toString())
-                                                    // Store product metadata
-                                                    setItems(items.map(i => {
-                                                        if (i.id === item.id) {
-                                                            return {
-                                                                ...i,
-                                                                productId: product.id,
-                                                                productCode: product.code,
-                                                                productName: product.name,
-                                                                supplierPrice: product.price
-                                                            }
-                                                        }
-                                                        return i
-                                                    }))
-                                                }}
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="p-2 bg-blue-50/30">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_workforce.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_workforce', val)}
-                                                onSelect={(product) => handleItemChange(item.id, 'cost_workforce', product.price.toString())}
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="p-2 bg-blue-50/30">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_packaging.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_packaging', val)}
-                                                onSelect={(product) => handleItemChange(item.id, 'cost_packaging', product.price.toString())}
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="p-2 bg-blue-50/30">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_transport.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_transport', val)}
-                                                onSelect={(product) => handleItemChange(item.id, 'cost_transport', product.price.toString())}
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="p-2 bg-blue-50/30">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_equipment.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_equipment', val)}
-                                                onSelect={(product) => handleItemChange(item.id, 'cost_equipment', product.price.toString())}
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="p-2 bg-blue-50/30">
-                                            <ItemProductAutocomplete
-                                                value={item.cost_other.toString()}
-                                                onChange={(val) => handleItemChange(item.id, 'cost_other', val)}
-                                                onSelect={(product) => handleItemChange(item.id, 'cost_other', product.price.toString())}
-                                                placeholder="0.00"
-                                            />
+                                            <div className="flex items-center justify-end gap-2 px-2">
+                                                <span className="text-sm font-medium text-blue-900">
+                                                    ${item.internal_unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                </span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                                                    onClick={() => setEditingCostId(item.id)}
+                                                    title="Editar Costos Detallados"
+                                                >
+                                                    <Settings2 className="h-3 w-3" />
+                                                </Button>
+                                            </div>
                                         </td>
                                         <td className="p-2 bg-blue-50/30">
                                             <div className="flex items-center justify-end px-2">
