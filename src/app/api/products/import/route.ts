@@ -66,11 +66,17 @@ export async function POST(req: NextRequest) {
         // Auto-detect format by checking header row
         let format: 'LP_MEXICO' | 'PROMO_OPCION' = 'LP_MEXICO'
         const headerRow = sheet.getRow(1)
+        const col1Header = headerRow.getCell(1).value?.toString().toUpperCase() || ''
         const col2Header = headerRow.getCell(2).value?.toString().toUpperCase() || ''
         const col3Header = headerRow.getCell(3).value?.toString().toUpperCase() || ''
 
-        // Format detection: if col2 is "CÓDIGO" and col3 is "NOMBRE", it's PROMO_OPCION format
-        if (col2Header.includes('CÓDIGO') && col3Header.includes('NOMBRE')) {
+        // Format detection: Check if it's the simple 3-column format
+        // Col1=CÓDIGO, Col2=NOMBRE, Col3=PRECIO
+        if (col1Header.includes('CÓDIGO') && col2Header.includes('NOMBRE') && col3Header.includes('PRECIO')) {
+            format = 'PROMO_OPCION'
+        }
+        // Also check if col2=NOMBRE and col3=PRECIO (código might be in col1 without header)
+        else if (col2Header.includes('NOMBRE') && col3Header.includes('PRECIO')) {
             format = 'PROMO_OPCION'
         }
 
@@ -82,10 +88,10 @@ export async function POST(req: NextRequest) {
             let code: string, parentCode: string | null, name: string, category: string | null, priceType: string | null, price: number
 
             if (format === 'PROMO_OPCION') {
-                // Format: Col2=Code, Col3=Name, Col4=Price
-                const codeVal = row.getCell(2).value
-                const nameVal = row.getCell(3).value
-                const priceVal = row.getCell(4).value
+                // Format: Col1=Code, Col2=Name, Col3=Price
+                const codeVal = row.getCell(1).value
+                const nameVal = row.getCell(2).value
+                const priceVal = row.getCell(3).value
 
                 if (!codeVal || !nameVal) return
 
