@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LayoutDashboard, Users, LogOut } from "lucide-react"
+import { LayoutDashboard, Users, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Navbar() {
@@ -13,21 +13,34 @@ export function Navbar() {
                         </Link>
 
                         <div className="hidden md:flex items-center gap-4">
-                            <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-                                <Users className="h-4 w-4" />
-                                Clientes
-                            </Button>
-                        </Link>
+                            <Link href="/dashboard">
+                                <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+                                    <LayoutDashboard className="h-4 w-4" />
+                                    Proyectos
+                                </Button>
+                            </Link>
+                            <Link href="/clients">
+                                <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+                                    <Users className="h-4 w-4" />
+                                    Clientes
+                                </Button>
+                            </Link>
+                            <Link href="/suppliers">
+                                <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+                                    <Package className="h-4 w-4" />
+                                    Proveedores
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
-                        AD
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                            AD
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        </nav >
+        </nav>
     )
 }
