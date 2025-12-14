@@ -334,36 +334,11 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                 {items.map((item) => (
                                     <tr key={item.id} className="group hover:bg-muted/5">
                                         <td className="p-2 relative">
-                                            <ItemProductAutocomplete
+                                            <Input
                                                 value={item.concept}
-                                                onChange={(val) => handleItemChange(item.id, 'concept', val)}
-                                                onSelect={(product) => {
-                                                    // Update item with product metadata (stored but not displayed)
-                                                    setItems(items.map(i => {
-                                                        if (i.id === item.id) {
-                                                            return {
-                                                                ...i,
-                                                                concept: product.name,
-                                                                productId: product.id,
-                                                                productCode: product.code,
-                                                                productName: product.name,
-                                                                supplierPrice: product.price
-                                                            }
-                                                        }
-                                                        return i
-                                                    }))
-
-                                                    // Update costs
-                                                    handleCostUpdate(item.id, {
-                                                        cost_article: product.price,
-                                                        cost_workforce: item.cost_workforce,
-                                                        cost_packaging: item.cost_packaging,
-                                                        cost_transport: item.cost_transport,
-                                                        cost_equipment: item.cost_equipment,
-                                                        cost_other: item.cost_other
-                                                    })
-                                                }}
+                                                onChange={(e) => handleItemChange(item.id, 'concept', e.target.value)}
                                                 placeholder="Descripción..."
+                                                className="border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -374,22 +349,70 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                                 className="border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2 text-center"
                                             />
                                         </td>
-                                        {/* Internal Inputs (With Dialog Trigger) */}
+
+                                        {/* Cost Breakdown - Each with Product Search */}
                                         <td className="p-2 bg-blue-50/30 border-l border-blue-100">
-                                            <div className="flex items-center justify-end gap-2 px-2">
-                                                <span className="text-sm font-medium text-blue-900">
-                                                    ${item.internal_unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                                </span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-6 w-6 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
-                                                    onClick={() => setEditingCostId(item.id)}
-                                                    title="Editar Costos Detallados"
-                                                >
-                                                    <Settings2 className="h-3 w-3" />
-                                                </Button>
-                                            </div>
+                                            <ItemProductAutocomplete
+                                                value={item.cost_article.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_article', val)}
+                                                onSelect={(product) => {
+                                                    handleItemChange(item.id, 'cost_article', product.price.toString())
+                                                    // Store product metadata
+                                                    setItems(items.map(i => {
+                                                        if (i.id === item.id) {
+                                                            return {
+                                                                ...i,
+                                                                productId: product.id,
+                                                                productCode: product.code,
+                                                                productName: product.name,
+                                                                supplierPrice: product.price
+                                                            }
+                                                        }
+                                                        return i
+                                                    }))
+                                                }}
+                                                placeholder="0.00"
+                                            />
+                                        </td>
+                                        <td className="p-2 bg-blue-50/30">
+                                            <ItemProductAutocomplete
+                                                value={item.cost_workforce.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_workforce', val)}
+                                                onSelect={(product) => handleItemChange(item.id, 'cost_workforce', product.price.toString())}
+                                                placeholder="0.00"
+                                            />
+                                        </td>
+                                        <td className="p-2 bg-blue-50/30">
+                                            <ItemProductAutocomplete
+                                                value={item.cost_packaging.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_packaging', val)}
+                                                onSelect={(product) => handleItemChange(item.id, 'cost_packaging', product.price.toString())}
+                                                placeholder="0.00"
+                                            />
+                                        </td>
+                                        <td className="p-2 bg-blue-50/30">
+                                            <ItemProductAutocomplete
+                                                value={item.cost_transport.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_transport', val)}
+                                                onSelect={(product) => handleItemChange(item.id, 'cost_transport', product.price.toString())}
+                                                placeholder="0.00"
+                                            />
+                                        </td>
+                                        <td className="p-2 bg-blue-50/30">
+                                            <ItemProductAutocomplete
+                                                value={item.cost_equipment.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_equipment', val)}
+                                                onSelect={(product) => handleItemChange(item.id, 'cost_equipment', product.price.toString())}
+                                                placeholder="0.00"
+                                            />
+                                        </td>
+                                        <td className="p-2 bg-blue-50/30">
+                                            <ItemProductAutocomplete
+                                                value={item.cost_other.toString()}
+                                                onChange={(val) => handleItemChange(item.id, 'cost_other', val)}
+                                                onSelect={(product) => handleItemChange(item.id, 'cost_other', product.price.toString())}
+                                                placeholder="0.00"
+                                            />
                                         </td>
                                         <td className="p-2 bg-blue-50/30">
                                             <div className="flex items-center justify-end px-2">
