@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ClientsPage() {
     const clients = await getClients()
+    const serializedClients = JSON.parse(JSON.stringify(clients))
 
     return (
         <div className="min-h-screen bg-background p-8">
@@ -43,14 +44,14 @@ export default async function ClientsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {clients.length === 0 ? (
+                            {serializedClients.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="p-8 text-center text-muted-foreground">
                                         No hay clientes registrados. Crea una cotización para agregar uno.
                                     </td>
                                 </tr>
                             ) : (
-                                clients.map((client) => (
+                                serializedClients.map((client: any) => (
                                     <tr key={client.id} className="group hover:bg-muted/5">
                                         <td className="p-4 font-medium">
                                             <Link href={`/clients/${client.id}`} className="hover:underline text-blue-600 font-semibold">

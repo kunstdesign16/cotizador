@@ -5,9 +5,9 @@ import { notFound } from "next/navigation"
 
 export const dynamic = 'force-dynamic'
 
-export default async function EditQuotePage({ params }: { params: { id: string } }) {
+export default async function EditQuotePage({ params }: { params: Promise<{ id: string }> }) {
     const { prisma } = await import('@/lib/prisma')
-    const { id } = params
+    const { id } = await params
     const [quote, clients] = await Promise.all([
         prisma.quote.findUnique({
             where: { id },

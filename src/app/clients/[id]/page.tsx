@@ -6,9 +6,9 @@ import { ClientFormDialog } from "@/components/client-form-dialog"
 
 export const dynamic = 'force-dynamic'
 
-export default async function ClientDetailPage({ params }: { params: { id: string } }) {
+export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { prisma } = await import('@/lib/prisma')
-    const { id } = params
+    const { id } = await params
     const client = await prisma.client.findUnique({
         where: { id },
         include: {
