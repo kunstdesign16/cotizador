@@ -16,6 +16,9 @@ export default async function DashboardPage() {
         orderBy: { name: 'asc' }
     })
 
+    const serializedQuotes = JSON.parse(JSON.stringify(quotes))
+    const serializedClients = JSON.parse(JSON.stringify(clients))
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="mx-auto max-w-6xl space-y-8">
@@ -40,7 +43,7 @@ export default async function DashboardPage() {
                     </div>
                 </header>
 
-                <DashboardClient quotes={quotes as any} clients={clients} />
+                <DashboardClient quotes={serializedQuotes} clients={serializedClients} />
             </div>
         </div>
     )

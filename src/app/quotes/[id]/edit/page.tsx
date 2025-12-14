@@ -57,11 +57,13 @@ export default async function EditQuotePage({ params }: { params: { id: string }
     // We need to bind the ID to the server action
     const updateQuoteWithId = updateQuote.bind(null, id)
 
+    const serializedClients = JSON.parse(JSON.stringify(clients))
+
     return (
         <QuoteForm
             title="Editar Cotización"
             initialData={formData}
-            clients={clients}
+            clients={serializedClients}
             action={updateQuoteWithId}
         />
     )

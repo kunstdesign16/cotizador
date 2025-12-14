@@ -29,6 +29,8 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
 
     if (!quote) return <div>Cotización no encontrada</div>
 
+    const serializedQuote = JSON.parse(JSON.stringify(quote))
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="mx-auto max-w-4xl space-y-8">
@@ -45,7 +47,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
                             <QuoteStatusSelector id={quote.id} currentStatus={quote.status} />
                         </div>
 
-                        <QuotePDFClient quote={quote} />
+                        <QuotePDFClient quote={serializedQuote} />
                         <Link href={`/quotes/${quote.id}/edit`}>
                             <Button variant="outline">
                                 <Pencil className="mr-2 h-4 w-4" /> Editar

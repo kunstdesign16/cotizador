@@ -27,11 +27,13 @@ export default async function NewQuotePage({ searchParams }: { searchParams: { c
         }
     }
 
+    const serializedClients = JSON.parse(JSON.stringify(clients))
+
     return (
         <QuoteForm
             title="Nueva Cotización (Costo + Margen)"
             action={saveQuote}
-            clients={clients}
+            clients={serializedClients}
             initialData={initialData}
         />
     )
