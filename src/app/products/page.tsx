@@ -39,7 +39,7 @@ export default async function ProductsPage() {
                             </div>
                         ) : (
                             <div className="grid gap-4">
-                                {suppliers.map(sup => (
+                                {suppliers.map((sup: any) => (
                                     <div key={sup.id} className="bg-card border p-4 rounded-lg flex justify-between items-center shadow-sm">
                                         <div>
                                             <div className="font-bold">{sup.name}</div>

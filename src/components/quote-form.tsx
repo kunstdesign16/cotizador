@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import QuoteItemCostDialog from './quote-item-cost-dialog'
 
 import { ClientCombobox } from './client-combobox'
+import { ItemProductAutocomplete } from "@/components/item-product-autocomplete"
 
 // Types
 export type QuoteItem = {
@@ -327,12 +328,45 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                             <tbody className="divide-y divide-border">
                                 {items.map((item) => (
                                     <tr key={item.id} className="group hover:bg-muted/5">
-                                        <td className="p-2">
-                                            <Input
+                                        import {ItemProductAutocomplete} from "@/components/item-product-autocomplete"
+
+                                        // ... imports
+
+                                        // Inside quote-form component
+                                        // ...
+
+                                        <td className="p-2 relative">
+                                            <ItemProductAutocomplete
                                                 value={item.concept}
-                                                onChange={e => handleItemChange(item.id, 'concept', e.target.value)}
+                                                onChange={(val) => handleItemChange(item.id, 'concept', val)}
+                                                onSelect={(product) => {
+                                                    // Update concept
+                                                    handleItemChange(item.id, 'concept', product.name)
+
+                                                    // Update cost (cost_article) which triggers total recalc
+                                                    // We need to trigger the full recalc logic that handleCostUpdate does, 
+                                                    // but handleCostUpdate takes an object.
+                                                    // We can manually call handleCostUpdate logic or reuse it.
+
+                                                    // Reusing logic by manually calling setStates is cleaner via a helper or 
+                                                    // creating a composite update. 
+                                                    // Let's replicate what handleCostUpdate does but for this specific triggered event.
+
+                                                    // Actually, we can just call handleCostUpdate with the new product price as cost_article
+                                                    // and keep others 0 or current?
+                                                    // Better: Keep existing costs? No, finding a product should probably override or at least set cost_article.
+                                                    // Assumption: Product Price is Base Cost (Article).
+
+                                                    handleCostUpdate(item.id, {
+                                                        cost_article: product.price,
+                                                        cost_workforce: item.cost_workforce,
+                                                        cost_packaging: item.cost_packaging,
+                                                        cost_transport: item.cost_transport,
+                                                        cost_equipment: item.cost_equipment,
+                                                        cost_other: item.cost_other
+                                                    })
+                                                }}
                                                 placeholder="Descripción..."
-                                                className="border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2"
                                             />
                                         </td>
                                         <td className="p-2">

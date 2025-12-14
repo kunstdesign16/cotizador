@@ -38,7 +38,13 @@ async function main() {
     console.log(`Reading rows from ${SHEET_NAME}...`)
 
     let count = 0
-    const productsToUpsert = []
+    const productsToUpsert: Array<{
+        code: string
+        name: string
+        category: string | null
+        price: number
+        supplierId: string
+    }> = []
 
     sheet.eachRow((row, rowNumber) => {
         if (rowNumber < START_ROW) return

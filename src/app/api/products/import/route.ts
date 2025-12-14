@@ -42,7 +42,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, message: 'No worksheet found' }, { status: 400 })
         }
 
-        const productsToUpsert: any[] = []
+        const productsToUpsert: Array<{
+            code: string
+            name: string
+            category: string | null
+            price: number
+            supplierId: string
+        }> = []
         const START_ROW = 8 // From inspection
 
         sheet.eachRow((row, rowNumber) => {
