@@ -17,6 +17,11 @@ export type QuoteItem = {
     id: string
     concept: string
     quantity: number
+    // Product Reference (optional)
+    productId?: string
+    productCode?: string
+    productName?: string
+    supplierPrice?: number
     internal_unit_cost: number
     // Cost Breakdown
     cost_article: number
@@ -333,7 +338,22 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                                 value={item.concept}
                                                 onChange={(val) => handleItemChange(item.id, 'concept', val)}
                                                 onSelect={(product) => {
-                                                    handleItemChange(item.id, 'concept', product.name)
+                                                    // Update item with product metadata (stored but not displayed)
+                                                    setItems(items.map(i => {
+                                                        if (i.id === item.id) {
+                                                            return {
+                                                                ...i,
+                                                                concept: product.name,
+                                                                productId: product.id,
+                                                                productCode: product.code,
+                                                                productName: product.name,
+                                                                supplierPrice: product.price
+                                                            }
+                                                        }
+                                                        return i
+                                                    }))
+
+                                                    // Update costs
                                                     handleCostUpdate(item.id, {
                                                         cost_article: product.price,
                                                         cost_workforce: item.cost_workforce,

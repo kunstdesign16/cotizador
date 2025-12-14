@@ -66,6 +66,13 @@ model QuoteItem {
   concept           String
   quantity          Float    @default(1)
   
+  // Product Reference (optional - for items from supplier catalog)
+  productId         String?
+  product           Product? @relation(fields: [productId], references: [id])
+  productCode       String?  // Snapshot of product code at time of quote
+  productName       String?  // Snapshot of product name
+  supplierPrice     Float?   // Snapshot of supplier price at time of quote
+  
   // Cost Analysis
   internal_unit_cost Float   @default(0)
   
@@ -103,6 +110,7 @@ model Product {
     priceType  String?  // NORMAL, ÚNICO, OUTLET
     supplierId String
     supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+    quoteItems QuoteItem[] // Products can be referenced in quotes
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
 

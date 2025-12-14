@@ -55,6 +55,11 @@ export async function saveQuote(data: any) {
                 create: data.items.map((item: any) => ({
                     concept: item.concept,
                     quantity: Number(item.quantity),
+                    // Product Reference
+                    productId: item.productId || null,
+                    productCode: item.productCode || null,
+                    productName: item.productName || null,
+                    supplierPrice: item.supplierPrice ? Number(item.supplierPrice) : null,
                     internal_unit_cost: Number(item.internal_unit_cost || 0),
                     // Breakdown
                     cost_article: Number(item.cost_article || 0),
@@ -121,27 +126,63 @@ export async function updateQuote(id: string, data: any) {
                 iva_amount,
                 isr_rate: Number(data.isr_rate || 0),
                 total: total - (subtotal * Number(data.isr_rate || 0)), // Ensure total subtracts ISR retention
-
-                items: {
-                    create: data.items.map((item: any) => ({
-                        concept: item.concept,
-                        quantity: Number(item.quantity),
-                        internal_unit_cost: Number(item.internal_unit_cost || 0),
-                        // Breakdown
-                        cost_article: Number(item.cost_article || 0),
-                        cost_workforce: Number(item.cost_workforce || 0),
-                        cost_packaging: Number(item.cost_packaging || 0),
-                        cost_transport: Number(item.cost_transport || 0),
-                        cost_equipment: Number(item.cost_equipment || 0),
-                        cost_other: Number(item.cost_other || 0),
-
-                        profit_margin: Number(item.profit_margin || 0),
-                        unit_cost: Number(item.unit_cost),
-                        subtotal: Number(item.subtotal)
-                    }))
-                }
             }
         })
+
+        // Create new items
+        const newItems = data.items.filter((item: any) => !item.dbId)
+        if (newItems.length > 0) {
+            await tx.quoteItem.createMany({
+                data: newItems.map((item: any) => ({
+                    quoteId: id,
+                    concept: item.concept,
+                    quantity: Number(item.quantity),
+                    // Product Reference
+                    productId: item.productId || null,
+                    productCode: item.productCode || null,
+                    productName: item.productName || null,
+                    supplierPrice: item.supplierPrice ? Number(item.supplierPrice) : null,
+                    internal_unit_cost: Number(item.internal_unit_cost || 0),
+                    cost_article: Number(item.cost_article || 0),
+                    cost_workforce: Number(item.cost_workforce || 0),
+                    cost_packaging: Number(item.cost_packaging || 0),
+                    cost_transport: Number(item.cost_transport || 0),
+                    cost_equipment: Number(item.cost_equipment || 0),
+                    cost_other: Number(item.cost_other || 0),
+                    profit_margin: Number(item.profit_margin || 0),
+                    unit_cost: Number(item.unit_cost),
+                    subtotal: Number(item.subtotal)
+                }))
+            })
+        }
+
+        // Re-create all items (including existing ones if they were deleted)
+        await tx.quoteItem.createMany({
+            data: data.items.map((item: any) => ({
+                quoteId: id,
+                concept: item.concept,
+                quantity: Number(item.quantity),
+                // Product Reference
+                productId: item.productId || null,
+                productCode: item.productCode || null,
+                productName: item.productName || null,
+                supplierPrice: item.supplierPrice ? Number(item.supplierPrice) : null,
+                internal_unit_cost: Number(item.internal_unit_cost || 0),
+                // Breakdown
+                cost_article: Number(item.cost_article || 0),
+                cost_workforce: Number(item.cost_workforce || 0),
+                cost_packaging: Number(item.cost_packaging || 0),
+                cost_transport: Number(item.cost_transport || 0),
+                cost_equipment: Number(item.cost_equipment || 0),
+                cost_other: Number(item.cost_other || 0),
+
+                profit_margin: Number(item.profit_margin || 0),
+                unit_cost: Number(item.unit_cost),
+                subtotal: Number(item.subtotal)
+            }))
+        })
+
+        return updatedQuote
     })
 
     revalidatePath('/dashboard')
