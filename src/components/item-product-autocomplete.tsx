@@ -89,7 +89,7 @@ export function ItemProductAutocomplete({ value, onChange, onSelect, placeholder
             </div>
 
             {open && results.length > 0 && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-[400px] rounded-md border bg-popover p-1 shadow-md text-popover-foreground">
+                <div className="absolute left-0 top-full z-50 mt-1 w-[400px] rounded-md border bg-white dark:bg-slate-900 p-1 shadow-lg text-popover-foreground">
                     <div className="max-h-[300px] overflow-auto py-1">
                         {results.map((product) => (
                             <button
@@ -111,7 +111,7 @@ export function ItemProductAutocomplete({ value, onChange, onSelect, placeholder
             )}
 
             {open && query.length >= 2 && !loading && results.length === 0 && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-[200px] rounded-md border bg-popover p-2 shadow-md text-muted-foreground text-xs">
+                <div className="absolute left-0 top-full z-50 mt-1 w-[200px] rounded-md border bg-white dark:bg-slate-900 p-2 shadow-lg text-muted-foreground text-xs">
                     No se encontraron productos.
                 </div>
             )}
