@@ -98,8 +98,8 @@ function ProductRow({ product, supplierId }: { product: any, supplierId: string 
             </td>
             <td className="p-4">
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${product.priceType === 'ÚNICO' ? 'bg-blue-100 text-blue-700' :
-                        product.priceType === 'OUTLET' ? 'bg-orange-100 text-orange-700' :
-                            'bg-gray-100 text-gray-700'
+                    product.priceType === 'OUTLET' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
                     }`}>
                     {product.priceType || 'NORMAL'}
                 </span>
@@ -118,6 +118,12 @@ function ProductActions({ product, supplierId }: { product: any, supplierId: str
     const { Button } = require('@/components/ui/button')
     const { Pencil, Trash2 } = require('lucide-react')
 
+    const handleDelete = async () => {
+        if (confirm('¿Estás seguro de eliminar este producto?')) {
+            await deleteProduct(product.id, supplierId)
+        }
+    }
+
     return (
         <div className="flex items-center justify-end gap-2">
             <ProductFormDialog supplierId={supplierId} product={product}>
@@ -125,14 +131,14 @@ function ProductActions({ product, supplierId }: { product: any, supplierId: str
                     <Pencil className="h-4 w-4" />
                 </Button>
             </ProductFormDialog>
-            <form action={async () => {
-                'use server'
-                await deleteProduct(product.id, supplierId)
-            }}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700">
-                    <Trash2 className="h-4 w-4" />
-                </Button>
-            </form>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700"
+                onClick={handleDelete}
+            >
+                <Trash2 className="h-4 w-4" />
+            </Button>
         </div>
     )
 }
