@@ -1,7 +1,7 @@
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
-import { ProductImportDialog } from "@/components/product-import-dialog"
+import { ProductImportForm } from "@/components/product-import-form"
 import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, Pencil, Trash2, Download } from 'lucide-react'
@@ -64,7 +64,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                                     Exportar Excel
                                 </Button>
                             </Link>
-                            <ProductImportDialog supplierId={supplier.id} />
+                            <ProductImportForm supplierId={supplier.id} supplierName={supplier.name} />
                             <ProductFormDialog supplierId={id}>
                                 <Button size="sm" className="gap-2">
                                     <Plus className="h-4 w-4" /> Agregar Producto
