@@ -44,14 +44,11 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Parse Excel
-        const buffer = await file.arrayBuffer()
+        const buffer = Buffer.from(await file.arrayBuffer())
         const workbook = new ExcelJS.Workbook()
         await workbook.xlsx.load(buffer)
 
-        // Assume first sheet or "LP MEXICO"
-        let sheet = workbook.getWorksheet('LP MEXICO')
-        if (!sheet) sheet = workbook.worksheets[0]
-
+        const sheet = workbook.worksheets[0]
         if (!sheet) {
             return NextResponse.json({ success: false, message: 'No worksheet found' }, { status: 400 })
         }
@@ -65,32 +62,71 @@ export async function POST(req: NextRequest) {
             priceType: string | null
             supplierId: string
         }> = []
-        const START_ROW = 8 // From inspection
+
+        // Auto-detect format by checking header row
+        let format: 'LP_MEXICO' | 'PROMO_OPCION' = 'LP_MEXICO'
+        const headerRow = sheet.getRow(1)
+        const col2Header = headerRow.getCell(2).value?.toString().toUpperCase() || ''
+        const col3Header = headerRow.getCell(3).value?.toString().toUpperCase() || ''
+
+        // Format detection: if col2 is "CÓDIGO" and col3 is "NOMBRE", it's PROMO_OPCION format
+        if (col2Header.includes('CÓDIGO') && col3Header.includes('NOMBRE')) {
+            format = 'PROMO_OPCION'
+        }
+
+        const START_ROW = format === 'PROMO_OPCION' ? 2 : 8
 
         sheet.eachRow((row, rowNumber) => {
             if (rowNumber < START_ROW) return
 
-            // Columns: 3(Code Hijo), 4(Code Padre), 5(Name), 6(Category), 7(Price), 8(Price Type)
-            const codeVal = row.getCell(3).value
-            const parentCodeVal = row.getCell(4).value
-            const nameVal = row.getCell(5).value
-            const categoryVal = row.getCell(6).value
-            const priceVal = row.getCell(7).value
-            const priceTypeVal = row.getCell(8).value
+            let code: string, parentCode: string | null, name: string, category: string | null, priceType: string | null, price: number
 
-            if (!codeVal || !nameVal) return
+            if (format === 'PROMO_OPCION') {
+                // Format: Col2=Code, Col3=Name, Col4=Price
+                const codeVal = row.getCell(2).value
+                const nameVal = row.getCell(3).value
+                const priceVal = row.getCell(4).value
 
-            const code = String(codeVal).trim()
-            const parentCode = parentCodeVal ? String(parentCodeVal).trim() : null
-            const name = String(nameVal).trim()
-            const category = categoryVal ? String(categoryVal).trim() : null
-            const priceType = priceTypeVal ? String(priceTypeVal).trim() : null
+                if (!codeVal || !nameVal) return
 
-            let price = 0
-            if (typeof priceVal === 'number') {
-                price = priceVal
-            } else if (typeof priceVal === 'string') {
-                price = parseFloat(priceVal.replace(/[^0-9.]/g, '')) || 0
+                code = String(codeVal).trim()
+                parentCode = null
+                name = String(nameVal).trim()
+                category = null
+                priceType = null
+
+                // Parse price (format: "$ 171.00")
+                if (typeof priceVal === 'string') {
+                    price = parseFloat(priceVal.replace(/[$,\s]/g, '')) || 0
+                } else if (typeof priceVal === 'number') {
+                    price = priceVal
+                } else {
+                    price = 0
+                }
+            } else {
+                // LP_MEXICO Format: Cols 3-8
+                const codeVal = row.getCell(3).value
+                const parentCodeVal = row.getCell(4).value
+                const nameVal = row.getCell(5).value
+                const categoryVal = row.getCell(6).value
+                const priceVal = row.getCell(7).value
+                const priceTypeVal = row.getCell(8).value
+
+                if (!codeVal || !nameVal) return
+
+                code = String(codeVal).trim()
+                parentCode = parentCodeVal ? String(parentCodeVal).trim() : null
+                name = String(nameVal).trim()
+                category = categoryVal ? String(categoryVal).trim() : null
+                priceType = priceTypeVal ? String(priceTypeVal).trim() : null
+
+                if (typeof priceVal === 'number') {
+                    price = priceVal
+                } else if (typeof priceVal === 'string') {
+                    price = parseFloat(priceVal.replace(/[^0-9.]/g, '')) || 0
+                } else {
+                    price = 0
+                }
             }
 
             productsToUpsert.push({
