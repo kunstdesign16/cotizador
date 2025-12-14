@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Parse Excel
-        const buffer = Buffer.from(await file.arrayBuffer())
+        const arrayBuffer = await file.arrayBuffer()
         const workbook = new ExcelJS.Workbook()
-        await workbook.xlsx.load(buffer)
+        await workbook.xlsx.load(arrayBuffer)
 
         const sheet = workbook.worksheets[0]
         if (!sheet) {
