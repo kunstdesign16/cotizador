@@ -58,9 +58,11 @@ export async function POST(req: NextRequest) {
 
         const productsToUpsert: Array<{
             code: string
+            parentCode: string | null
             name: string
             category: string | null
             price: number
+            priceType: string | null
             supplierId: string
         }> = []
         const START_ROW = 8 // From inspection

@@ -40,9 +40,11 @@ async function main() {
     let count = 0
     const productsToUpsert: Array<{
         code: string
+        parentCode: string | null
         name: string
         category: string | null
         price: number
+        priceType: string | null
         supplierId: string
     }> = []
 
