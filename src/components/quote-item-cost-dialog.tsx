@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import ItemProductAutocomplete from './item-product-autocomplete'
+import ItemProductAutocomplete from '@/components/item-product-autocomplete'
 
 interface QuoteItemCostDialogProps {
     isOpen: boolean
