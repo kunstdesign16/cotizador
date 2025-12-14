@@ -11,22 +11,36 @@ export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData()
         const file = formData.get('file') as File
-        const supplierName = formData.get('supplierName') as string || 'Proveedor General'
+        const supplierId = formData.get('supplierId') as string | null
+        const supplierName = formData.get('supplierName') as string | null
 
         if (!file) {
             return NextResponse.json({ success: false, message: 'No file provided' }, { status: 400 })
         }
 
-        // 1. Create or Get Supplier
-        // Use a slug-like ID generation or just findFirst to keep it simple for now
-        let supplier = await prisma.supplier.findFirst({
-            where: { name: supplierName }
-        })
+        // 1. Get or Create Supplier
+        let supplier
 
-        if (!supplier) {
-            supplier = await prisma.supplier.create({
-                data: { name: supplierName }
+        if (supplierId) {
+            // Use existing supplier by ID
+            supplier = await prisma.supplier.findUnique({
+                where: { id: supplierId }
             })
+            if (!supplier) {
+                return NextResponse.json({ success: false, message: 'Proveedor no encontrado' }, { status: 404 })
+            }
+        } else {
+            // Find or create by name
+            const name = supplierName || 'Proveedor General'
+            supplier = await prisma.supplier.findFirst({
+                where: { name }
+            })
+
+            if (!supplier) {
+                supplier = await prisma.supplier.create({
+                    data: { name }
+                })
+            }
         }
 
         // 2. Parse Excel

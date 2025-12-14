@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export function ProductImportForm() {
+export function ProductImportForm({ supplierId, supplierName }: { supplierId?: string, supplierName?: string }) {
     const [file, setFile] = useState<File | null>(null)
-    const [supplierName, setSupplierName] = useState('LP Mexico')
+    const [supplierNameInput, setSupplierNameInput] = useState(supplierName || 'LP Mexico')
     const [uploading, setUploading] = useState(false)
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const router = useRouter()
@@ -23,7 +23,11 @@ export function ProductImportForm() {
 
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('supplierName', supplierName)
+        if (supplierId) {
+            formData.append('supplierId', supplierId)
+        } else {
+            formData.append('supplierName', supplierNameInput)
+        }
 
         try {
             const res = await fetch('/api/products/import', {
@@ -56,15 +60,17 @@ export function ProductImportForm() {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Nombre del Proveedor</label>
-                    <Input
-                        value={supplierName}
-                        onChange={(e) => setSupplierName(e.target.value)}
-                        placeholder="Ej. LP Mexico"
-                        required
-                    />
-                </div>
+                {!supplierId && (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Nombre del Proveedor</label>
+                        <Input
+                            value={supplierNameInput}
+                            onChange={(e) => setSupplierNameInput(e.target.value)}
+                            placeholder="Ej. LP Mexico"
+                            required
+                        />
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Archivo Excel (.xlsx)</label>
