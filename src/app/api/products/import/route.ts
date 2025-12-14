@@ -68,17 +68,21 @@ export async function POST(req: NextRequest) {
         sheet.eachRow((row, rowNumber) => {
             if (rowNumber < START_ROW) return
 
-            // Columns: 3(Code), 5(Name), 6(Category), 7(Price)
+            // Columns: 3(Code Hijo), 4(Code Padre), 5(Name), 6(Category), 7(Price), 8(Price Type)
             const codeVal = row.getCell(3).value
+            const parentCodeVal = row.getCell(4).value
             const nameVal = row.getCell(5).value
             const categoryVal = row.getCell(6).value
             const priceVal = row.getCell(7).value
+            const priceTypeVal = row.getCell(8).value
 
             if (!codeVal || !nameVal) return
 
             const code = String(codeVal).trim()
+            const parentCode = parentCodeVal ? String(parentCodeVal).trim() : null
             const name = String(nameVal).trim()
             const category = categoryVal ? String(categoryVal).trim() : null
+            const priceType = priceTypeVal ? String(priceTypeVal).trim() : null
 
             let price = 0
             if (typeof priceVal === 'number') {
@@ -89,10 +93,12 @@ export async function POST(req: NextRequest) {
 
             productsToUpsert.push({
                 code,
+                parentCode,
                 name,
                 category,
                 price,
-                supplierId: supplier!.id
+                priceType,
+                supplierId: supplier.id
             })
         })
 

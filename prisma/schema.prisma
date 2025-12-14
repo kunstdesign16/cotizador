@@ -94,17 +94,17 @@ model Supplier {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  code        String
-  name        String
-  category    String?
-  price       Float    @default(0)
-  
-  supplierId  String
-  supplier    Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+    id         String   @id @default(cuid())
+    code       String   // Código Hijo
+    parentCode String?  // Código Padre
+    name       String
+    category   String?
+    price      Float    // Precio Base
+    priceType  String?  // NORMAL, ÚNICO, OUTLET
+    supplierId String
+    supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([supplierId, code])
+    @@unique([supplierId, code])
 }

@@ -64,10 +64,12 @@ export function ProductTable({ products, supplierId }: ProductTableProps) {
                     <table className="w-full text-left text-sm">
                         <thead className="border-b bg-muted/50 text-xs uppercase text-muted-foreground">
                             <tr>
-                                <th className="p-4 font-medium">Código</th>
+                                <th className="p-4 font-medium">Código Hijo</th>
+                                <th className="p-4 font-medium">Código Padre</th>
                                 <th className="p-4 font-medium">Nombre</th>
                                 <th className="p-4 font-medium">Categoría</th>
-                                <th className="p-4 font-medium text-right">Precio</th>
+                                <th className="p-4 font-medium text-right">Precio Base</th>
+                                <th className="p-4 font-medium">Tipo Precio</th>
                                 <th className="p-4 font-medium text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -88,10 +90,19 @@ function ProductRow({ product, supplierId }: { product: any, supplierId: string 
     return (
         <tr className="hover:bg-muted/5">
             <td className="p-4 font-mono text-xs">{product.code}</td>
+            <td className="p-4 font-mono text-xs text-muted-foreground">{product.parentCode || '-'}</td>
             <td className="p-4 font-medium">{product.name}</td>
             <td className="p-4 text-muted-foreground">{product.category || '-'}</td>
             <td className="p-4 text-right font-semibold">
                 ${product.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            </td>
+            <td className="p-4">
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${product.priceType === 'ÚNICO' ? 'bg-blue-100 text-blue-700' :
+                        product.priceType === 'OUTLET' ? 'bg-orange-100 text-orange-700' :
+                            'bg-gray-100 text-gray-700'
+                    }`}>
+                    {product.priceType || 'NORMAL'}
+                </span>
             </td>
             <td className="p-4 text-right">
                 <ProductActions product={product} supplierId={supplierId} />
