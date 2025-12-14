@@ -323,7 +323,13 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                 <tr>
                                     <th className="px-4 py-3 min-w-[200px]">Concepto</th>
                                     <th className="px-4 py-3 w-20 text-center">Cant.</th>
-                                    <th className="px-4 py-3 w-40 text-right bg-blue-50/50 text-blue-900 border-l">Costo Int.</th>
+                                    {/* Cost Breakdown Fields */}
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900 border-l">Artículo</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Mano Obra</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Empaque</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Transporte</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Equipo</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-blue-50/50 text-blue-900">Otros</th>
                                     <th className="px-4 py-3 w-24 text-right bg-blue-50/50 text-blue-900">% Margen</th>
                                     <th className="px-4 py-3 w-32 text-right border-l font-semibold">P. Unitario</th>
                                     <th className="px-4 py-3 w-32 text-right font-semibold">Total</th>
