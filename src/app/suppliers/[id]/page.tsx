@@ -1,8 +1,8 @@
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
-import { deleteProduct } from "@/actions/products"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
 import { ProductImportForm } from "@/components/product-import-form"
+import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, Pencil, Trash2, Upload } from 'lucide-react'
 import Link from "next/link"
@@ -73,53 +73,9 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                         </ProductFormDialog>
                     </div>
 
-                    {supplier.products.length === 0 ? (
-                        <div className="p-12 text-center text-muted-foreground">
-                            <p>No hay productos registrados para este proveedor.</p>
-                            <p className="text-sm mt-2">Importa una lista de precios o agrega productos manualmente.</p>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="border-b bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th className="p-4 font-medium">Código</th>
-                                        <th className="p-4 font-medium">Nombre</th>
-                                        <th className="p-4 font-medium">Categoría</th>
-                                        <th className="p-4 font-medium text-right">Precio</th>
-                                        <th className="p-4 font-medium text-right">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {supplier.products.map((product: any) => (
-                                        <tr key={product.id} className="hover:bg-muted/5">
-                                            <td className="p-4 font-mono text-xs">{product.code}</td>
-                                            <td className="p-4 font-medium">{product.name}</td>
-                                            <td className="p-4 text-muted-foreground">{product.category || '-'}</td>
-                                            <td className="p-4 text-right font-semibold">
-                                                ${product.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                            </td>
-                                            <td className="p-4 text-right flex items-center justify-end gap-2">
-                                                <ProductFormDialog supplierId={id} product={product}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                </ProductFormDialog>
-                                                <form action={async () => {
-                                                    'use server'
-                                                    await deleteProduct(product.id, id)
-                                                }}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                    <div className="p-6">
+                        <ProductTable products={supplier.products} supplierId={id} />
+                    </div>
                 </section>
             </div>
         </div>
