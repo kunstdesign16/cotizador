@@ -136,7 +136,7 @@ export async function duplicateSupplierOrder(id: string) {
             data: {
                 supplierId: original.supplierId,
                 quoteId: original.quoteId,
-                items: original.items,
+                items: original.items as any,
                 expectedDate: original.expectedDate,
                 status: 'PENDING',
                 paymentStatus: 'PENDING'
