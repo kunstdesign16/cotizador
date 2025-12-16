@@ -11,6 +11,7 @@ import { Client, Quote } from "@prisma/client"
 import DeleteQuoteButton from "./delete-quote-button"
 import DuplicateQuoteButton from "./duplicate-quote-button"
 import { QuoteStatusSelector } from "./quote-status-selector"
+import { ProjectDeliveryDate } from "./project-delivery-date"
 
 type QuoteWithClient = Quote & { client: Client }
 
@@ -88,58 +89,77 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                 </div>
             </div>
 
-            {/* Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Grouped Grid */}
+            <div className="space-y-8">
                 {filteredQuotes.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/5">
+                    <div className="py-12 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/5">
                         No se encontraron cotizaciones con los filtros actuales.
                     </div>
                 ) : (
-                    filteredQuotes.map((quote) => (
-                        <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                            <div className="group relative rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/50 flex flex-col h-full">
-                                <div className="mb-4 flex items-start justify-between">
-                                    <div className="rounded-full bg-primary/10 p-2 text-primary">
-                                        <FileText className="h-5 w-5" />
-                                    </div>
-                                    {/* Status Selector - Stop Propagation explicitly */}
-                                    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                        <QuoteStatusSelector id={quote.id} currentStatus={quote.status} compact />
-                                    </div>
+                    Array.from(new Set(filteredQuotes.map(q => q.clientId))).map(clientId => {
+                        const clientQuotes = filteredQuotes.filter(q => q.clientId === clientId)
+                        const client = clientQuotes[0].client
+
+                        return (
+                            <div key={clientId} className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-foreground/80">{client.name}</h2>
+                                    {client.company && <span className="text-sm text-muted-foreground">({client.company})</span>}
+                                    <div className="h-px bg-border flex-1 ml-4" />
                                 </div>
 
-                                <div className="flex-1">
-                                    <h3 className="font-semibold leading-none tracking-tight">{quote.project_name}</h3>
-                                    <p className="mt-1 text-sm text-muted-foreground font-medium">
-                                        {quote.client.company || quote.client.name}
-                                    </p>
-                                </div>
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {clientQuotes.map((quote) => (
+                                        <Link key={quote.id} href={`/quotes/${quote.id}`}>
+                                            <div className="group relative rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/50 flex flex-col h-full">
+                                                <div className="mb-4 flex items-start justify-between">
+                                                    <div className="rounded-full bg-primary/10 p-2 text-primary">
+                                                        <FileText className="h-5 w-5" />
+                                                    </div>
+                                                    {/* Status Selector - Stop Propagation explicitly */}
+                                                    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                                        <QuoteStatusSelector id={quote.id} currentStatus={quote.status} compact />
+                                                    </div>
+                                                </div>
 
-                                <div className="mt-4 flex items-center justify-between text-sm pt-4 border-t">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="flex items-center text-muted-foreground text-xs">
-                                            <Calendar className="mr-1 h-3 w-3" />
-                                            {format(new Date(quote.date), 'd MMM yyyy', { locale: es })}
-                                        </span>
-                                        {quote.deliveryDate && (
-                                            <span className="flex items-center text-amber-600 font-medium text-xs mt-1">
-                                                <Calendar className="mr-1 h-3 w-3" />
-                                                Entrega: {format(new Date(quote.deliveryDate), 'd MMM yyyy', { locale: es })}
-                                            </span>
-                                        )}
-                                        <span className="font-medium text-base">
-                                            ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                        </span>
-                                    </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold leading-none tracking-tight">{quote.project_name}</h3>
+                                                    {/* Client info is redundant here if grouped, but good for context if searched */}
+                                                </div>
 
-                                    <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                        <DuplicateQuoteButton id={quote.id} iconOnly />
-                                        <DeleteQuoteButton id={quote.id} iconOnly />
-                                    </div>
+                                                <div className="mt-4 flex items-center justify-between text-sm pt-4 border-t">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="flex items-center text-muted-foreground text-xs">
+                                                            <Calendar className="mr-1 h-3 w-3" />
+                                                            {format(new Date(quote.date), 'd MMM yyyy', { locale: es })}
+                                                        </span>
+
+                                                        {/* Editable Delivery Date */}
+                                                        <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                                            <ProjectDeliveryDate
+                                                                id={quote.id}
+                                                                date={quote.deliveryDate as any}
+                                                                status={quote.status}
+                                                            />
+                                                        </div>
+
+                                                        <span className="font-medium text-base mt-1">
+                                                            ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                                        <DuplicateQuoteButton id={quote.id} iconOnly />
+                                                        <DeleteQuoteButton id={quote.id} iconOnly />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
                                 </div>
                             </div>
-                        </Link>
-                    ))
+                        )
+                    })
                 )}
             </div>
         </div>

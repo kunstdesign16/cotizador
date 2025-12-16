@@ -252,3 +252,17 @@ export async function duplicateQuote(id: string) {
         return { success: false, error: 'Error al duplicar la cotización' }
     }
 }
+
+export async function updateProjectDate(id: string, date: Date | null) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.quote.update({
+            where: { id },
+            data: { deliveryDate: date }
+        })
+        revalidatePath('/dashboard')
+        return { success: true }
+    } catch (e) {
+        return { success: false, error: 'Error modifying date' }
+    }
+}

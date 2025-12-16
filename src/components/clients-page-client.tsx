@@ -9,6 +9,7 @@ import { ClientExportButton } from '@/components/client-export-button'
 import { ClientImportButton } from '@/components/client-import-button'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import DeleteClientButton from '@/components/delete-client-button'
 
 export function ClientsPageClient({ clients }: { clients: any[] }) {
     const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
@@ -92,6 +93,7 @@ export function ClientsPageClient({ clients }: { clients: any[] }) {
                                                         Ver Detalle
                                                     </Button>
                                                 </Link>
+                                                <DeleteClientButton id={client.id} iconOnly />
                                             </div>
                                         </div>
                                     </div>
