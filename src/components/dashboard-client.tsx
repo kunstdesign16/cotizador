@@ -121,6 +121,12 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                                             <Calendar className="mr-1 h-3 w-3" />
                                             {format(new Date(quote.date), 'd MMM yyyy', { locale: es })}
                                         </span>
+                                        {quote.deliveryDate && (
+                                            <span className="flex items-center text-amber-600 font-medium text-xs mt-1">
+                                                <Calendar className="mr-1 h-3 w-3" />
+                                                Entrega: {format(new Date(quote.deliveryDate), 'd MMM yyyy', { locale: es })}
+                                            </span>
+                                        )}
                                         <span className="font-medium text-base">
                                             ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                         </span>
