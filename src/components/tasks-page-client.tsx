@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckSquare, Filter } from 'lucide-react'
+import { CheckSquare, Pencil, Trash2 } from 'lucide-react'
 import { NewTaskDialog } from './new-task-dialog'
-import { updateTaskStatus } from '@/actions/supplier-tasks'
+import { EditTaskDialog } from './edit-task-dialog'
+import { updateTaskStatus, deleteTask } from '@/actions/supplier-tasks'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +18,7 @@ interface TasksPageClientProps {
 export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageClientProps) {
     const [tasks, setTasks] = useState(initialTasks)
     const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED' | 'URGENT'>('PENDING')
+    const [editingTask, setEditingTask] = useState<any | null>(null)
     const router = useRouter()
 
     const filteredTasks = tasks.filter((task: any) => {
@@ -40,6 +42,18 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
             alert('Error actualizando estatus')
         } else {
             router.refresh()
+        }
+    }
+
+    const handleDelete = async (taskId: string) => {
+        if (!confirm('¿Estás seguro de eliminar esta tarea?')) return
+
+        const result = await deleteTask(taskId)
+        if (result.success) {
+            setTasks(tasks.filter((t: any) => t.id !== taskId))
+            router.refresh()
+        } else {
+            alert(result.error || 'Error al eliminar tarea')
         }
     }
 
@@ -133,21 +147,48 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-right text-sm">
+                                    <div className="flex items-center gap-2">
                                         {task.expectedDate && (
                                             <div className={cn(
-                                                "text-muted-foreground",
+                                                "text-muted-foreground text-sm",
                                                 !task.status.includes('COMPLETED') && new Date(task.expectedDate) < new Date() && "text-red-500 font-medium"
                                             )}>
                                                 {new Date(task.expectedDate).toLocaleDateString('es-MX')}
                                             </div>
                                         )}
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setEditingTask(task)}
+                                                title="Editar tarea"
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                                onClick={() => handleDelete(task.id)}
+                                                title="Eliminar tarea"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
+
+                {editingTask && (
+                    <EditTaskDialog
+                        task={editingTask}
+                        onClose={() => setEditingTask(null)}
+                    />
+                )}
             </div>
         </div>
     )

@@ -114,8 +114,56 @@ export async function deleteOrder(id: string) {
     try {
         await prisma.supplierOrder.delete({ where: { id } })
         revalidatePath('/suppliers')
+        revalidatePath('/supplier-orders')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error al eliminar' }
+    }
+}
+
+export async function duplicateSupplierOrder(id: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        const original = await prisma.supplierOrder.findUnique({
+            where: { id }
+        })
+
+        if (!original) {
+            return { success: false, error: 'Orden no encontrada' }
+        }
+
+        const duplicate = await prisma.supplierOrder.create({
+            data: {
+                supplierId: original.supplierId,
+                quoteId: original.quoteId,
+                items: original.items,
+                expectedDate: original.expectedDate,
+                status: 'PENDING',
+                paymentStatus: 'PENDING'
+            }
+        })
+
+        revalidatePath('/suppliers')
+        revalidatePath('/supplier-orders')
+        return { success: true, id: duplicate.id }
+    } catch (error) {
+        console.error('Error duplicating order:', error)
+        return { success: false, error: 'Error al duplicar orden' }
+    }
+}
+
+export async function updatePaymentStatus(id: string, paymentStatus: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierOrder.update({
+            where: { id },
+            data: { paymentStatus }
+        })
+        revalidatePath('/suppliers')
+        revalidatePath('/supplier-orders')
+        revalidatePath('/dashboard')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Error actualizando estatus de pago' }
     }
 }
