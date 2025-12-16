@@ -19,9 +19,9 @@ const navigation = [
     { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Clientes', href: '/clients', icon: Users },
+    { name: 'Proveedores', href: '/suppliers', icon: Truck },
     { name: 'Reportes', href: '/reports', icon: BarChart },
     { name: 'Configuración', href: '/settings', icon: Settings },
-    // { name: 'Proveedores', href: '/suppliers', icon: Truck },
 ]
 
 export function Sidebar() {
@@ -32,8 +32,8 @@ export function Sidebar() {
     return (
         <div className="flex h-full flex-col bg-card border-r w-64 fixed left-0 top-0 bottom-0 z-40">
             <div className="flex h-16 items-center px-6 border-b">
-                <Link href="/dashboard" className="flex items-center justify-center w-full py-4">
-                    <img src="/logo.svg" alt="Kunst Design" className="h-10 w-auto" />
+                <Link href="/dashboard" className="flex items-center justify-center w-full py-6">
+                    <img src="/logo.svg" alt="Kunst Design" className="h-[60px] w-auto" />
                 </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">

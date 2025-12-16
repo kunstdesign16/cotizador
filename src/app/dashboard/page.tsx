@@ -40,6 +40,9 @@ export default async function DashboardPage() {
     const activeQuotes = quotes.filter(q => q.status === 'DRAFT' || q.status === 'SAVED').length
     const sentQuotes = quotes.filter(q => q.status === 'SENT').length
     const approvedQuotes = quotes.filter(q => q.status === 'APPROVED' || q.status === 'FACTURADO').length
+    const approvedQuotesTotal = quotes
+        .filter(q => q.status === 'APPROVED' || q.status === 'FACTURADO')
+        .reduce((acc, q) => acc + (q.total || 0), 0)
 
     // Count total pending tasks
     const pendingTasksCount = await prisma.supplierTask.count({
@@ -116,6 +119,27 @@ export default async function DashboardPage() {
                         <div className="text-2xl font-bold">{pendingTasksCount}</div>
                         <p className="text-xs text-muted-foreground">
                             {urgentTasks.length} Urgentes
+                        </p>
+                    </div>
+
+                    {/* Billed Projects Metric */}
+                    <div className="rounded-xl border bg-emerald-50 text-emerald-900 shadow-sm p-6 md:col-span-2 lg:col-span-4 border-emerald-200">
+                        <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 className="tracking-tight text-lg font-semibold text-emerald-800">Proyectos Cobrados</h3>
+                            <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <span className="font-bold">$</span>
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-4 mt-2">
+                            <div className="text-4xl font-bold">
+                                ${approvedQuotesTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="text-sm font-medium text-emerald-700">
+                                en {approvedQuotes} proyectos
+                            </div>
+                        </div>
+                        <p className="text-xs text-emerald-600/80 mt-1">
+                            Suma total de cotizaciones Aprobadas o Facturadas
                         </p>
                     </div>
                 </div>
