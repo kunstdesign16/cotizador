@@ -3,11 +3,11 @@ import ExcelJS from 'exceljs'
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { supplierId: string } }
+    { params }: { params: Promise<{ supplierId: string }> }
 ) {
     try {
         const { prisma } = await import('@/lib/prisma')
-        const { supplierId } = params
+        const { supplierId } = await params
 
         // Fetch supplier and products
         const supplier = await prisma.supplier.findUnique({
