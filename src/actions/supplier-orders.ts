@@ -16,7 +16,6 @@ export async function createSupplierOrder(
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
-        // 1. Create the Order
         const order = await prisma.supplierOrder.create({
             data: {
                 supplierId,
@@ -26,40 +25,18 @@ export async function createSupplierOrder(
             }
         })
 
-        // 2. Logic to update Linked Quotes
-        // Strategy: We need to find which active Quotes contain these products.
-        // Or, does the Order link to a specific Quote?
-        // Ideally, an Order *can* be linked to a Quote, or just be stock replenishment.
-        // For this feature request: "alimente los costos de las cotizaciones" implies we might want to update ANY open quote using this product? 
-        // OR better, we check if this order is specifically for a Quote.
-        // CURRENT LIMITATION: Our `SupplierOrder` model has optional `quoteId`.
-        // The current UI doesn't allow selecting a Quote when creating an order (unlike Tasks).
-        // Let's implement a smarter "Find and Update" logic:
-
-        // Find ALL Active/Draft quotes that have items with these product codes AND are associated with this Supplier (via product relation ideally, but code is the link)
-
-        // Let's iterate over the items and update matching QuoteItems in Draft quotes.
-        // Getting complex: What if multiple quotes use it? Do we update all?
-        // User request: "alimente los costos de las cotizaciones".
-        // Safer approach: Update `QuoteItem` where `productCode` matches for DRAFT quotes.
-
-        // Optimization: Run this in parallel or background? Next.js server actions are blocking.
-        // Let's do a quick update for DRAFT quotes.
-
+        // Sync logic: Update DRAFT quotes items with this product code
         for (const item of items) {
             if (item.unitCost !== undefined && item.unitCost > 0) {
-                // Update DRAFT quotes items with this product code
                 await prisma.quoteItem.updateMany({
                     where: {
                         productCode: item.code,
                         quote: {
-                            status: { in: ['DRAFT', 'SAVED'] } // Only update non-finalized quotes
+                            status: { in: ['DRAFT', 'SAVED'] }
                         }
                     },
                     data: {
                         cost_article: item.unitCost,
-                        // potentially we could update unit_cost if we wanted to maintain margin, but usually cost updates affect margin.
-                        // We will just update the cost.
                     }
                 })
             }
@@ -71,6 +48,50 @@ export async function createSupplierOrder(
     } catch (error) {
         console.error('Error creating order:', error)
         return { success: false, error: 'Error al crear orden' }
+    }
+}
+
+export async function updateSupplierOrder(
+    id: string,
+    items: OrderItemInput[],
+    expectedDate?: Date
+) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierOrder.update({
+            where: { id },
+            data: {
+                items: items as any,
+                expectedDate
+            }
+        })
+
+        // Sync logic: Re-run update logic for costs
+        // Note: This matches the logic in create. Ideally enable refactoring into a helper if reused more.
+        for (const item of items) {
+            if (item.unitCost !== undefined && item.unitCost > 0) {
+                await prisma.quoteItem.updateMany({
+                    where: {
+                        productCode: item.code,
+                        quote: {
+                            status: { in: ['DRAFT', 'SAVED'] }
+                        }
+                    },
+                    data: {
+                        cost_article: item.unitCost,
+                    }
+                })
+            }
+        }
+
+        revalidatePath('/suppliers')
+        // We can't easily adhere to the supplierId pattern without fetching it, but usually the UI handles the refresh via router.refresh() 
+        // or revalidating the specific page if we knew the supplier ID. 
+        // For now, revalidate general paths.
+        return { success: true }
+    } catch (error) {
+        console.error('Error updating order:', error)
+        return { success: false, error: 'Error al actualizar orden' }
     }
 }
 

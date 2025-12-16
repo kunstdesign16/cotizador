@@ -1,10 +1,8 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, X, ShoppingCart } from 'lucide-react'
-import { createSupplierOrder } from '@/actions/supplier-orders'
+import { Plus, X, ShoppingCart, Pencil, Receipt } from 'lucide-react'
+import { createSupplierOrder, updateSupplierOrder } from '@/actions/supplier-orders'
 import { useRouter } from 'next/navigation'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from 'date-fns'
@@ -16,12 +14,6 @@ interface Product {
     name: string
 }
 
-interface SupplierOrderFormProps {
-    supplierId: string
-    products: Product[]
-    children?: React.ReactNode
-}
-
 interface OrderItem {
     code: string
     name: string
@@ -29,7 +21,18 @@ interface OrderItem {
     unitCost?: number
 }
 
-export function SupplierOrderForm({ supplierId, products, children }: SupplierOrderFormProps) {
+interface SupplierOrderFormProps {
+    supplierId: string
+    products: Product[]
+    initialData?: {
+        id: string
+        items: any[]
+        expectedDate?: Date | null
+    }
+    children?: React.ReactNode
+}
+
+export function SupplierOrderForm({ supplierId, products, initialData, children }: SupplierOrderFormProps) {
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<OrderItem[]>([])
     const [selectedProduct, setSelectedProduct] = useState('')
@@ -37,6 +40,19 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
     const [expectedDate, setExpectedDate] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+
+    useEffect(() => {
+        if (open && initialData) {
+            setItems(initialData.items)
+            if (initialData.expectedDate) {
+                setExpectedDate(new Date(initialData.expectedDate).toISOString().split('T')[0])
+            }
+        } else if (open && !initialData) {
+            // Reset for new order
+            setItems([])
+            setExpectedDate('')
+        }
+    }, [open, initialData])
 
     const handleAddItem = () => {
         if (!selectedProduct) return
@@ -70,22 +86,35 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
         setLoading(true)
         try {
             const date = expectedDate ? new Date(expectedDate + 'T12:00:00') : undefined
-            const result = await createSupplierOrder(supplierId, items, date)
+
+            let result;
+            if (initialData?.id) {
+                result = await updateSupplierOrder(initialData.id, items, date)
+            } else {
+                result = await createSupplierOrder(supplierId, items, date)
+            }
 
             if (result.success) {
                 setOpen(false)
-                setItems([])
-                setExpectedDate('')
+                if (!initialData) {
+                    setItems([])
+                    setExpectedDate('')
+                }
                 router.refresh()
             } else {
                 alert(result.error)
             }
         } catch (error) {
-            alert('Error al crear orden')
+            alert('Error al guardar orden')
         } finally {
             setLoading(false)
         }
     }
+
+    // Calculations
+    const subtotal = items.reduce((acc, item) => acc + (item.quantity * (item.unitCost || 0)), 0)
+    const iva = subtotal * 0.16
+    const total = subtotal + iva
 
     return (
         <>
@@ -95,10 +124,11 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
 
             {open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-background rounded-xl border shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="bg-background rounded-xl border shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
-                                <ShoppingCart className="h-5 w-5" /> Nueva Orden de Compra
+                                {initialData ? <Pencil className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
+                                {initialData ? 'Editar Orden de Compra' : 'Nueva Orden de Compra'}
                             </h2>
                             <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
                                 <X className="h-4 w-4" />
@@ -182,18 +212,25 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
                                             ))
                                         )}
                                     </tbody>
-                                    {items.length > 0 && (
-                                        <tfoot className="bg-muted/50 font-medium">
-                                            <tr>
-                                                <td colSpan={4} className="p-4 text-right">Total Estimado:</td>
-                                                <td className="p-4 text-right">
-                                                    ${items.reduce((acc, item) => acc + (item.quantity * (item.unitCost || 0)), 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                        </tfoot>
-                                    )}
                                 </table>
+
+                                {/* Financial Summary */}
+                                {items.length > 0 && (
+                                    <div className="bg-muted/50 p-4 space-y-2 border-t text-sm">
+                                        <div className="flex justify-end gap-8">
+                                            <span className="text-muted-foreground">Subtotal:</span>
+                                            <span className="font-medium w-24 text-right">${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-end gap-8">
+                                            <span className="text-muted-foreground">IVA (16%):</span>
+                                            <span className="font-medium w-24 text-right">${iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-end gap-8 text-base border-t border-border/50 pt-2 mt-2">
+                                            <span className="font-semibold">Total:</span>
+                                            <span className="font-bold w-24 text-right">${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Date & Submit */}
@@ -212,7 +249,7 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
                                         Cancelar
                                     </Button>
                                     <Button type="submit" disabled={loading || items.length === 0}>
-                                        {loading ? 'Creando...' : 'Crear Orden'}
+                                        {loading ? 'Guardando...' : (initialData ? 'Actualizar Orden' : 'Crear Orden')}
                                     </Button>
                                 </div>
                             </form>

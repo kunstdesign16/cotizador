@@ -1,10 +1,11 @@
+```
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
 import { ProductImportForm } from "@/components/product-import-form"
 import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Plus, Pencil, Trash2, Download } from 'lucide-react'
+import { Trash2, Phone, Mail, FileText, ArrowLeft, Plus, ExternalLink, Calendar, MapPin, Pencil, Download } from "lucide-react"
 import Link from "next/link"
 import { notFound } from 'next/navigation'
 import { SupplierOrderForm } from "@/components/supplier-order-form"
@@ -137,16 +138,6 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-muted-foreground">ID: {order.id.slice(-6)}</span>
-                                                    <span className={cn(
-                                                        "text-[10px] px-1.5 py-0.5 rounded-full font-medium border",
-                                                        order.status === 'PENDING' && "bg-yellow-50 text-yellow-600 border-yellow-200",
-                                                        order.status === 'ORDERED' && "bg-blue-50 text-blue-600 border-blue-200",
-                                                        order.status === 'RECEIVED' && "bg-green-50 text-green-600 border-green-200"
-                                                    )}>
-                                                        {order.status === 'PENDING' && 'Pendiente'}
-                                                        {order.status === 'ORDERED' && 'Ordenado'}
-                                                        {order.status === 'RECEIVED' && 'Recibido'}
-                                                    </span>
                                                 </div>
                                                 <p className="text-sm font-medium">
                                                     {order.items.length} productos
@@ -177,7 +168,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                     <div className="p-6 border-b flex justify-between items-center">
                         <h2 className="font-semibold text-lg">Catálogo de Productos</h2>
                         <div className="flex gap-2">
-                            <Link href={`/api/suppliers/${supplier.id}/products/export`}>
+                            <Link href={`/ api / suppliers / ${ supplier.id } /products/export`}>
                                 <Button variant="outline" size="sm" className="gap-2">
                                     <Download className="h-4 w-4" />
                                     Exportar Excel
