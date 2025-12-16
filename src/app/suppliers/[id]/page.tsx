@@ -1,4 +1,4 @@
-```
+
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
