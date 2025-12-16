@@ -91,8 +91,9 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                                     </tr>
                                 ) : (
                                     orders.map((order: any) => {
-                                        const items = JSON.parse(order.items as string) as any[]
-                                        const total = calculateTotal(items)
+                                        // Handle both object and string formats (Prisma Json vs serialized)
+                                        const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[] || [])
+                                        const total = calculateTotal(Array.isArray(items) ? items : [])
 
                                         return (
                                             <tr key={order.id} className="hover:bg-muted/50">
@@ -106,9 +107,9 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
-                                                            order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                                order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
-                                                                    'bg-gray-100 text-gray-600 border-gray-200'
+                                                        order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                            order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
+                                                                'bg-gray-100 text-gray-600 border-gray-200'
                                                         }`}>
                                                         {order.status}
                                                     </span>

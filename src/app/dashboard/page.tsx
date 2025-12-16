@@ -54,8 +54,9 @@ export default async function DashboardPage() {
     const paidOrdersTotal = supplierOrders
         .filter(o => o.paymentStatus === 'PAID')
         .reduce((acc, o) => {
-            const items = JSON.parse(o.items as string) as any[]
-            const orderTotal = items.reduce((sum, item) => sum + (item.unitCost || 0) * (item.quantity || 0), 0)
+            // Handle both object and string formats (Prisma Json vs serialized)
+            const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items as any[])
+            const orderTotal = Array.isArray(items) ? items.reduce((sum, item) => sum + (item.unitCost || 0) * (item.quantity || 0), 0) : 0
             return acc + orderTotal
         }, 0)
 
@@ -263,10 +264,11 @@ export default async function DashboardPage() {
                         ) : (
                             <div className="divide-y">
                                 {serializedOrders.map((order: any) => {
-                                    const items = JSON.parse(order.items as string) as any[]
-                                    const total = items.reduce((sum: number, item: any) =>
+                                    // Handle both object and string formats (Prisma Json vs serialized)
+                                    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
+                                    const total = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
                                         sum + (item.unitCost || 0) * (item.quantity || 0), 0
-                                    )
+                                    ) : 0
 
                                     return (
                                         <div key={order.id} className="p-4 hover:bg-muted/50 transition-colors">
@@ -285,15 +287,15 @@ export default async function DashboardPage() {
                                             </div>
                                             <div className="flex gap-2 mt-2">
                                                 <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
-                                                        order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                            order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
-                                                                'bg-gray-100 text-gray-600 border-gray-200'
+                                                    order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                        order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
+                                                            'bg-gray-100 text-gray-600 border-gray-200'
                                                     }`}>
                                                     {order.status}
                                                 </span>
                                                 <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.paymentStatus === 'PAID'
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                                                     }`}>
                                                     {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
                                                 </span>
