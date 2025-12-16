@@ -168,7 +168,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                     <div className="p-6 border-b flex justify-between items-center">
                         <h2 className="font-semibold text-lg">Catálogo de Productos</h2>
                         <div className="flex gap-2">
-                            <Link href={`/api/suppliers/${supplier.id}/products/export`}>
+                            <Link href={"/api/suppliers/" + supplier.id + "/products/export"}>
                                 <Button variant="outline" size="sm" className="gap-2">
                                     <Download className="h-4 w-4" />
                                     Exportar Excel
