@@ -30,9 +30,8 @@ export function Sidebar() {
     return (
         <div className="flex h-full flex-col bg-card border-r w-64 fixed left-0 top-0 bottom-0 z-40">
             <div className="flex h-16 items-center px-6 border-b">
-                <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl">
-                    <span className="text-primary">KUNST</span>
-                    <span className="text-foreground">DESIGN</span>
+                <Link href="/dashboard" className="flex items-center justify-center w-full py-4">
+                    <img src="/logo.svg" alt="Kunst Design" className="h-10 w-auto" />
                 </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
@@ -42,20 +41,38 @@ export function Sidebar() {
                 {navigation.map((item) => {
                     const isActive = pathname === item.href || (item.match && pathname.startsWith(item.match))
                     const Icon = item.icon
+                    const isSuppliers = item.name === 'Proveedores'
+
                     return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                                isActive
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        <div key={item.name}>
+                            <Link
+                                href={item.href}
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                                    isActive
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                            >
+                                <Icon className="h-4 w-4" />
+                                {item.name}
+                            </Link>
+                            {isSuppliers && (
+                                <div className="ml-9 mt-1 space-y-1">
+                                    <Link
+                                        href="/supplier-orders"
+                                        className={cn(
+                                            "block px-3 py-2 text-xs font-medium rounded-md transition-colors",
+                                            pathname.startsWith('/supplier-orders')
+                                                ? "text-primary bg-primary/5"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                        )}
+                                    >
+                                        Ordenes de Compra
+                                    </Link>
+                                </div>
                             )}
-                        >
-                            <Icon className="h-4 w-4" />
-                            {item.name}
-                        </Link>
+                        </div>
                     )
                 })}
             </nav>
