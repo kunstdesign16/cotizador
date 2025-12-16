@@ -151,7 +151,9 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                                                 <p className="text-sm font-medium">
                                                     {order.items.length} productos
                                                     <span className="text-muted-foreground font-normal mx-1">•</span>
-                                                    {new Date(order.createdAt).toLocaleDateString('es-MX')}
+                                                    <span className="font-semibold text-foreground">
+                                                        ${order.items.reduce((acc: number, item: any) => acc + (item.quantity * (item.unitCost || 0)), 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div className="text-right text-sm">

@@ -26,6 +26,7 @@ interface OrderItem {
     code: string
     name: string
     quantity: number
+    unitCost?: number
 }
 
 export function SupplierOrderForm({ supplierId, products, children }: SupplierOrderFormProps) {
@@ -46,10 +47,16 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
         if (existingItem) {
             setItems(items.map(i => i.code === product.code ? { ...i, quantity: i.quantity + quantity } : i))
         } else {
-            setItems([...items, { code: product.code, name: product.name, quantity }])
+            // Initialize with current product price if available (assuming price in product is sell price, maybe we don't have cost)
+            // For now, init at 0 or empty
+            setItems([...items, { code: product.code, name: product.name, quantity, unitCost: 0 }])
         }
         setSelectedProduct('')
         setQuantity(1)
+    }
+
+    const handleUpdateCost = (code: string, cost: number) => {
+        setItems(items.map(i => i.code === code ? { ...i, unitCost: cost } : i))
     }
 
     const handleRemoveItem = (code: string) => {
@@ -128,34 +135,65 @@ export function SupplierOrderForm({ supplierId, products, children }: SupplierOr
                                 </Button>
                             </div>
 
-                            {/* Items List */}
-                            <div className="border rounded-md">
-                                <div className="bg-muted px-4 py-2 text-sm font-medium grid grid-cols-12 gap-2">
-                                    <div className="col-span-2">Código</div>
-                                    <div className="col-span-8">Descripción</div>
-                                    <div className="col-span-1 text-right">Cant.</div>
-                                    <div className="col-span-1"></div>
-                                </div>
-                                {items.length === 0 ? (
-                                    <div className="p-8 text-center text-muted-foreground text-sm">
-                                        No hay productos agregados a la orden
-                                    </div>
-                                ) : (
-                                    <div className="divide-y">
-                                        {items.map(item => (
-                                            <div key={item.code} className="px-4 py-2 text-sm grid grid-cols-12 gap-2 items-center">
-                                                <div className="col-span-2 font-mono">{item.code}</div>
-                                                <div className="col-span-8">{item.name}</div>
-                                                <div className="col-span-1 text-right">{item.quantity}</div>
-                                                <div className="col-span-1 text-right">
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => handleRemoveItem(item.code)}>
-                                                        <X className="h-3 w-3" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                            {/* Items Table */}
+                            <div className="border rounded-md overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-muted text-muted-foreground font-medium">
+                                        <tr className="border-b">
+                                            <th className="h-10 px-4 text-left font-medium">Código</th>
+                                            <th className="h-10 px-4 text-left font-medium">Descripción</th>
+                                            <th className="h-10 px-4 text-right font-medium w-24">Cant.</th>
+                                            <th className="h-10 px-4 text-right font-medium w-32">Costo Unit.</th>
+                                            <th className="h-10 px-4 text-right font-medium w-32">Total</th>
+                                            <th className="h-10 px-4 w-12"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {items.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                                                    No hay productos agregados a la orden
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            items.map((item, index) => (
+                                                <tr key={item.code} className="hover:bg-muted/50">
+                                                    <td className="p-4 font-mono text-xs">{item.code}</td>
+                                                    <td className="p-4">{item.name}</td>
+                                                    <td className="p-4 text-right">{item.quantity}</td>
+                                                    <td className="p-4">
+                                                        <Input
+                                                            type="number"
+                                                            className="text-right h-8"
+                                                            placeholder="0.00"
+                                                            value={item.unitCost || ''}
+                                                            onChange={(e) => handleUpdateCost(item.code, Number(e.target.value))}
+                                                        />
+                                                    </td>
+                                                    <td className="p-4 text-right font-medium">
+                                                        ${((item.quantity * (item.unitCost || 0)).toLocaleString('es-MX', { minimumFractionDigits: 2 }))}
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleRemoveItem(item.code)}>
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                    {items.length > 0 && (
+                                        <tfoot className="bg-muted/50 font-medium">
+                                            <tr>
+                                                <td colSpan={4} className="p-4 text-right">Total Estimado:</td>
+                                                <td className="p-4 text-right">
+                                                    ${items.reduce((acc, item) => acc + (item.quantity * (item.unitCost || 0)), 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    )}
+                                </table>
                             </div>
 
                             {/* Date & Submit */}
