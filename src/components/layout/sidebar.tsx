@@ -10,7 +10,8 @@ import {
     Truck,
     CheckSquare,
     Settings,
-    Package
+    Package,
+    BarChart
 } from 'lucide-react'
 
 const navigation = [
@@ -18,8 +19,9 @@ const navigation = [
     { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Clientes', href: '/clients', icon: Users },
-    { name: 'Proveedores', href: '/suppliers', icon: Truck },
-    // { name: 'Configuración', href: '/settings', icon: Settings },
+    { name: 'Reportes', href: '/reports', icon: BarChart },
+    { name: 'Configuración', href: '/settings', icon: Settings },
+    // { name: 'Proveedores', href: '/suppliers', icon: Truck },
 ]
 
 export function Sidebar() {

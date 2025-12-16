@@ -6,16 +6,18 @@ export async function createSupplierTask(
     supplierId: string,
     quoteId: string, // Tasks are generally linked to a project/quote
     description: string,
-    expectedDate?: Date
+    expectedDate?: Date,
+    priority: string = 'MEDIUM'
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
         const task = await prisma.supplierTask.create({
             data: {
                 supplierId,
-                quoteId,
+                quoteId: quoteId || undefined, // Allow null/undefined
                 description,
                 expectedDate,
+                priority,
                 status: 'PENDING'
             }
         })

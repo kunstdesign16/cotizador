@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Save, ArrowLeft, Settings2 } from 'lucide-react'
+import { Plus, Trash2, Save, ArrowLeft, Settings2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import QuoteItemCostDialog from './quote-item-cost-dialog'
@@ -67,6 +67,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [editingCostId, setEditingCostId] = useState<string | null>(null)
     const [isrRate, setIsrRate] = useState(initialData?.isr_rate || 0)
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
+    const [showNewClientDialog, setShowNewClientDialog] = useState(false)
 
     const [client, setClient] = useState(initialData?.client || { name: '', company: '', email: '', phone: '' })
     const [project, setProject] = useState(initialData?.project || { name: '', date: new Date().toISOString().split('T')[0], deliveryDate: '' })
@@ -245,7 +246,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         <div className="flex items-center justify-between">
                             <h2 className="font-semibold text-lg">Información del Cliente</h2>
                             {/* Client Selector */}
-                            <div className="w-[250px]">
+                            <div className="w-[250px] flex gap-2">
                                 <ClientCombobox
                                     clients={clients}
                                     value={selectedClientId || undefined}
@@ -264,6 +265,9 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                         }
                                     }}
                                 />
+                                <Button size="icon" variant="outline" onClick={() => setShowNewClientDialog(true)} title="Nuevo Cliente Rápido">
+                                    <Plus className="h-4 w-4" />
+                                </Button>
                             </div>
                         </div>
                         <div className="space-y-3">
@@ -473,6 +477,67 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         />
                     )
                 })()}
+
+                {/* Quick Add Client Dialog */}
+                {showNewClientDialog && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in-0">
+                        <div className="bg-background rounded-lg shadow-lg w-full max-w-md overflow-hidden animate-in zoom-in-95">
+                            <div className="flex items-center justify-between p-4 border-b">
+                                <h2 className="text-lg font-semibold">Nuevo Cliente Rápido</h2>
+                                <Button variant="ghost" size="sm" onClick={() => setShowNewClientDialog(false)} className="h-8 w-8 p-0">
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                            <form action={async (formData) => {
+                                setLoading(true)
+                                const { createClient } = await import('@/actions/clients')
+                                const result = await createClient({}, formData)
+                                setLoading(false)
+                                if (result.success && result.id) {
+                                    setShowNewClientDialog(false)
+                                    // Optimistic update logic would involve adding to the list, 
+                                    // but for now we rely on the parent page revalidation or manual set
+                                    // Since we can't easily update the 'clients' prop from here without a router refresh...
+                                    // We will just set the current client data manually and assume the ID is valid
+                                    setSelectedClientId(result.id)
+                                    setClient({
+                                        name: formData.get('name') as string,
+                                        company: formData.get('company') as string,
+                                        email: formData.get('email') as string,
+                                        phone: formData.get('phone') as string
+                                    })
+                                    router.refresh()
+                                } else {
+                                    alert(result.message || 'Error al crear cliente')
+                                }
+                            }} className="p-4 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Nombre *</label>
+                                    <Input name="name" required placeholder="Nombre del cliente" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Empresa</label>
+                                    <Input name="company" placeholder="Nombre de la empresa" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Email</label>
+                                        <Input name="email" type="email" placeholder="correo@ejemplo.com" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Teléfono</label>
+                                        <Input name="phone" placeholder="555-0000" />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-2">
+                                    <Button type="submit" disabled={loading}>
+                                        {loading ? 'Guardando...' : 'Crear Cliente'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

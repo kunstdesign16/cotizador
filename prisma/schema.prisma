@@ -135,6 +135,7 @@ model SupplierTask {
   quote        Quote?    @relation(fields: [quoteId], references: [id])
   description  String
   status       String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  priority     String    @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
   expectedDate DateTime?
   deliveryDate DateTime?
   createdAt    DateTime  @default(now())
