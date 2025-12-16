@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, X, ShoppingCart, Pencil, Receipt } from 'lucide-react'
+import { Plus, X, ShoppingCart, Pencil, Receipt, Trash2 } from 'lucide-react'
 import { createSupplierOrder, updateSupplierOrder } from '@/actions/supplier-orders'
 import { useRouter } from 'next/navigation'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -45,7 +45,7 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
 
     useEffect(() => {
         if (open && initialData) {
-            setItems(initialData.items)
+            setItems(Array.isArray(initialData.items) ? initialData.items : [])
             if (initialData.expectedDate) {
                 setExpectedDate(new Date(initialData.expectedDate).toISOString().split('T')[0])
             }
@@ -130,11 +130,27 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 {initialData ? <Pencil className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
-                                {initialData ? 'Editar Orden de Compra' : 'Nueva Orden de Compra'}
+                                {initialData ? 'Editar Orden/Ver Detalles' : 'Nueva Orden de Compra'}
                             </h2>
-                            <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-                                <X className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                {initialData && (
+                                    <form action={async () => {
+                                        if (confirm('¿Estás seguro de eliminar esta orden?')) {
+                                            const { deleteOrder } = await import('@/actions/supplier-orders')
+                                            await deleteOrder(initialData.id)
+                                            setOpen(false)
+                                            router.refresh()
+                                        }
+                                    }}>
+                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </form>
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="space-y-6">
