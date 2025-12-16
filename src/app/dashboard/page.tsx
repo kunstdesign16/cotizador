@@ -84,6 +84,14 @@ export default async function DashboardPage() {
     // Recent 5 quotes
     const recentQuotes = serializedQuotes.slice(0, 5)
 
+    // Recent 5 supplier orders
+    const recentOrders = await prisma.supplierOrder.findMany({
+        include: { supplier: true },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+    })
+    const serializedOrders = JSON.parse(JSON.stringify(recentOrders))
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="mx-auto max-w-7xl space-y-8">
@@ -236,6 +244,65 @@ export default async function DashboardPage() {
                                 <Button className="w-full" variant="outline">Ver Todas las Tareas</Button>
                             </Link>
                         </div>
+                    </div>
+                </div>
+
+                {/* Recent Supplier Orders Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-semibold">Órdenes de Compra Recientes</h2>
+                        <Link href="/supplier-orders">
+                            <Button variant="outline" size="sm">Ver Todas</Button>
+                        </Link>
+                    </div>
+                    <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+                        {serializedOrders.length === 0 ? (
+                            <div className="p-8 text-center text-muted-foreground text-sm">
+                                No hay órdenes registradas.
+                            </div>
+                        ) : (
+                            <div className="divide-y">
+                                {serializedOrders.map((order: any) => {
+                                    const items = JSON.parse(order.items as string) as any[]
+                                    const total = items.reduce((sum: number, item: any) =>
+                                        sum + (item.unitCost || 0) * (item.quantity || 0), 0
+                                    )
+
+                                    return (
+                                        <div key={order.id} className="p-4 hover:bg-muted/50 transition-colors">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <span className="font-semibold text-sm">{order.supplier.name}</span>
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        {new Date(order.createdAt).toLocaleDateString('es-MX')}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-medium text-sm">
+                                                        ${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
+                                                        order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                            order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
+                                                                'bg-gray-100 text-gray-600 border-gray-200'
+                                                    }`}>
+                                                    {order.status}
+                                                </span>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.paymentStatus === 'PAID'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                    }`}>
+                                                    {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
