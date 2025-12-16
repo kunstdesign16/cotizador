@@ -8,13 +8,14 @@ import { createSupplier, updateSupplier } from '@/actions/suppliers'
 import { useRouter } from 'next/navigation'
 
 interface SupplierFormDialogProps {
-    supplier?: { id: string, name: string }
+    supplier?: { id: string, name: string, type: string }
     children?: React.ReactNode
 }
 
 export function SupplierFormDialog({ supplier, children }: SupplierFormDialogProps) {
     const [open, setOpen] = useState(false)
     const [name, setName] = useState(supplier?.name || '')
+    const [type, setType] = useState(supplier?.type || 'RAW_MATERIAL')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -25,8 +26,8 @@ export function SupplierFormDialog({ supplier, children }: SupplierFormDialogPro
         setLoading(true)
         try {
             const result = supplier
-                ? await updateSupplier(supplier.id, name)
-                : await createSupplier(name)
+                ? await updateSupplier(supplier.id, name, type)
+                : await createSupplier(name, type)
 
             if (result.success) {
                 setOpen(false)
@@ -71,6 +72,19 @@ export function SupplierFormDialog({ supplier, children }: SupplierFormDialogPro
                                     required
                                     autoFocus
                                 />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium">Tipo de Proveedor</label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={type}
+                                    onChange={(e) => setType(e.target.value)}
+                                >
+                                    <option value="RAW_MATERIAL">Materia Prima</option>
+                                    <option value="SERVICE">Servicio / Personalización</option>
+                                    <option value="FINISHED_PRODUCT">Producto Terminado</option>
+                                </select>
                             </div>
 
                             <div className="flex gap-2 justify-end">

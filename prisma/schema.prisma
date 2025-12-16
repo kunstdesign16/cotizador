@@ -58,6 +58,9 @@ model Quote {
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  
+  supplierOrders SupplierOrder[]
+  supplierTasks  SupplierTask[]
 }
 
 model QuoteItem {
@@ -94,12 +97,48 @@ model QuoteItem {
 
 
 
+enum SupplierType {
+  RAW_MATERIAL
+  SERVICE
+  FINISHED_PRODUCT
+}
+
 model Supplier {
   id        String    @id @default(cuid())
   name      String
+  type      SupplierType @default(RAW_MATERIAL)
   products  Product[]
+  orders    SupplierOrder[]
+  tasks     SupplierTask[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model SupplierOrder {
+  id           String    @id @default(cuid())
+  supplierId   String
+  supplier     Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  quoteId      String?
+  quote        Quote?    @relation(fields: [quoteId], references: [id])
+  status       String    @default("PENDING") // PENDING, ORDERED, RECEIVED
+  expectedDate DateTime?
+  items        Json      // [{ code, quantity, name }]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model SupplierTask {
+  id           String    @id @default(cuid())
+  supplierId   String
+  supplier     Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  quoteId      String?
+  quote        Quote?    @relation(fields: [quoteId], references: [id])
+  description  String
+  status       String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  expectedDate DateTime?
+  deliveryDate DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Product {

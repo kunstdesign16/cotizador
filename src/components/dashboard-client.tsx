@@ -103,8 +103,8 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                         return (
                             <div key={clientId} className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <h2 className="text-lg font-bold text-foreground/80">{client.name}</h2>
-                                    {client.company && <span className="text-sm text-muted-foreground">({client.company})</span>}
+                                    <h2 className="text-lg font-bold text-foreground/80">{client.company || client.name}</h2>
+                                    {client.company && <span className="text-sm text-muted-foreground">({client.name})</span>}
                                     <div className="h-px bg-border flex-1 ml-4" />
                                 </div>
 

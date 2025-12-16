@@ -1,0 +1,54 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+
+export async function createSupplierTask(
+    supplierId: string,
+    quoteId: string, // Tasks are generally linked to a project/quote
+    description: string,
+    expectedDate?: Date
+) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        const task = await prisma.supplierTask.create({
+            data: {
+                supplierId,
+                quoteId,
+                description,
+                expectedDate,
+                status: 'PENDING'
+            }
+        })
+        revalidatePath('/suppliers')
+        revalidatePath(`/suppliers/${supplierId}`)
+        return { success: true, id: task.id }
+    } catch (error) {
+        console.error('Error creating task:', error)
+        return { success: false, error: 'Error al crear tarea' }
+    }
+}
+
+export async function updateTaskStatus(id: string, status: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierTask.update({
+            where: { id },
+            data: { status }
+        })
+        revalidatePath('/suppliers')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Error actualizando estatus' }
+    }
+}
+
+export async function deleteTask(id: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierTask.delete({ where: { id } })
+        revalidatePath('/suppliers')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Error al eliminar tarea' }
+    }
+}

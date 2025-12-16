@@ -15,10 +15,13 @@ export async function getSuppliers() {
     return suppliers
 }
 
-export async function createSupplier(name: string) {
+export async function createSupplier(name: string, type: string) {
     try {
         const supplier = await prisma.supplier.create({
-            data: { name }
+            data: {
+                name,
+                type: type as any // Cast to SupplierType
+            }
         })
         revalidatePath('/suppliers')
         return { success: true, supplier }
@@ -28,11 +31,14 @@ export async function createSupplier(name: string) {
     }
 }
 
-export async function updateSupplier(id: string, name: string) {
+export async function updateSupplier(id: string, name: string, type: string) {
     try {
         const supplier = await prisma.supplier.update({
             where: { id },
-            data: { name }
+            data: {
+                name,
+                type: type as any
+            }
         })
         revalidatePath('/suppliers')
         revalidatePath(`/suppliers/${id}`)
@@ -65,6 +71,19 @@ export async function getSupplierById(id: string) {
             },
             _count: {
                 select: { products: true }
+            },
+            orders: {
+                orderBy: { createdAt: 'desc' },
+                take: 20
+            },
+            tasks: {
+                orderBy: { createdAt: 'desc' },
+                take: 20,
+                include: {
+                    quote: {
+                        select: { project_name: true }
+                    }
+                }
             }
         }
     })

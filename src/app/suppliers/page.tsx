@@ -3,6 +3,7 @@ import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { Button } from "@/components/ui/button"
 import { Plus, Package, ChevronRight } from 'lucide-react'
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +49,16 @@ export default async function SuppliersPage() {
                                         <div className="flex-1">
                                             <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
                                                 {supplier.name}
+                                                <span className={cn(
+                                                    "ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-medium border",
+                                                    supplier.type === 'RAW_MATERIAL' && "bg-slate-100 text-slate-600 border-slate-200",
+                                                    supplier.type === 'SERVICE' && "bg-blue-50 text-blue-600 border-blue-200",
+                                                    supplier.type === 'FINISHED_PRODUCT' && "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                                )}>
+                                                    {supplier.type === 'RAW_MATERIAL' && 'Materia Prima'}
+                                                    {supplier.type === 'SERVICE' && 'Servicio/Pers.'}
+                                                    {supplier.type === 'FINISHED_PRODUCT' && 'Producto Final'}
+                                                </span>
                                             </h3>
                                             <p className="text-xs text-muted-foreground mt-1">
                                                 Actualizado: {new Date(supplier.updatedAt).toLocaleDateString('es-MX')}

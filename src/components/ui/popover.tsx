@@ -100,7 +100,7 @@ const PopoverContent = React.forwardRef<
                 else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node
             }}
             className={cn(
-                "absolute z-50 mt-2 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95",
+                "absolute z-50 mt-2 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95 bg-white dark:bg-slate-950",
                 align === "start" && "left-0",
                 align === "center" && "left-1/2 -translate-x-1/2",
                 align === "end" && "right-0",
