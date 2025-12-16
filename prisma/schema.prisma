@@ -34,7 +34,7 @@ model Quote {
   id           String      @id @default(cuid())
   project_name String
   date         DateTime    @default(now())
-  status       String      @default("DRAFT") // DRAFT, SAVED, EXPORTED
+  status       String      @default("DRAFT") // DRAFT, SAVED, SENT, APPROVED, FACTURADO, COBRADO
   // Financials
   deliveryDate DateTime?
   
@@ -121,6 +121,7 @@ model SupplierOrder {
   quoteId      String?
   quote        Quote?    @relation(fields: [quoteId], references: [id])
   status       String    @default("PENDING") // PENDING, ORDERED, RECEIVED
+  paymentStatus String   @default("PENDING") // PENDING, PAID
   expectedDate DateTime?
   items        Json      // [{ code, quantity, name }]
   createdAt    DateTime  @default(now())

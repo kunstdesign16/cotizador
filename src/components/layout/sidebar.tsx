@@ -17,6 +17,7 @@ import {
 const navigation = [
     { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
+    { name: 'Proyectos', href: '/projects', icon: Package },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Clientes', href: '/clients', icon: Users },
     { name: 'Proveedores', href: '/suppliers', icon: Truck },

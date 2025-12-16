@@ -38,9 +38,32 @@ export async function updateTaskStatus(id: string, status: string) {
             data: { status }
         })
         revalidatePath('/suppliers')
+        revalidatePath('/tasks')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error actualizando estatus' }
+    }
+}
+
+export async function updateSupplierTask(
+    id: string,
+    data: {
+        description?: string
+        priority?: string
+        expectedDate?: Date | null
+    }
+) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierTask.update({
+            where: { id },
+            data
+        })
+        revalidatePath('/suppliers')
+        revalidatePath('/tasks')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Error actualizando tarea' }
     }
 }
 
@@ -49,6 +72,7 @@ export async function deleteTask(id: string) {
     try {
         await prisma.supplierTask.delete({ where: { id } })
         revalidatePath('/suppliers')
+        revalidatePath('/tasks')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error al eliminar tarea' }
