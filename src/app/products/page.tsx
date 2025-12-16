@@ -3,6 +3,7 @@ import { ProductImportForm } from "@/components/product-import-form"
 import { prisma } from "@/lib/prisma"
 import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
+import { ProductExportButton } from "@/components/product-export-button"
 
 export const dynamic = 'force-dynamic'
 
@@ -19,9 +20,12 @@ export default async function ProductsPage() {
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="mx-auto max-w-6xl space-y-8">
-                <header>
-                    <h1 className="text-3xl font-bold tracking-tight">Catálogo de Productos</h1>
-                    <p className="text-muted-foreground">Gestiona tus proveedores y listas de precios</p>
+                <header className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Catálogo de Productos</h1>
+                        <p className="text-muted-foreground">Gestiona tus proveedores y listas de precios</p>
+                    </div>
+                    <ProductExportButton />
                 </header>
 
                 <div className="grid gap-8 md:grid-cols-2">

@@ -45,6 +45,7 @@ export async function saveQuote(data: any) {
         data: {
             project_name: data.project.name,
             date: new Date(data.project.date),
+            deliveryDate: data.project.deliveryDate ? new Date(data.project.deliveryDate) : null,
             subtotal: subtotal,
             iva_rate: data.iva_rate,
             iva_amount: iva_amount,
@@ -121,6 +122,7 @@ export async function updateQuote(id: string, data: any) {
             data: {
                 project_name: data.project.name,
                 date: new Date(data.project.date),
+                deliveryDate: data.project.deliveryDate ? new Date(data.project.deliveryDate) : null,
                 subtotal,
                 iva_rate: data.iva_rate || 0.16,
                 iva_amount,
@@ -188,5 +190,65 @@ export async function deleteQuote(id: string) {
         return { success: true }
     } catch (e) {
         return { success: false, error: 'Error deleting quote' }
+    }
+}
+
+export async function duplicateQuote(id: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        // 1. Get original quote with items
+        const original = await prisma.quote.findUnique({
+            where: { id },
+            include: { items: true }
+        })
+
+        if (!original) return { success: false, error: 'Original quote not found' }
+
+        // 2. Create new quote based on original
+        const newQuote = await prisma.quote.create({
+            data: {
+                project_name: `${original.project_name} (Copia)`,
+                date: new Date(),
+                status: 'DRAFT',
+                clientId: original.clientId,
+                userId: original.userId,
+
+                subtotal: original.subtotal,
+                iva_rate: original.iva_rate,
+                iva_amount: original.iva_amount,
+                isr_rate: original.isr_rate,
+                isr_amount: original.isr_amount,
+                profit_rate: original.profit_rate,
+                profit_amount: original.profit_amount,
+                total: original.total,
+
+                items: {
+                    create: original.items.map(item => ({
+                        concept: item.concept,
+                        quantity: item.quantity,
+                        productId: item.productId,
+                        productCode: item.productCode,
+                        productName: item.productName,
+                        supplierPrice: item.supplierPrice,
+                        internal_unit_cost: item.internal_unit_cost,
+                        cost_article: item.cost_article,
+                        cost_workforce: item.cost_workforce,
+                        cost_packaging: item.cost_packaging,
+                        cost_transport: item.cost_transport,
+                        cost_equipment: item.cost_equipment,
+                        cost_other: item.cost_other,
+                        profit_margin: item.profit_margin,
+                        unit_cost: item.unit_cost,
+                        subtotal: item.subtotal
+                    }))
+                }
+            }
+        })
+
+        revalidatePath('/dashboard')
+        return { success: true, id: newQuote.id }
+    } catch (error) {
+        console.error('Error duplicating quote:', error)
+        return { success: false, error: 'Error al duplicar la cotización' }
     }
 }

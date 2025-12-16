@@ -47,6 +47,7 @@ export type QuoteFormData = {
     project: {
         name: string
         date: string
+        deliveryDate?: string
     }
     items: QuoteItem[]
     isr_rate?: number
@@ -68,7 +69,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
 
     const [client, setClient] = useState(initialData?.client || { name: '', company: '', email: '', phone: '' })
-    const [project, setProject] = useState(initialData?.project || { name: '', date: new Date().toISOString().split('T')[0] })
+    const [project, setProject] = useState(initialData?.project || { name: '', date: new Date().toISOString().split('T')[0], deliveryDate: '' })
 
     // Ensure items have internal_unit_cost and profit_margin if loading from legacy data or partial data
     const safeItems = (initialData?.items || [{
@@ -299,11 +300,24 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                 value={project.name}
                                 onChange={e => setProject({ ...project, name: e.target.value })}
                             />
-                            <Input
-                                type="date"
-                                value={project.date}
-                                onChange={e => setProject({ ...project, date: e.target.value })}
-                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs text-muted-foreground">Fecha de Creación</label>
+                                    <Input
+                                        type="date"
+                                        value={project.date}
+                                        onChange={e => setProject({ ...project, date: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-muted-foreground">Fecha de Entrega</label>
+                                    <Input
+                                        type="date"
+                                        value={project.deliveryDate || ''}
+                                        onChange={e => setProject({ ...project, deliveryDate: e.target.value })}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>

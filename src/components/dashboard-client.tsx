@@ -9,6 +9,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Client, Quote } from "@prisma/client"
 import DeleteQuoteButton from "./delete-quote-button"
+import DuplicateQuoteButton from "./duplicate-quote-button"
 import { QuoteStatusSelector } from "./quote-status-selector"
 
 type QuoteWithClient = Quote & { client: Client }
@@ -125,7 +126,8 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                                         </span>
                                     </div>
 
-                                    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                    <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                        <DuplicateQuoteButton id={quote.id} iconOnly />
                                         <DeleteQuoteButton id={quote.id} iconOnly />
                                     </div>
                                 </div>

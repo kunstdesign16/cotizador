@@ -35,6 +35,8 @@ model Quote {
   project_name String
   date         DateTime    @default(now())
   status       String      @default("DRAFT") // DRAFT, SAVED, EXPORTED
+  // Financials
+  deliveryDate DateTime?
   
   // Financials
   subtotal     Float       @default(0)

@@ -99,7 +99,10 @@ export function ItemProductAutocomplete({ value, onChange, onSelect, placeholder
                             >
                                 <div>
                                     <div className="font-medium">{product.name}</div>
-                                    <div className="text-xs text-muted-foreground">{product.code}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {product.category ? <span className="font-medium text-amber-600 mr-2">{product.category}</span> : null}
+                                        {product.code}
+                                    </div>
                                 </div>
                                 <div className="text-xs font-semibold text-primary">
                                     ${product.price.toLocaleString('es-MX', { minimumFractionDigits: 2 })}

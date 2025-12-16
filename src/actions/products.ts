@@ -11,7 +11,8 @@ export async function searchProducts(query: string) {
         where: {
             OR: [
                 { name: { contains: query, mode: 'insensitive' } },
-                { code: { contains: query, mode: 'insensitive' } }
+                { code: { contains: query, mode: 'insensitive' } },
+                { category: { contains: query, mode: 'insensitive' } }
             ]
         },
         take: 20,
@@ -76,4 +77,32 @@ export async function deleteProduct(id: string, supplierId: string) {
         console.error('Error deleting product:', error)
         return { success: false, error: 'Error al eliminar producto' }
     }
+}
+
+export async function exportProductsToCSV() {
+    const products = await prisma.product.findMany({
+        include: { supplier: true },
+        orderBy: { name: 'asc' }
+    })
+
+    // Generate CSV Header
+    const headers = ['Código', 'Nombre', 'Categoría', 'Precio', 'Proveedor', 'Fecha Actualización']
+
+    // Generate Rows
+    const rows = products.map(p => [
+        p.code,
+        p.name,
+        p.category || '',
+        p.price.toString(),
+        p.supplier.name,
+        p.updatedAt.toISOString().split('T')[0]
+    ])
+
+    // Combine
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+    ].join('\n')
+
+    return csvContent
 }
