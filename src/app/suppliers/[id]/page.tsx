@@ -153,7 +153,13 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                                                         Espera: {new Date(order.expectedDate).toLocaleDateString('es-MX')}
                                                     </p>
                                                 )}
-                                                {/* Actions like status change could go here */}
+                                                <div className="flex justify-end gap-2 mt-2">
+                                                    <SupplierOrderForm supplierId={supplier.id} products={supplier.products} initialData={order}>
+                                                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                                            <Pencil className="h-3 w-3" />
+                                                        </Button>
+                                                    </SupplierOrderForm>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
