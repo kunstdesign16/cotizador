@@ -216,7 +216,6 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
                 amount: total,
                 category: 'Material', // Default
                 date: new Date(),
-                status: 'PAID', // VariableExpense doesn't have status in schema, but implies paid. Wait schema doesn't have status. 
                 // Schema: description, amount, category, date, paymentMethod, supplierId, supplierOrderId, quoteId
                 supplierId: order.supplierId,
                 supplierOrderId: order.id,
