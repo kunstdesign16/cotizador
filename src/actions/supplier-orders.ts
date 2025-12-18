@@ -178,6 +178,7 @@ export async function updatePaymentStatus(id: string, paymentStatus: string) {
 
         revalidatePath('/suppliers')
         revalidatePath('/supplier-orders')
+        revalidatePath('/accounting')
         revalidatePath('/dashboard')
         return { success: true }
     } catch (error) {

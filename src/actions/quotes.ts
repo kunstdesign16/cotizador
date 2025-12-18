@@ -178,6 +178,7 @@ export async function updateQuoteStatus(id: string, status: string) {
         }
 
         revalidatePath('/dashboard')
+        revalidatePath('/accounting')
         revalidatePath(`/quotes/${id}`)
         return { success: true }
     } catch (e) {
