@@ -81,10 +81,17 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                     <div key={order.id} className="p-4 hover:bg-muted/50 transition-colors block">
                         <div className="flex justify-between items-start mb-2">
                             <Link href={`/suppliers/${order.supplier.id}?orderId=${order.id}`} className="block">
-                                <span className="font-semibold text-sm">{order.supplier.name}</span>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {new Date(order.createdAt).toLocaleDateString('es-MX')}
-                                </p>
+                                <span className="font-semibold text-sm block truncate w-[180px]" title={Array.isArray(items) ? items.map((i: any) => i.name || i.code).join(', ') : ''}>
+                                    {Array.isArray(items) && items.length > 0
+                                        ? items.map((i: any) => `${i.quantity}x ${i.name || i.code}`).join(', ')
+                                        : 'Sin conceptos'}
+                                </span>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                    <span className="text-xs font-medium text-foreground/80">{order.supplier.name}</span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                        {new Date(order.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
+                                    </span>
+                                </div>
                             </Link>
                             <div className="text-right">
                                 <div className="font-medium text-sm">
