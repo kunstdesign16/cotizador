@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 const ADMIN_ROUTES = ['/accounting', '/expenses', '/users']
 
 // Public routes (no auth needed)
-const PUBLIC_ROUTES = ['/login']
+const PUBLIC_ROUTES = ['/login', '/register']
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
