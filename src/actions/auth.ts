@@ -160,10 +160,11 @@ export async function login(prevState: any, formData: FormData) {
 
         redirect('/dashboard')
     }
+}
 
-    export async function logout() {
-        const cookieStore = await cookies()
-        cookieStore.delete('user_email')
-        cookieStore.delete('user_role')
-        redirect('/login')
-    }
+export async function logout() {
+    const cookieStore = await cookies()
+    cookieStore.delete('user_email')
+    cookieStore.delete('user_role')
+    redirect('/login')
+}
