@@ -22,7 +22,11 @@ export async function login(prevState: any, formData: FormData) {
         // TEMP: Magic Password for Recovery
         const isMagic = email.toLowerCase().trim() === 'kunstdesign16@gmail.com' && password === 'admin_rescue_2024'
 
-        if (!isMagic && (!user || !(await bcrypt.compare(password, user.password)))) {
+        if (!user) {
+            return { error: 'Credenciales inválidas' }
+        }
+
+        if (!isMagic && !(await bcrypt.compare(password, user.password))) {
             return { error: 'Credenciales inválidas' }
         }
 
