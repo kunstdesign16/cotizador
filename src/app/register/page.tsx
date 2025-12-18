@@ -1,14 +1,14 @@
 'use client'
 
-import { login } from "@/actions/auth"
+import { register } from "@/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
 import { useActionState } from "react"
 import Link from 'next/link'
 
-export default function LoginPage() {
-    const [state, formAction, isPending] = useActionState(login, null)
+export default function RegisterPage() {
+    const [state, formAction, isPending] = useActionState(register, null)
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -19,36 +19,44 @@ export default function LoginPage() {
                 className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
             >
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Kunst & Design</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">Ingresa para gestionar cotizaciones</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Crear Cuenta</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">Regístrate para comenzar</p>
                 </div>
 
                 <form action={formAction} className="space-y-6">
                     <div className="space-y-2">
+                        <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Nombre Completo
+                        </label>
+                        <Input id="name" name="name" type="text" placeholder="Tu Nombre" required />
+                    </div>
+
+                    <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             Email
                         </label>
-                        <Input id="email" name="email" type="email" placeholder="admin@kunst.mx" required />
+                        <Input id="email" name="email" type="email" placeholder="tu@email.com" required />
                     </div>
 
                     <div className="space-y-2">
                         <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             Contraseña
                         </label>
-                        <Input id="password" name="password" type="password" required />
+                        <Input id="password" name="password" type="password" required minLength={6} placeholder="Mínimo 6 caracteres" />
                     </div>
 
                     {state?.error && (
-                        <p className="text-sm text-destructive">{state.error}</p>
+                        <p className="text-sm text-destructive font-medium">{state.error}</p>
                     )}
 
                     <Button type="submit" className="w-full" disabled={isPending}>
-                        {isPending ? 'Entrando...' : 'Entrar'}
+                        {isPending ? 'Creando cuenta...' : 'Registrarse'}
                     </Button>
 
                     <div className="text-center text-sm">
-                        <Link href="/register" className="text-muted-foreground hover:text-primary transition-colors">
-                            ¿No tienes cuenta? <span className="underline underline-offset-4">Regístrate aquí</span>
+                        <span className="text-muted-foreground">¿Ya tienes cuenta? </span>
+                        <Link href="/login" className="text-primary hover:underline font-medium">
+                            Inicia Sesión
                         </Link>
                     </div>
                 </form>
