@@ -20,6 +20,8 @@ export async function login(prevState: any, formData: FormData) {
     cookieStore.set('auth_refresh', Date.now().toString())
 
     redirect('/dashboard')
+    // Unreachable return to satisfy TypeScript inference for useActionState
+    return { error: undefined }
 }
 
 export async function register(prevState: any, formData: FormData) {
@@ -32,6 +34,8 @@ export async function register(prevState: any, formData: FormData) {
     cookieStore.set('auth_refresh', Date.now().toString())
 
     redirect('/dashboard')
+    // Unreachable return to satisfy TypeScript inference for useActionState
+    return { error: undefined }
 }
 
 export async function logout() {
