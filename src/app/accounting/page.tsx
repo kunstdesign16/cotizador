@@ -1,46 +1,32 @@
-import { AccountingClient } from '@/components/accounting-client'
+import { AccountingDashboard } from '@/components/accounting/dashboard'
+import { getAccountingSummary } from '@/actions/accounting'
 
+// Allow searchParams
 export const dynamic = 'force-dynamic'
 
-export default async function AccountingPage() {
-    const { prisma } = await import('@/lib/prisma')
+export default async function AccountingPage({
+    searchParams,
+}: {
+    searchParams?: { [key: string]: string | string[] | undefined }
+}) {
+    // Default to current month if not specified
+    const month = typeof searchParams?.month === 'string' ? searchParams.month : new Date().toISOString().slice(0, 7)
+
+    let summary = { incomes: [], variableExpenses: [], fixedExpenses: [] }
 
     try {
-        // Fetch all data for accounting
-        const [quotes, supplierOrders, fixedExpenses] = await Promise.all([
-            prisma.quote.findMany({
-                where: { status: 'COBRADO' },
-                include: { client: true },
-                orderBy: { date: 'desc' }
-            }),
-            prisma.supplierOrder.findMany({
-                where: { paymentStatus: 'PAID' },
-                include: {
-                    supplier: true,
-                    quote: { include: { client: true } }
-                },
-                orderBy: { createdAt: 'desc' }
-            }),
-            prisma.fixedExpense.findMany({
-                orderBy: { date: 'desc' }
-            })
-        ])
-
-        return (
-            <AccountingClient
-                quotes={JSON.parse(JSON.stringify(quotes))}
-                supplierOrders={JSON.parse(JSON.stringify(supplierOrders))}
-                fixedExpenses={JSON.parse(JSON.stringify(fixedExpenses))}
-            />
-        )
+        summary = await getAccountingSummary(month)
     } catch (error) {
-        console.error("Error loading accounting data:", error)
-        return (
-            <div className="p-8 text-center text-destructive">
-                <h2 className="text-xl font-bold mb-2">Error al cargar contabilidad</h2>
-                <p>Ocurrió un problema al conectar con la base de datos.</p>
-                <code className="block mt-4 p-2 bg-muted rounded text-xs">{String(error)}</code>
-            </div>
-        )
+        console.error("Error fetching accounting data:", error)
+        // Fallback or empty state will be handled by UI
     }
+
+    // Serialize for Client Component
+    const serializedSummary = JSON.parse(JSON.stringify(summary))
+
+    return (
+        <div className="container mx-auto py-8">
+            <AccountingDashboard summary={serializedSummary} month={month} />
+        </div>
+    )
 }

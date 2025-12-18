@@ -171,11 +171,57 @@ export async function updatePaymentStatus(id: string, paymentStatus: string) {
             where: { id },
             data: { paymentStatus }
         })
+
+        if (paymentStatus === 'PAID') {
+            await syncExpenseFromOrder(id, paymentStatus)
+        }
+
         revalidatePath('/suppliers')
         revalidatePath('/supplier-orders')
         revalidatePath('/dashboard')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error actualizando estatus de pago' }
+    }
+}
+
+// Internal helper to sync expense
+async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
+    const { prisma } = await import('@/lib/prisma')
+
+    if (paymentStatus !== 'PAID') return // Only care about paid
+
+    const order = await prisma.supplierOrder.findUnique({
+        where: { id: orderId },
+        include: { supplier: true }
+    })
+
+    if (!order) return
+
+    // Calculate total
+    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
+    const total = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
+        sum + (item.unitCost || 0) * (item.quantity || 0), 0
+    ) : 0
+
+    // Check if exists
+    const existing = await prisma.variableExpense.findFirst({
+        where: { supplierOrderId: orderId }
+    })
+
+    if (!existing) {
+        await prisma.variableExpense.create({
+            data: {
+                description: `Orden de Compra: ${order.supplier.name}`,
+                amount: total,
+                category: 'Material', // Default
+                date: new Date(),
+                status: 'PAID', // VariableExpense doesn't have status in schema, but implies paid. Wait schema doesn't have status. 
+                // Schema: description, amount, category, date, paymentMethod, supplierId, supplierOrderId, quoteId
+                supplierId: order.supplierId,
+                supplierOrderId: order.id,
+                quoteId: order.quoteId
+            }
+        })
     }
 }

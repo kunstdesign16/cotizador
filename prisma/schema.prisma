@@ -30,6 +30,7 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   quotes    Quote[]
+  incomes   Income[]
 }
 
 model Quote {
@@ -63,6 +64,8 @@ model Quote {
   
   supplierOrders SupplierOrder[]
   supplierTasks  SupplierTask[]
+  incomes        Income[]
+  expenses       VariableExpense[]
 }
 
 model QuoteItem {
@@ -112,6 +115,7 @@ model Supplier {
   products  Product[]
   orders    SupplierOrder[]
   tasks     SupplierTask[]
+  expenses  VariableExpense[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -128,6 +132,7 @@ model SupplierOrder {
   items        Json      // [{ code, quantity, name }]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  expenses     VariableExpense[]
 }
 
 model SupplierTask {
@@ -169,7 +174,56 @@ model FixedExpense {
     category    String?  // Renta, Servicios, Nómina, Otros
     date        DateTime @default(now())
     recurring   Boolean  @default(false)
+    frequency   String?  // MONTHLY, ANNUALLY
+    isActive    Boolean  @default(true)
+    paymentMethod String? // TRANSFER, CASH, CREDIT_CARD
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+}
+
+model Income {
+    id            String   @id @default(cuid())
+    description   String?
+    amount        Float
+    date          DateTime @default(now())
+    status        String   @default("PAID") // PENDING, PAID, PARTIAL
+    paymentMethod String?  // TRANSFER, CASH, CHECK
+    
+    // Relations
+    clientId      String?
+    client        Client?  @relation(fields: [clientId], references: [id])
+    quoteId       String?
+    quote         Quote?   @relation(fields: [quoteId], references: [id])
+    
+    // For manual entries not linked to a quote
+    projectId     String?  // Optional external project reference if no quote exists
+    
+    notes         String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
+
+model VariableExpense {
+    id            String   @id @default(cuid())
+    description   String
+    amount        Float
+    category      String?  // MATERIAL, LABOR, SHIPPING, etc.
+    date          DateTime @default(now())
+    paymentMethod String?
+    
+    // Relations
+    supplierId    String?
+    supplier      Supplier? @relation(fields: [supplierId], references: [id])
+    supplierOrderId String?
+    supplierOrder SupplierOrder? @relation(fields: [supplierOrderId], references: [id])
+    
+    // Link to project
+    quoteId       String?
+    quote         Quote?   @relation(fields: [quoteId], references: [id])
+    
+    proofFile     String?  // URL to receipt/invoice
+    
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 }
 
