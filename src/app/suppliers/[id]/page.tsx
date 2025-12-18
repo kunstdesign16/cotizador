@@ -1,5 +1,6 @@
 
 import { getSupplierById, deleteSupplier } from "@/actions/suppliers"
+import { prisma } from "@/lib/prisma"
 import { SupplierFormDialog } from "@/components/supplier-form-dialog"
 import { ProductFormDialog } from "@/components/product-form-dialog"
 import { ProductImportForm } from "@/components/product-import-form"
@@ -21,6 +22,33 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
     if (!supplier) {
         notFound()
     }
+
+    // Fetch active projects (quotes) to assign to orders
+    const projects = await prisma.quote.findMany({
+        where: {
+            status: { not: 'DRAFT' } // Only show "real" projects, adjust logic if needed (e.g. status != COBRADO if completed projects shouldn't show)
+        },
+        select: {
+            id: true,
+            project_name: true,
+            client: {
+                select: {
+                    company: true,
+                    name: true
+                }
+            }
+        },
+        orderBy: { date: 'desc' }
+    })
+
+    // Transform projects to match interface (handle nulls)
+    const formattedProjects = projects.map(p => ({
+        ...p,
+        client: {
+            name: p.client.name,
+            company: p.client.company || ''
+        }
+    }))
 
     return (
         <div className="min-h-screen bg-background p-8">
@@ -120,7 +148,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                     <section className="bg-card border rounded-xl shadow-sm overflow-hidden mb-8">
                         <div className="p-6 border-b flex justify-between items-center">
                             <h2 className="font-semibold text-lg">Órdenes de Compra</h2>
-                            <SupplierOrderForm supplierId={supplier.id} products={supplier.products}>
+                            <SupplierOrderForm supplierId={supplier.id} products={supplier.products} projects={formattedProjects}>
                                 <Button size="sm" className="gap-2">
                                     <Plus className="h-4 w-4" /> Nueva Orden
                                 </Button>
@@ -154,7 +182,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
                                                     </p>
                                                 )}
                                                 <div className="flex justify-end gap-2 mt-2">
-                                                    <SupplierOrderForm supplierId={supplier.id} products={supplier.products} initialData={order}>
+                                                    <SupplierOrderForm supplierId={supplier.id} products={supplier.products} projects={formattedProjects} initialData={order}>
                                                         <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                                                             <Pencil className="h-3 w-3" />
                                                         </Button>

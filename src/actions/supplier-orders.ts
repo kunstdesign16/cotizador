@@ -12,7 +12,8 @@ interface OrderItemInput {
 export async function createSupplierOrder(
     supplierId: string,
     items: OrderItemInput[], // Updated type to include cost
-    expectedDate?: Date
+    expectedDate?: Date,
+    quoteId?: string
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -21,6 +22,7 @@ export async function createSupplierOrder(
                 supplierId,
                 items: items as any, // Store JSON
                 expectedDate,
+                quoteId,
                 status: 'PENDING'
             }
         })
@@ -54,7 +56,8 @@ export async function createSupplierOrder(
 export async function updateSupplierOrder(
     id: string,
     items: OrderItemInput[],
-    expectedDate?: Date
+    expectedDate?: Date,
+    quoteId?: string
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -62,7 +65,8 @@ export async function updateSupplierOrder(
             where: { id },
             data: {
                 items: items as any,
-                expectedDate
+                expectedDate,
+                quoteId
             }
         })
 

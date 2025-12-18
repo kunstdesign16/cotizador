@@ -179,7 +179,7 @@ export function Sidebar() {
 
             {/* Mobile Sidebar */}
             <div className={cn(
-                "lg:hidden fixed inset-y-0 left-0 z-40 w-64 bg-card border-r transform transition-transform duration-300",
+                "lg:hidden fixed inset-y-0 left-0 z-40 w-64 bg-background border-r transform transition-transform duration-300",
                 mobileOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex h-full flex-col">

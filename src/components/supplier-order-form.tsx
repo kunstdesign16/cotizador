@@ -24,21 +24,33 @@ interface OrderItem {
     unitCost?: number
 }
 
+interface Project {
+    id: string
+    project_name: string
+    client: {
+        company: string
+        name: string
+    }
+}
+
 interface SupplierOrderFormProps {
     supplierId: string
     products: Product[]
+    projects: Project[]
     initialData?: {
         id: string
         items: any[]
         expectedDate?: Date | null
+        quoteId?: string | null
     }
     children?: React.ReactNode
 }
 
-export function SupplierOrderForm({ supplierId, products, initialData, children }: SupplierOrderFormProps) {
+export function SupplierOrderForm({ supplierId, products, projects = [], initialData, children }: SupplierOrderFormProps) {
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<OrderItem[]>([])
     const [selectedProduct, setSelectedProduct] = useState('')
+    const [selectedProject, setSelectedProject] = useState<string>('')
     const [quantity, setQuantity] = useState(1)
     const [expectedDate, setExpectedDate] = useState('')
     const [loading, setLoading] = useState(false)
@@ -50,10 +62,14 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
             if (initialData.expectedDate) {
                 setExpectedDate(new Date(initialData.expectedDate).toISOString().split('T')[0])
             }
+            if (initialData.quoteId) {
+                setSelectedProject(initialData.quoteId)
+            }
         } else if (open && !initialData) {
             // Reset for new order
             setItems([])
             setExpectedDate('')
+            setSelectedProject('')
         }
     }, [open, initialData])
 
@@ -91,9 +107,9 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
 
             let result;
             if (initialData?.id) {
-                result = await updateSupplierOrder(initialData.id, items, date)
+                result = await updateSupplierOrder(initialData.id, items, date, selectedProject || undefined)
             } else {
-                result = await createSupplierOrder(supplierId, items, date)
+                result = await createSupplierOrder(supplierId, items, date, selectedProject || undefined)
             }
 
             if (result.success) {
@@ -154,6 +170,23 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
                         </div>
 
                         <div className="space-y-6">
+                            {/* Project Selection */}
+                            <div className="bg-muted/30 p-4 rounded-lg space-y-2">
+                                <label className="text-sm font-medium">Asignar a Proyecto (Cliente)</label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={selectedProject}
+                                    onChange={(e) => setSelectedProject(e.target.value)}
+                                >
+                                    <option value="">-- Sin Proyecto (Stock) --</option>
+                                    {projects.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.project_name} - {p.client.company || p.client.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             {/* Add Item Section */}
                             <div className="flex gap-2 items-end bg-muted/30 p-4 rounded-lg">
                                 <div className="flex-1">
