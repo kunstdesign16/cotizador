@@ -62,6 +62,14 @@ export function UserNav({ userName, userRole, userEmail }: UserNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                    {/*
+                    {userRole === 'admin' && (
+                        <DropdownMenuItem onClick={() => router.push('/admin/users')}>
+                            <Users className="mr-2 h-4 w-4" />
+                            <span>Gestión de Usuarios</span>
+                        </DropdownMenuItem>
+                    )}
+                    */}
                     <DropdownMenuItem>
                         <User className="mr-2 h-4 w-4" />
                         <span>Preferencias de usuario</span>

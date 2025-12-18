@@ -27,14 +27,14 @@ export async function login(prevState: any, formData: FormData) {
         // We do NOT update the DB directly here to avoid permission/schema issues during login
         const ADMIN_EMAILS = ['kunstdesign16@gmail.com', 'dirección@kunstdesign.com.mx', 'direccion@kunstdesign.com.mx']
         const userEmailLower = user.email.toLowerCase().trim()
-
+        
         let finalRole = user.role
         if (ADMIN_EMAILS.includes(userEmailLower)) {
             finalRole = 'admin'
         }
 
         const cookieStore = await cookies()
-        // Basic cookie setting without complex attributes that might fail in some envs
+         // Basic cookie setting without complex attributes that might fail in some envs
         cookieStore.set('user_email', user.email)
         cookieStore.set('user_role', finalRole)
         cookieStore.set('user_name', user.name || 'Usuario')
