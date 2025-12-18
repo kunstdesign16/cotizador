@@ -172,11 +172,46 @@ export async function updateQuoteStatus(id: string, status: string) {
             where: { id },
             data: { status }
         })
+
+        if (status === 'COBRADO') {
+            await syncIncomeFromQuote(id)
+        }
+
         revalidatePath('/dashboard')
         revalidatePath(`/quotes/${id}`)
         return { success: true }
     } catch (e) {
         return { success: false, error: 'Error modifying status' }
+    }
+}
+
+async function syncIncomeFromQuote(quoteId: string) {
+    const { prisma } = await import('@/lib/prisma')
+
+    const quote = await prisma.quote.findUnique({
+        where: { id: quoteId },
+        include: { client: true }
+    })
+
+    if (!quote) return
+
+    // Check if income exists
+    const existing = await prisma.income.findFirst({
+        where: { quoteId }
+    })
+
+    if (!existing) {
+        await prisma.income.create({
+            data: {
+                description: `Cobro Proyecto: ${quote.project_name}`,
+                amount: quote.total,
+                date: new Date(),
+                status: 'PAID',
+                clientId: quote.clientId,
+                quoteId: quote.id,
+                paymentMethod: 'TRANSFER' // Default, user can edit later
+            }
+        })
     }
 }
 

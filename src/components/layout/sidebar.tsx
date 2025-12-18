@@ -36,7 +36,6 @@ const navigation = [
 ]
 
 const adminNavigation = [
-    { name: 'Gastos Fijos', href: '/expenses', icon: Wallet },
     { name: 'Contabilidad', href: '/accounting', icon: Calculator },
     { name: 'Usuarios', href: '/users', icon: UserCog },
 ]

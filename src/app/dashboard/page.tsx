@@ -150,47 +150,7 @@ export default async function DashboardPage() {
                         </p>
                     </div>
 
-                    {/* Billed Projects Metric */}
-                    <div className="rounded-xl border bg-emerald-50 text-emerald-900 shadow-sm p-6 md:col-span-2 lg:col-span-2 border-emerald-200">
-                        <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <h3 className="tracking-tight text-lg font-semibold text-emerald-800">Proyectos Cobrados</h3>
-                            <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                                <span className="font-bold">$</span>
-                            </div>
-                        </div>
-                        <div className="flex items-baseline gap-4 mt-2">
-                            <div className="text-4xl font-bold">
-                                ${approvedQuotesTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="text-sm font-medium text-emerald-700">
-                                en {cobradoQuotes} proyectos
-                            </div>
-                        </div>
-                        <p className="text-xs text-emerald-600/80 mt-1">
-                            Suma total de cotizaciones con estatus COBRADO
-                        </p>
-                    </div>
 
-                    {/* Paid Orders Metric */}
-                    <div className="rounded-xl border bg-blue-50 text-blue-900 shadow-sm p-6 md:col-span-2 lg:col-span-2 border-blue-200">
-                        <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <h3 className="tracking-tight text-lg font-semibold text-blue-800">Órdenes Pagadas</h3>
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                <span className="font-bold">$</span>
-                            </div>
-                        </div>
-                        <div className="flex items-baseline gap-4 mt-2">
-                            <div className="text-4xl font-bold">
-                                ${paidOrdersTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="text-sm font-medium text-blue-700">
-                                en {paidOrders} órdenes
-                            </div>
-                        </div>
-                        <p className="text-xs text-blue-600/80 mt-1">
-                            Total pagado a proveedores
-                        </p>
-                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
