@@ -12,7 +12,7 @@ export default async function AccountingPage({
     // Default to current month if not specified
     const month = typeof searchParams?.month === 'string' ? searchParams.month : new Date().toISOString().slice(0, 7)
 
-    let summary = { incomes: [], variableExpenses: [], fixedExpenses: [] }
+    let summary: any = { incomes: [], variableExpenses: [], fixedExpenses: [] }
 
     try {
         summary = await getAccountingSummary(month)
