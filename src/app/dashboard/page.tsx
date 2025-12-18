@@ -2,10 +2,14 @@ import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { Plus, FileText, Users } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
+import { DashboardTaskList } from "@/components/dashboard-task-list"
+import { DashboardOrderList } from "@/components/dashboard-order-list"
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+    // ... imports and fetching logic ... 
+    // (Keeping fetching logic same, just replacing rendering)
     const { prisma } = await import('@/lib/prisma')
 
     // Fetch Quotes
@@ -212,32 +216,7 @@ export default async function DashboardPage() {
                             )}
                         </h2>
                         <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                            {serializedUrgentTasks.length === 0 ? (
-                                <div className="p-8 text-center text-muted-foreground text-sm">
-                                    No hay tareas urgentes.
-                                </div>
-                            ) : (
-                                <div className="divide-y">
-                                    {serializedUrgentTasks.map((task: any) => (
-                                        <Link key={task.id} href="/tasks" className="block p-4 hover:bg-muted/50 transition-colors">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <span className="font-semibold text-sm">{task.supplier.name}</span>
-                                                <span className="text-[10px] px-2 py-0.5 rounded-full border bg-red-50 text-red-600 border-red-200 uppercase font-bold">
-                                                    {task.priority || 'URGENTE'}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-foreground mb-1">{task.description}</p>
-
-                                            <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-                                                <span className="truncate max-w-[120px]">{task.quote?.project_name || 'Sin proyecto'}</span>
-                                                {task.expectedDate && (
-                                                    <span>{new Date(task.expectedDate).toLocaleDateString('es-MX')}</span>
-                                                )}
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
+                            <DashboardTaskList tasks={serializedUrgentTasks} />
                         </div>
 
                         <div className="mt-4 pt-4">
@@ -257,54 +236,7 @@ export default async function DashboardPage() {
                         </Link>
                     </div>
                     <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                        {serializedOrders.length === 0 ? (
-                            <div className="p-8 text-center text-muted-foreground text-sm">
-                                No hay órdenes registradas.
-                            </div>
-                        ) : (
-                            <div className="divide-y">
-                                {serializedOrders.map((order: any) => {
-                                    // Handle both object and string formats (Prisma Json vs serialized)
-                                    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
-                                    const total = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
-                                        sum + (item.unitCost || 0) * (item.quantity || 0), 0
-                                    ) : 0
-
-                                    return (
-                                        <Link key={order.id} href={`/suppliers/${order.supplier.id}?orderId=${order.id}`} className="block p-4 hover:bg-muted/50 transition-colors">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <span className="font-semibold text-sm">{order.supplier.name}</span>
-                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                        {new Date(order.createdAt).toLocaleDateString('es-MX')}
-                                                    </p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="font-medium text-sm">
-                                                        ${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2 mt-2">
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
-                                                    order.status === 'ORDERED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                        order.status === 'RECEIVED' ? 'bg-green-50 text-green-600 border-green-200' :
-                                                            'bg-gray-100 text-gray-600 border-gray-200'
-                                                    }`}>
-                                                    {order.status}
-                                                </span>
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${order.paymentStatus === 'PAID'
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                    }`}>
-                                                    {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
-                                                </span>
-                                            </div>
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-                        )}
+                        <DashboardOrderList orders={serializedOrders} />
                     </div>
                 </div>
             </div>

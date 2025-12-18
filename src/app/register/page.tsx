@@ -19,9 +19,7 @@ export default function RegisterPage() {
                 className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/60"
             >
                 <div className="text-center flex flex-col items-center">
-                    <img src="/logo.svg" alt="Kunst Design" className="h-[80px] w-auto mb-6" />
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Crear Cuenta</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">Regístrate para comenzar</p>
+                    <img src="/logo.svg" alt="Kunst Design" className="h-32 w-auto mb-6" />
                 </div>
 
                 <form action={formAction} className="space-y-6">
@@ -62,6 +60,6 @@ export default function RegisterPage() {
                     </div>
                 </form>
             </motion.div>
-        </div>
+        </div >
     )
 }

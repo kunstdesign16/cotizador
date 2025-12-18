@@ -39,9 +39,26 @@ export async function updateTaskStatus(id: string, status: string) {
         })
         revalidatePath('/suppliers')
         revalidatePath('/tasks')
+        revalidatePath('/dashboard')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error actualizando estatus' }
+    }
+}
+
+export async function updateTaskPriority(id: string, priority: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        await prisma.supplierTask.update({
+            where: { id },
+            data: { priority }
+        })
+        revalidatePath('/suppliers')
+        revalidatePath('/tasks')
+        revalidatePath('/dashboard')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Error actualizando prioridad' }
     }
 }
 

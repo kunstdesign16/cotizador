@@ -99,6 +99,10 @@ export async function updateSupplierOrder(
     }
 }
 
+// ALIASES FOR CONSITENCY
+export const updateSupplierOrderStatus = updateOrderStatus
+export const updateSupplierOrderPaymentStatus = updatePaymentStatus
+
 export async function updateOrderStatus(id: string, status: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -107,6 +111,8 @@ export async function updateOrderStatus(id: string, status: string) {
             data: { status }
         })
         revalidatePath('/suppliers')
+        revalidatePath('/dashboard')
+        revalidatePath(`/suppliers/${id}`) // If checking specifically
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error actualizando estatus' }
@@ -119,6 +125,7 @@ export async function deleteOrder(id: string) {
         await prisma.supplierOrder.delete({ where: { id } })
         revalidatePath('/suppliers')
         revalidatePath('/supplier-orders')
+        revalidatePath('/dashboard')
         return { success: true }
     } catch (error) {
         return { success: false, error: 'Error al eliminar' }
@@ -149,6 +156,7 @@ export async function duplicateSupplierOrder(id: string) {
 
         revalidatePath('/suppliers')
         revalidatePath('/supplier-orders')
+        revalidatePath('/dashboard')
         return { success: true, id: duplicate.id }
     } catch (error) {
         console.error('Error duplicating order:', error)

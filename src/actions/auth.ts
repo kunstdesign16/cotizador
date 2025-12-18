@@ -123,21 +123,27 @@ export async function login(prevState: any, formData: FormData) {
     } else {
         // Valid user - set session cookies
 
-        // ADMIN OVERRIDE FOR WHITELISTED EMAILS
-        const ADMIN_EMAILS = ['kunstdesign16@gmail.com', 'dirección@kunstdesign.com.mx', 'direccion@kunstdesign.com.mx'] // Added normalized version just in case
+        // ADMIN OVERRIDE FOR WHITELISTED EMAILS (Robust Check)
+        const ADMIN_EMAILS = ['kunstdesign16@gmail.com', 'dirección@kunstdesign.com.mx', 'direccion@kunstdesign.com.mx']
+        const userEmailLower = user.email.toLowerCase().trim()
+
         let finalRole = user.role
 
-        if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        // Force Admin role if email is whitelisted
+        if (ADMIN_EMAILS.includes(userEmailLower)) {
+            // Always ensure the database reflects this, even if it says otherwise currently
             if (user.role !== 'admin') {
                 await prisma.user.update({
                     where: { id: user.id },
                     data: { role: 'admin' }
                 })
-                finalRole = 'admin'
             }
+            finalRole = 'admin'
         }
 
         const cookieStore = await cookies()
+
+        // Force update user_role cookie with finalRole
         cookieStore.set('user_email', user.email, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -150,7 +156,6 @@ export async function login(prevState: any, formData: FormData) {
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7
         })
-        // Set user_name for Sidebar display
         cookieStore.set('user_name', user.name || 'Usuario', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

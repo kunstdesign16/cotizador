@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/actions/auth'
+import { UserNav } from '@/components/user-nav'
 
 const navigation = [
     { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
@@ -45,12 +46,14 @@ export function Sidebar() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [userRole, setUserRole] = useState<string>('staff')
     const [userName, setUserName] = useState<string>('')
+    const [userEmail, setUserEmail] = useState<string>('')
 
     useEffect(() => {
         // Read role from cookie on client side
         const cookies = document.cookie.split(';')
         const roleCookie = cookies.find(c => c.trim().startsWith('user_role='))
         const nameCookie = cookies.find(c => c.trim().startsWith('user_name='))
+        const emailCookie = cookies.find(c => c.trim().startsWith('user_email='))
 
         if (roleCookie) {
             const role = roleCookie.split('=')[1]
@@ -59,6 +62,10 @@ export function Sidebar() {
         if (nameCookie) {
             const name = decodeURIComponent(nameCookie.split('=')[1])
             setUserName(name)
+        }
+        if (emailCookie) {
+            const email = decodeURIComponent(emailCookie.split('=')[1])
+            setUserEmail(email)
         }
     }, [])
 
@@ -149,23 +156,9 @@ export function Sidebar() {
                 )}
             </nav>
             <div className="p-4 border-t space-y-3">
-                {userName && (
-                    <div className="flex items-center gap-2 px-2 mb-2">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {userName.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-medium truncate">{userName}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{userRole === 'admin' ? 'Administrador' : 'Staff'}</p>
-                        </div>
-                    </div>
-                )}
-                <form action={logout}>
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-destructive gap-2">
-                        <LogOut className="h-4 w-4" />
-                        Cerrar Sesión
-                    </Button>
-                </form>
+                <div className="px-2">
+                    <UserNav userName={userName} userRole={userRole} userEmail={userEmail} />
+                </div>
                 <div className="bg-muted/30 rounded-lg p-4 text-xs text-muted-foreground">
                     <p className="font-semibold mb-1">Cotizador v2.0</p>
                     <p>Sistema de Gestión</p>
