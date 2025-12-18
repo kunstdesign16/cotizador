@@ -14,6 +14,7 @@ interface Product {
     id: string
     code: string
     name: string
+    price: number
 }
 
 interface OrderItem {
@@ -65,9 +66,8 @@ export function SupplierOrderForm({ supplierId, products, initialData, children 
         if (existingItem) {
             setItems(items.map(i => i.code === product.code ? { ...i, quantity: i.quantity + quantity } : i))
         } else {
-            // Initialize with current product price if available (assuming price in product is sell price, maybe we don't have cost)
-            // For now, init at 0 or empty
-            setItems([...items, { code: product.code, name: product.name, quantity, unitCost: 0 }])
+            // Initialize with current product price if available
+            setItems([...items, { code: product.code, name: product.name, quantity, unitCost: product.price || 0 }])
         }
         setSelectedProduct('')
         setQuantity(1)
