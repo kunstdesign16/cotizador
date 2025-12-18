@@ -8,6 +8,11 @@ export default async function SupplierOrdersPage() {
     const orders = await prisma.supplierOrder.findMany({
         include: {
             supplier: true,
+            quote: {
+                include: {
+                    client: true
+                }
+            }
         },
         orderBy: { createdAt: 'desc' }
     })

@@ -1,9 +1,9 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 
-// Simple auth for MVP - In production use Auth.js or Clerk
 const LoginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1)
@@ -20,38 +20,66 @@ export async function login(prevState: any, formData: FormData) {
         return { error: 'Invalid input' }
     }
 
-    // TODO: Add real password hashing verification (bcrypt)
-    // For MVP/Demo: check if user exists, if not create one for demo purposes if it matches 'admin' or just verify mock.
-    // Actually, let's just create a seed script for users, or allow any login for now if we want to be fast, 
-    // but let's be slightly secure: Check DB.
-
     const user = await prisma.user.findUnique({
         where: { email }
     })
 
-    // Mock Password Check (Replace with bcrypt.compare)
-    // If user doesn't exist, we might want to reject.
-    // For the sake of the demo, if no users exist, create admin?
-    // Let's assume we will seed.
-
+    // Password check (should use bcrypt in production)
     if (!user || user.password !== password) {
-        // Fallback for demo if seed failed
+        // Fallback for demo if no users seeded
         if (email === 'admin@kunst.mx' && password === 'kunst') {
-            // Allow
+            // Create admin user if doesn't exist
+            const existingAdmin = await prisma.user.findUnique({ where: { email: 'admin@kunst.mx' } })
+            if (!existingAdmin) {
+                await prisma.user.create({
+                    data: {
+                        email: 'admin@kunst.mx',
+                        password: 'kunst',
+                        name: 'Admin',
+                        role: 'admin'
+                    }
+                })
+            }
+            // Set session cookie
+            const cookieStore = await cookies()
+            cookieStore.set('user_email', 'admin@kunst.mx', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7 // 1 week
+            })
+            cookieStore.set('user_role', 'admin', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7
+            })
         } else {
-            return { error: 'Invalid credentials' }
+            return { error: 'Credenciales inválidas' }
         }
+    } else {
+        // Valid user - set session cookies
+        const cookieStore = await cookies()
+        cookieStore.set('user_email', user.email, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7
+        })
+        cookieStore.set('user_role', user.role, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7
+        })
     }
 
-    // Session management would go here (cookies)
-    // For MVP without external auth provider, we can set a lightweight cookie.
-
-    // Since we are using Server Actions, we can just redirect on success.
-    // But we need to set a cookie to persist state.
-
-    // For this task, I'll assume we can skip complex auth or just use a simple cookie.
-    // I will skip cookie logic for a second and just redirect to dashboard.
-    // Real app needs cookies().set('session', ...)
-
     redirect('/dashboard')
+}
+
+export async function logout() {
+    const cookieStore = await cookies()
+    cookieStore.delete('user_email')
+    cookieStore.delete('user_role')
+    redirect('/login')
 }

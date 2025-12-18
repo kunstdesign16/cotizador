@@ -335,7 +335,96 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         </Button>
                     </div>
 
-                    <div className="relative overflow-x-auto">
+                    {/* Mobile Card View (Visible on small screens) */}
+                    <div className="md:hidden space-y-4">
+                        {items.map((item) => (
+                            <div key={item.id} className="rounded-lg border bg-card p-4 shadow-sm space-y-3">
+                                {/* Header: Concept & Actions */}
+                                <div className="flex justify-between items-start gap-3">
+                                    <div className="flex-1">
+                                        <label className="text-xs font-semibold text-muted-foreground uppercase">Concepto</label>
+                                        <Input
+                                            value={item.concept}
+                                            onChange={(e) => handleItemChange(item.id, 'concept', e.target.value)}
+                                            placeholder="Descripción..."
+                                            className="mt-1 font-medium"
+                                        />
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeItem(item.id)}
+                                        className="text-muted-foreground hover:text-destructive shrink-0 -mt-1 -mr-2"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+
+                                {/* Quantity & Profit */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-muted-foreground uppercase">Cantidad</label>
+                                        <Input
+                                            type="number"
+                                            value={item.quantity}
+                                            onChange={e => handleItemChange(item.id, 'quantity', e.target.value)}
+                                            className="mt-1"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-blue-700 uppercase">% Margen</label>
+                                        <div className="relative mt-1">
+                                            <Input
+                                                type="number"
+                                                value={item.profit_margin}
+                                                onChange={e => handleItemChange(item.id, 'profit_margin', e.target.value)}
+                                                className="pr-6 text-right text-blue-700 font-medium"
+                                            />
+                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Internal Cost & Dialog Trigger */}
+                                <div className="rounded-md bg-blue-50/50 p-3 border border-blue-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-semibold text-blue-900 uppercase">Costo Interno Unit.</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 px-2 text-blue-700 hover:text-blue-900 hover:bg-blue-100 -mr-2"
+                                            onClick={() => setEditingCostId(item.id)}
+                                        >
+                                            <Settings2 className="h-3 w-3 mr-1" />
+                                            <span className="text-xs">Detalles</span>
+                                        </Button>
+                                    </div>
+                                    <div className="text-lg font-semibold text-blue-900 text-right">
+                                        ${item.internal_unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </div>
+                                </div>
+
+                                {/* Results: Unit Price & Subtotal */}
+                                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Precio Unitario</p>
+                                        <p className="font-medium">
+                                            ${item.unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-muted-foreground">Total Línea</p>
+                                        <p className="font-bold text-lg">
+                                            ${item.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table View (Hidden on small screens) */}
+                    <div className="hidden md:block relative overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead className="border-b text-xs uppercase text-muted-foreground bg-muted/50">
                                 <tr>
@@ -412,7 +501,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         </table>
                     </div>
 
-                    <div className="mt-8 grid grid-cols-2 gap-8">
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2 text-sm p-4 bg-blue-50/30 rounded-lg border border-blue-100">
                             <h3 className="font-semibold text-blue-900 mb-2">Análisis Interno</h3>
                             <div className="flex justify-between text-blue-800">
