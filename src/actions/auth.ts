@@ -122,6 +122,21 @@ export async function login(prevState: any, formData: FormData) {
         }
     } else {
         // Valid user - set session cookies
+
+        // ADMIN OVERRIDE FOR WHITELISTED EMAILS
+        const ADMIN_EMAILS = ['kunstdesign16@gmail.com', 'dirección@kunstdesign.com.mx', 'direccion@kunstdesign.com.mx'] // Added normalized version just in case
+        let finalRole = user.role
+
+        if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            if (user.role !== 'admin') {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { role: 'admin' }
+                })
+                finalRole = 'admin'
+            }
+        }
+
         const cookieStore = await cookies()
         cookieStore.set('user_email', user.email, {
             httpOnly: true,
@@ -129,20 +144,26 @@ export async function login(prevState: any, formData: FormData) {
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7
         })
-        cookieStore.set('user_role', user.role, {
+        cookieStore.set('user_role', finalRole, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7
         })
+        // Set user_name for Sidebar display
+        cookieStore.set('user_name', user.name || 'Usuario', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7
+        })
+
+        redirect('/dashboard')
     }
 
-    redirect('/dashboard')
-}
-
-export async function logout() {
-    const cookieStore = await cookies()
-    cookieStore.delete('user_email')
-    cookieStore.delete('user_role')
-    redirect('/login')
-}
+    export async function logout() {
+        const cookieStore = await cookies()
+        cookieStore.delete('user_email')
+        cookieStore.delete('user_role')
+        redirect('/login')
+    }

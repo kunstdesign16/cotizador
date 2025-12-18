@@ -44,9 +44,10 @@ interface SupplierOrderFormProps {
         quoteId?: string | null
     }
     children?: React.ReactNode
+    autoOpen?: boolean
 }
 
-export function SupplierOrderForm({ supplierId, products, projects = [], initialData, children }: SupplierOrderFormProps) {
+export function SupplierOrderForm({ supplierId, products, projects = [], initialData, children, autoOpen = false }: SupplierOrderFormProps) {
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<OrderItem[]>([])
     const [selectedProduct, setSelectedProduct] = useState('')
@@ -55,6 +56,12 @@ export function SupplierOrderForm({ supplierId, products, projects = [], initial
     const [expectedDate, setExpectedDate] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+
+    useEffect(() => {
+        if (autoOpen) {
+            setOpen(true)
+        }
+    }, [autoOpen])
 
     useEffect(() => {
         if (open && initialData) {

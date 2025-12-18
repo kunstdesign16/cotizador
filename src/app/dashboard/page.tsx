@@ -219,7 +219,7 @@ export default async function DashboardPage() {
                             ) : (
                                 <div className="divide-y">
                                     {serializedUrgentTasks.map((task: any) => (
-                                        <div key={task.id} className="p-4 hover:bg-muted/50 transition-colors">
+                                        <Link key={task.id} href="/tasks" className="block p-4 hover:bg-muted/50 transition-colors">
                                             <div className="flex justify-between items-start mb-1">
                                                 <span className="font-semibold text-sm">{task.supplier.name}</span>
                                                 <span className="text-[10px] px-2 py-0.5 rounded-full border bg-red-50 text-red-600 border-red-200 uppercase font-bold">
@@ -234,7 +234,7 @@ export default async function DashboardPage() {
                                                     <span>{new Date(task.expectedDate).toLocaleDateString('es-MX')}</span>
                                                 )}
                                             </div>
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
                             )}
@@ -271,7 +271,7 @@ export default async function DashboardPage() {
                                     ) : 0
 
                                     return (
-                                        <div key={order.id} className="p-4 hover:bg-muted/50 transition-colors">
+                                        <Link key={order.id} href={`/suppliers/${order.supplier.id}?orderId=${order.id}`} className="block p-4 hover:bg-muted/50 transition-colors">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
                                                     <span className="font-semibold text-sm">{order.supplier.name}</span>
@@ -300,7 +300,7 @@ export default async function DashboardPage() {
                                                     {order.paymentStatus === 'PAID' ? 'Pagado' : 'Pendiente'}
                                                 </span>
                                             </div>
-                                        </div>
+                                        </Link>
                                     )
                                 })}
                             </div>
