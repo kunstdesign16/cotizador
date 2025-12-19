@@ -218,7 +218,7 @@ export async function getAccountingTrends() {
 
         return {
             month,
-            label: format(startDate, 'MMM yy', { locale: (await import('date-fns/locale')).es }),
+            label: format(startDate, 'MMM yy', { locale: es }),
             income: incomes._sum.amount || 0,
             expense: (variableExpenses._sum.amount || 0) + (fixedExpenses._sum.amount || 0)
         }

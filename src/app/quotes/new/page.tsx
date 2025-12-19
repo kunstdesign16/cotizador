@@ -4,8 +4,8 @@ import QuoteForm from '@/components/quote-form'
 
 export const dynamic = 'force-dynamic'
 
-export default async function NewQuotePage({ searchParams }: { searchParams: { client?: string } }) {
-    const { client: clientId } = searchParams
+export default async function NewQuotePage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+    const { client: clientId } = await searchParams
     const clients = await getClients()
 
     // Pre-fill data if clientId is present
