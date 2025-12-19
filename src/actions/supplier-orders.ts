@@ -200,10 +200,10 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
     if (!order) return
 
     // Calculate total
-    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
     const total = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
         sum + (item.unitCost || 0) * (item.quantity || 0), 0
     ) : 0
+    const iva = total * 0.16
 
     // Check if exists
     const existing = await prisma.variableExpense.findFirst({
@@ -215,9 +215,9 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
             data: {
                 description: `Orden de Compra: ${order.supplier.name}`,
                 amount: total,
+                iva: iva,
                 category: 'Material', // Default
                 date: new Date(),
-                // Schema: description, amount, category, date, paymentMethod, supplierId, supplierOrderId, quoteId
                 supplierId: order.supplierId,
                 supplierOrderId: order.id,
                 quoteId: order.quoteId

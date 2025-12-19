@@ -19,6 +19,16 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
         paymentMethod: 'TRANSFER'
     })
 
+    const handleAmountChange = (val: string) => {
+        const amount = Number(val)
+        const iva = amount * 0.16
+        setFormData({
+            ...formData,
+            amount: val,
+            iva: iva.toFixed(2)
+        })
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -53,18 +63,18 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                    <Label>Monto</Label>
+                    <Label>Subtotal</Label>
                     <Input
                         required
                         type="number"
                         min="0"
                         step="0.01"
                         value={formData.amount}
-                        onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                        onChange={e => handleAmountChange(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>IVA</Label>
+                    <Label>IVA (16%)</Label>
                     <Input
                         type="number"
                         min="0"
@@ -82,6 +92,12 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                         onChange={e => setFormData({ ...formData, date: e.target.value })}
                     />
                 </div>
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg flex justify-between items-center text-sm">
+                <span className="font-medium">Total Cobrado (IVA Incl.):</span>
+                <span className="font-bold text-green-600 text-lg">
+                    ${(Number(formData.amount) + Number(formData.iva)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                </span>
             </div>
             <div className="space-y-2">
                 <Label>Método de Pago</Label>
@@ -120,6 +136,16 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
         paymentMethod: 'TRANSFER'
     })
 
+    const handleAmountChange = (val: string) => {
+        const amount = Number(val)
+        const iva = amount * 0.16
+        setFormData({
+            ...formData,
+            amount: val,
+            iva: iva.toFixed(2)
+        })
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -154,18 +180,18 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                    <Label>Monto</Label>
+                    <Label>Subtotal</Label>
                     <Input
                         required
                         type="number"
                         min="0"
                         step="0.01"
                         value={formData.amount}
-                        onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                        onChange={e => handleAmountChange(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>IVA</Label>
+                    <Label>IVA (16%)</Label>
                     <Input
                         type="number"
                         min="0"
@@ -184,12 +210,18 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                     />
                 </div>
             </div>
+            <div className="p-3 bg-muted/50 rounded-lg flex justify-between items-center text-sm">
+                <span className="font-medium">Total Pagado (IVA Incl.):</span>
+                <span className="font-bold text-red-600 text-lg">
+                    ${(Number(formData.amount) + Number(formData.iva)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                </span>
+            </div>
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label>Categoría</Label>
                     <Select
                         value={formData.category}
-                        onValueChange={val => setFormData({ ...formData, category: val })}
+                        onValueChange={(val: any) => setFormData({ ...formData, category: val })}
                     >
                         <SelectTrigger>
                             <SelectValue />
@@ -207,7 +239,7 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                     <Label>Método de Pago</Label>
                     <Select
                         value={formData.paymentMethod}
-                        onValueChange={val => setFormData({ ...formData, paymentMethod: val })}
+                        onValueChange={(val: any) => setFormData({ ...formData, paymentMethod: val })}
                     >
                         <SelectTrigger>
                             <SelectValue />
