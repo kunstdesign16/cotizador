@@ -13,7 +13,8 @@ export async function createSupplierOrder(
     supplierId: string,
     items: OrderItemInput[], // Updated type to include cost
     expectedDate?: Date,
-    quoteId?: string
+    quoteId?: string,
+    taskId?: string
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -23,6 +24,7 @@ export async function createSupplierOrder(
                 items: items as any, // Store JSON
                 expectedDate,
                 quoteId,
+                taskId,
                 status: 'PENDING'
             }
         })
@@ -57,7 +59,8 @@ export async function updateSupplierOrder(
     id: string,
     items: OrderItemInput[],
     expectedDate?: Date,
-    quoteId?: string
+    quoteId?: string,
+    taskId?: string
 ) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -66,7 +69,8 @@ export async function updateSupplierOrder(
             data: {
                 items: items as any,
                 expectedDate,
-                quoteId
+                quoteId,
+                taskId
             }
         })
 
@@ -147,6 +151,7 @@ export async function duplicateSupplierOrder(id: string) {
             data: {
                 supplierId: original.supplierId,
                 quoteId: original.quoteId,
+                taskId: original.taskId,
                 items: original.items as any,
                 expectedDate: original.expectedDate,
                 status: 'PENDING',

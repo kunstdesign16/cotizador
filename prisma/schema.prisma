@@ -126,6 +126,8 @@ model SupplierOrder {
   supplier     Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   quoteId      String?
   quote        Quote?    @relation(fields: [quoteId], references: [id])
+  taskId       String?
+  task         SupplierTask? @relation(fields: [taskId], references: [id])
   status       String    @default("PENDING") // PENDING, ORDERED, RECEIVED
   paymentStatus String   @default("PENDING") // PENDING, PAID
   expectedDate DateTime?
@@ -141,6 +143,7 @@ model SupplierTask {
   supplier     Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   quoteId      String?
   quote        Quote?    @relation(fields: [quoteId], references: [id])
+  orders       SupplierOrder[]
   description  String
   status       String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
   priority     String    @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT

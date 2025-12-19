@@ -161,6 +161,7 @@ export default async function SupplierDetailPage({
                                 supplierId={supplier.id}
                                 products={supplier.products}
                                 projects={formattedProjects}
+                                tasks={supplier.tasks}
                                 autoOpen={newOrder === 'true'}
                             >
                                 <Button size="sm" className="gap-2">
@@ -196,7 +197,13 @@ export default async function SupplierDetailPage({
                                                     </p>
                                                 )}
                                                 <div className="flex justify-end gap-2 mt-2">
-                                                    <SupplierOrderForm supplierId={supplier.id} products={supplier.products} projects={formattedProjects} initialData={order}>
+                                                    <SupplierOrderForm
+                                                        supplierId={supplier.id}
+                                                        products={supplier.products}
+                                                        projects={formattedProjects}
+                                                        tasks={supplier.tasks}
+                                                        initialData={order}
+                                                    >
                                                         <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                                                             <Pencil className="h-3 w-3" />
                                                         </Button>

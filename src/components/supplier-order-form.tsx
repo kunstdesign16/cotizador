@@ -37,21 +37,24 @@ interface SupplierOrderFormProps {
     supplierId: string
     products: Product[]
     projects: Project[]
+    tasks?: any[]
     initialData?: {
         id: string
         items: any[]
         expectedDate?: Date | null
         quoteId?: string | null
+        taskId?: string | null
     }
     children?: React.ReactNode
     autoOpen?: boolean
 }
 
-export function SupplierOrderForm({ supplierId, products, projects = [], initialData, children, autoOpen = false }: SupplierOrderFormProps) {
+export function SupplierOrderForm({ supplierId, products, projects = [], tasks = [], initialData, children, autoOpen = false }: SupplierOrderFormProps) {
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<OrderItem[]>([])
     const [selectedProduct, setSelectedProduct] = useState('')
     const [selectedProject, setSelectedProject] = useState<string>('')
+    const [selectedTask, setSelectedTask] = useState<string>('')
     const [quantity, setQuantity] = useState(1)
     const [expectedDate, setExpectedDate] = useState('')
     const [loading, setLoading] = useState(false)
@@ -72,11 +75,15 @@ export function SupplierOrderForm({ supplierId, products, projects = [], initial
             if (initialData.quoteId) {
                 setSelectedProject(initialData.quoteId)
             }
+            if (initialData.taskId) {
+                setSelectedTask(initialData.taskId)
+            }
         } else if (open && !initialData) {
             // Reset for new order
             setItems([])
             setExpectedDate('')
             setSelectedProject('')
+            setSelectedTask('')
         }
     }, [open, initialData])
 
@@ -114,9 +121,9 @@ export function SupplierOrderForm({ supplierId, products, projects = [], initial
 
             let result;
             if (initialData?.id) {
-                result = await updateSupplierOrder(initialData.id, items, date, selectedProject || undefined)
+                result = await updateSupplierOrder(initialData.id, items, date, selectedProject || undefined, selectedTask || undefined)
             } else {
-                result = await createSupplierOrder(supplierId, items, date, selectedProject || undefined)
+                result = await createSupplierOrder(supplierId, items, date, selectedProject || undefined, selectedTask || undefined)
             }
 
             if (result.success) {
@@ -135,6 +142,9 @@ export function SupplierOrderForm({ supplierId, products, projects = [], initial
             setLoading(false)
         }
     }
+
+    // Filter tasks based on selected project
+    const filteredTasks = tasks?.filter(t => !selectedProject || t.quoteId === selectedProject) || []
 
     // Calculations
     const subtotal = items.reduce((acc, item) => acc + (item.quantity * (item.unitCost || 0)), 0)
@@ -192,6 +202,26 @@ export function SupplierOrderForm({ supplierId, products, projects = [], initial
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            {/* Task Selection */}
+                            <div className="bg-muted/30 p-4 rounded-lg space-y-2">
+                                <label className="text-sm font-medium">Asignar a Tarea de este Proveedor</label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={selectedTask}
+                                    onChange={(e) => setSelectedTask(e.target.value)}
+                                >
+                                    <option value="">-- Sin Tarea Específica --</option>
+                                    {filteredTasks.map((t: any) => (
+                                        <option key={t.id} value={t.id}>
+                                            {t.description.slice(0, 40)}... (Proyecto: {t.quote?.project_name})
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    Nota: Solo se muestran tareas asignadas a este proveedor.
+                                </p>
                             </div>
 
                             {/* Add Item Section */}
