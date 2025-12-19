@@ -185,6 +185,7 @@ model Income {
     id            String   @id @default(cuid())
     description   String?
     amount        Float
+    iva           Float    @default(0)
     date          DateTime @default(now())
     status        String   @default("PAID") // PENDING, PAID, PARTIAL
     paymentMethod String?  // TRANSFER, CASH, CHECK
@@ -207,6 +208,7 @@ model VariableExpense {
     id            String   @id @default(cuid())
     description   String
     amount        Float
+    iva           Float    @default(0)
     category      String?  // MATERIAL, LABOR, SHIPPING, etc.
     date          DateTime @default(now())
     paymentMethod String?

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function createIncome(data: {
     amount: number
+    iva?: number
     description?: string
     date: Date
     paymentMethod?: string
@@ -20,6 +21,7 @@ export async function createIncome(data: {
         await prisma.income.create({
             data: {
                 amount: data.amount,
+                iva: data.iva || 0,
                 description: data.description,
                 date: data.date,
                 paymentMethod: data.paymentMethod,
@@ -40,6 +42,7 @@ export async function createIncome(data: {
 
 export async function updateIncome(id: string, data: Partial<{
     amount: number
+    iva: number
     description: string
     date: Date
     paymentMethod: string
@@ -75,6 +78,7 @@ export async function deleteIncome(id: string) {
 export async function createVariableExpense(data: {
     description: string
     amount: number
+    iva?: number
     category?: string
     date: Date
     paymentMethod?: string
@@ -86,7 +90,18 @@ export async function createVariableExpense(data: {
     const { prisma } = await import('@/lib/prisma')
     try {
         await prisma.variableExpense.create({
-            data
+            data: {
+                description: data.description,
+                amount: data.amount,
+                iva: data.iva || 0,
+                category: data.category,
+                date: data.date,
+                paymentMethod: data.paymentMethod,
+                supplierId: data.supplierId,
+                supplierOrderId: data.supplierOrderId,
+                quoteId: data.quoteId,
+                proofFile: data.proofFile
+            }
         })
         revalidatePath('/accounting')
         return { success: true }
@@ -99,6 +114,7 @@ export async function createVariableExpense(data: {
 export async function updateVariableExpense(id: string, data: Partial<{
     description: string
     amount: number
+    iva: number
     category: string
     date: Date
     paymentMethod: string
@@ -127,10 +143,6 @@ export async function deleteVariableExpense(id: string) {
         return { success: false, error: 'Error al eliminar egreso' }
     }
 }
-
-// --- FIXED EXPENSE UPDATES ---
-// We replicate existing logic from expenses.ts but might merge or keep separate.
-// Assuming we use the existing ones for Fixed, but I'll add a helper here if needed.
 
 export async function getAccountingSummary(month: string) {
     const { prisma } = await import('@/lib/prisma')

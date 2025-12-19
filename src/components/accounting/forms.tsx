@@ -1,3 +1,5 @@
+'use server'
+
 'use client'
 
 import { useState } from 'react'
@@ -14,6 +16,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
     const [formData, setFormData] = useState({
         description: '',
         amount: '',
+        iva: '0',
         date: new Date().toISOString().split('T')[0],
         paymentMethod: 'TRANSFER'
     })
@@ -25,6 +28,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
             await createIncome({
                 description: formData.description,
                 amount: Number(formData.amount),
+                iva: Number(formData.iva),
                 date: new Date(formData.date),
                 paymentMethod: formData.paymentMethod,
                 status: 'PAID'
@@ -49,7 +53,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                     placeholder="Ej. Anticipo Proyecto X"
                 />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label>Monto</Label>
                     <Input
@@ -59,6 +63,16 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                         step="0.01"
                         value={formData.amount}
                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>IVA</Label>
+                    <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.iva}
+                        onChange={e => setFormData({ ...formData, iva: e.target.value })}
                     />
                 </div>
                 <div className="space-y-2">
@@ -83,7 +97,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                     <SelectContent>
                         <SelectItem value="TRANSFER">Transferencia</SelectItem>
                         <SelectItem value="CASH">Efectivo</SelectItem>
-                        <SelectItem value="dCHECK">Cheque</SelectItem>
+                        <SelectItem value="CHECK">Cheque</SelectItem>
                         <SelectItem value="CARD">Tarjeta</SelectItem>
                     </SelectContent>
                 </Select>
@@ -102,6 +116,7 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
     const [formData, setFormData] = useState({
         description: '',
         amount: '',
+        iva: '0',
         category: 'Material',
         date: new Date().toISOString().split('T')[0],
         paymentMethod: 'TRANSFER'
@@ -114,6 +129,7 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
             await createVariableExpense({
                 description: formData.description,
                 amount: Number(formData.amount),
+                iva: Number(formData.iva),
                 category: formData.category,
                 date: new Date(formData.date),
                 paymentMethod: formData.paymentMethod
@@ -138,7 +154,7 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                     placeholder="Ej. Compra de material extra"
                 />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label>Monto</Label>
                     <Input
@@ -148,6 +164,16 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                         step="0.01"
                         value={formData.amount}
                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>IVA</Label>
+                    <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.iva}
+                        onChange={e => setFormData({ ...formData, iva: e.target.value })}
                     />
                 </div>
                 <div className="space-y-2">

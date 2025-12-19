@@ -206,6 +206,7 @@ async function syncIncomeFromQuote(quoteId: string) {
             data: {
                 description: `Cobro Proyecto: ${quote.project_name}`,
                 amount: quote.total,
+                iva: quote.iva_amount || 0,
                 date: new Date(),
                 status: 'PAID',
                 clientId: quote.clientId,

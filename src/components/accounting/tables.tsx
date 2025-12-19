@@ -13,7 +13,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Plus, Trash2, Pencil } from "lucide-react"
+import { Plus, Trash2, Pencil, MoreHorizontal } from "lucide-react"
+import { deleteIncome, deleteVariableExpense } from "@/actions/accounting"
+import { toast } from "sonner"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function IncomeTable({ incomes }: { incomes: any[] }) {
     return (
@@ -25,7 +33,9 @@ export function IncomeTable({ incomes }: { incomes: any[] }) {
                         <TableHead>Descripción</TableHead>
                         <TableHead>Cliente / Proyecto</TableHead>
                         <TableHead>Método</TableHead>
-                        <TableHead className="text-right">Monto</TableHead>
+                        <TableHead className="text-right">IVA</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -47,8 +57,33 @@ export function IncomeTable({ incomes }: { incomes: any[] }) {
                                     </div>
                                 </TableCell>
                                 <TableCell className="capitalize">{income.paymentMethod || '-'}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">
+                                    ${(income.iva || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </TableCell>
                                 <TableCell className="text-right font-bold text-green-600">
-                                    ${income.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    ${(income.amount + (income.iva || 0)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem
+                                                className="text-red-600"
+                                                onClick={async () => {
+                                                    if (confirm('¿Eliminar este ingreso?')) {
+                                                        await deleteIncome(income.id)
+                                                        window.location.reload()
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                         ))
@@ -69,7 +104,9 @@ export function VariableExpenseTable({ expenses }: { expenses: any[] }) {
                         <TableHead>Descripción</TableHead>
                         <TableHead>Categoría</TableHead>
                         <TableHead>Proveedor</TableHead>
-                        <TableHead className="text-right">Monto</TableHead>
+                        <TableHead className="text-right">IVA</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -88,8 +125,33 @@ export function VariableExpenseTable({ expenses }: { expenses: any[] }) {
                                     <span className="bg-muted px-2 py-1 rounded text-xs">{expense.category || 'General'}</span>
                                 </TableCell>
                                 <TableCell>{expense.supplier?.name || '-'}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">
+                                    ${(expense.iva || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </TableCell>
                                 <TableCell className="text-right font-bold text-red-600">
-                                    ${expense.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    ${(expense.amount + (expense.iva || 0)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem
+                                                className="text-red-600"
+                                                onClick={async () => {
+                                                    if (confirm('¿Eliminar este egreso?')) {
+                                                        await deleteVariableExpense(expense.id)
+                                                        window.location.reload()
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                         ))
