@@ -9,15 +9,52 @@ import { createIncome, createVariableExpense } from "@/actions/accounting"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
+export function IncomeForm({ projects = [], onSuccess }: { projects?: any[], onSuccess: () => void }) {
     const [loading, setLoading] = useState(false)
+    const [selectedProject, setSelectedProject] = useState<any>(null)
+    const [percentage, setPercentage] = useState('')
+
     const [formData, setFormData] = useState({
         description: '',
         amount: '',
         iva: '0',
         date: new Date().toISOString().split('T')[0],
-        paymentMethod: 'TRANSFER'
+        paymentMethod: 'TRANSFER',
+        quoteId: ''
     })
+
+    const handleProjectChange = (quoteId: string) => {
+        if (quoteId === 'none') {
+            setSelectedProject(null)
+            setFormData(prev => ({ ...prev, quoteId: '', description: '' }))
+            return
+        }
+
+        const project = projects.find(p => p.id === quoteId)
+        if (project) {
+            setSelectedProject(project)
+            setFormData(prev => ({
+                ...prev,
+                quoteId: project.id,
+                description: `Cobro Proyecto: ${project.project_name}`
+            }))
+            // Reset percentage when project changes
+            setPercentage('')
+        }
+    }
+
+    const handlePercentageApply = (pct: string) => {
+        setPercentage(pct)
+        if (selectedProject) {
+            const amount = selectedProject.subtotal * (Number(pct) / 100)
+            const iva = amount * 0.16
+            setFormData(prev => ({
+                ...prev,
+                amount: amount.toFixed(2),
+                iva: iva.toFixed(2)
+            }))
+        }
+    }
 
     const handleAmountChange = (val: string) => {
         const amount = Number(val)
@@ -39,6 +76,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                 iva: Number(formData.iva),
                 date: new Date(formData.date),
                 paymentMethod: formData.paymentMethod,
+                quoteId: formData.quoteId || undefined,
                 status: 'PAID'
             })
             toast.success("Ingreso registrado")
@@ -53,6 +91,46 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
+                <Label>Relacionar con Proyecto (Opcional)</Label>
+                <Select onValueChange={handleProjectChange}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un proyecto..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="none">Sin relación</SelectItem>
+                        {projects.map((p: any) => (
+                            <SelectItem key={p.id} value={p.id}>
+                                {p.project_name} (${p.subtotal.toLocaleString()})
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {selectedProject && (
+                <div className="grid grid-cols-4 gap-2">
+                    {['30', '50', '100'].map(pct => (
+                        <Button
+                            key={pct}
+                            type="button"
+                            variant={percentage === pct ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePercentageApply(pct)}
+                        >
+                            {pct}%
+                        </Button>
+                    ))}
+                    <Input
+                        placeholder="%"
+                        type="number"
+                        className="h-9"
+                        value={percentage}
+                        onChange={(e) => handlePercentageApply(e.target.value)}
+                    />
+                </div>
+            )}
+
+            <div className="space-y-2">
                 <Label>Descripción</Label>
                 <Input
                     required
@@ -61,6 +139,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                     placeholder="Ej. Anticipo Proyecto X"
                 />
             </div>
+
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label>Subtotal</Label>
@@ -93,12 +172,14 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                     />
                 </div>
             </div>
+
             <div className="p-3 bg-muted/50 rounded-lg flex justify-between items-center text-sm">
                 <span className="font-medium">Total Cobrado (IVA Incl.):</span>
                 <span className="font-bold text-green-600 text-lg">
                     ${(Number(formData.amount) + Number(formData.iva)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
             </div>
+
             <div className="space-y-2">
                 <Label>Método de Pago</Label>
                 <Select
@@ -116,6 +197,7 @@ export function IncomeForm({ onSuccess }: { onSuccess: () => void }) {
                     </SelectContent>
                 </Select>
             </div>
+
             <div className="flex justify-end pt-4">
                 <Button type="submit" disabled={loading}>
                     {loading ? "Registrando..." : "Registrar Ingreso"}

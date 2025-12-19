@@ -13,20 +13,26 @@ export default async function AccountingPage({
     const month = typeof searchParams?.month === 'string' ? searchParams.month : new Date().toISOString().slice(0, 7)
 
     let summary: any = { incomes: [], variableExpenses: [], fixedExpenses: [] }
+    let trends: any[] = []
 
     try {
+        const { getAccountingTrends } = await import('@/actions/accounting')
         summary = await getAccountingSummary(month)
+        trends = await getAccountingTrends()
     } catch (error) {
         console.error("Error fetching accounting data:", error)
-        // Fallback or empty state will be handled by UI
     }
 
-    // Serialize for Client Component
     const serializedSummary = JSON.parse(JSON.stringify(summary))
+    const serializedTrends = JSON.parse(JSON.stringify(trends))
 
     return (
         <div className="container mx-auto py-8">
-            <AccountingDashboard summary={serializedSummary} month={month} />
+            <AccountingDashboard
+                summary={serializedSummary}
+                trends={serializedTrends}
+                month={month}
+            />
         </div>
     )
 }

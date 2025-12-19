@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 // --- INCOME ACTIONS ---
 
@@ -182,4 +184,45 @@ export async function getAccountingSummary(month: string) {
     ])
 
     return { incomes, variableExpenses, fixedExpenses }
+}
+
+export async function getAccountingTrends() {
+    const { prisma } = await import('@/lib/prisma')
+
+    // Get last 6 months
+    const now = new Date()
+    const months = []
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        months.push(d.toISOString().slice(0, 7))
+    }
+
+    const trends = await Promise.all(months.map(async (month) => {
+        const startDate = new Date(`${month}-01`)
+        const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
+
+        const [incomes, variableExpenses, fixedExpenses] = await Promise.all([
+            prisma.income.aggregate({
+                _sum: { amount: true },
+                where: { date: { gte: startDate, lt: endDate } }
+            }),
+            prisma.variableExpense.aggregate({
+                _sum: { amount: true },
+                where: { date: { gte: startDate, lt: endDate } }
+            }),
+            prisma.fixedExpense.aggregate({
+                _sum: { amount: true },
+                where: { date: { gte: startDate, lt: endDate } }
+            })
+        ])
+
+        return {
+            month,
+            label: format(startDate, 'MMM yy', { locale: (await import('date-fns/locale')).es }),
+            income: incomes._sum.amount || 0,
+            expense: (variableExpenses._sum.amount || 0) + (fixedExpenses._sum.amount || 0)
+        }
+    }))
+
+    return trends
 }

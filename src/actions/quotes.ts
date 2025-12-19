@@ -165,6 +165,28 @@ export async function updateQuote(id: string, data: any) {
     return { success: true, id: quote.id }
 }
 
+export async function getActiveProjects() {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        const projects = await prisma.quote.findMany({
+            where: {
+                status: { in: ['SENT', 'APPROVED', 'COBRADO'] }
+            },
+            select: {
+                id: true,
+                project_name: true,
+                total: true,
+                subtotal: true
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        return projects
+    } catch (error) {
+        console.error('Error fetching active projects:', error)
+        return []
+    }
+}
+
 export async function updateQuoteStatus(id: string, status: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
