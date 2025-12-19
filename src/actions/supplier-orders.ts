@@ -200,6 +200,7 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
     if (!order) return
 
     // Calculate total
+    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
     const total = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
         sum + (item.unitCost || 0) * (item.quantity || 0), 0
     ) : 0
