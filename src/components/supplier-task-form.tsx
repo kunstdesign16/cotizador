@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 interface SupplierTaskFormProps {
     supplierId: string
     supplierType: string
+    projects: any[]
     children?: React.ReactNode
 }
 
@@ -20,7 +21,7 @@ interface QuoteSummary {
     client: { name: string }
 }
 
-export function SupplierTaskForm({ supplierId, supplierType, children }: SupplierTaskFormProps) {
+export function SupplierTaskForm({ supplierId, supplierType, projects = [], children }: SupplierTaskFormProps) {
     const [open, setOpen] = useState(false)
     const [quotes, setQuotes] = useState<QuoteSummary[]>([])
     const [selectedQuote, setSelectedQuote] = useState('')
@@ -83,13 +84,19 @@ export function SupplierTaskForm({ supplierId, supplierType, children }: Supplie
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="text-sm font-medium">ID del Proyecto / Cotización</label>
-                                <Input
-                                    placeholder="Ingresa ID del proyecto"
+                                <label className="text-sm font-medium">Relacionar con Proyecto / Cotización</label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                     value={selectedQuote}
                                     onChange={(e) => setSelectedQuote(e.target.value)}
-                                />
-                                <p className="text-xs text-muted-foreground">Copia el ID de la URL de la cotización</p>
+                                >
+                                    <option value="">-- Seleccionar Proyecto --</option>
+                                    {projects.map((p: any) => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.project_name} - {p.client.company || p.client.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>

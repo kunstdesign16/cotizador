@@ -36,9 +36,7 @@ export default async function SupplierDetailPage({
 
     // Fetch active projects (quotes) to assign to orders
     const projects = await prisma.quote.findMany({
-        where: {
-            status: { not: 'DRAFT' } // Only show "real" projects, adjust logic if needed (e.g. status != COBRADO if completed projects shouldn't show)
-        },
+        where: {}, // Allow all statuses including DRAFT
         select: {
             id: true,
             project_name: true,
@@ -103,7 +101,7 @@ export default async function SupplierDetailPage({
                             <h2 className="font-semibold text-lg">
                                 {supplier.type === 'SERVICE' ? 'Tareas Asignadas' : 'Proyectos Asignados'}
                             </h2>
-                            <SupplierTaskForm supplierId={supplier.id} supplierType={supplier.type}>
+                            <SupplierTaskForm supplierId={supplier.id} supplierType={supplier.type} projects={formattedProjects}>
                                 <Button size="sm" className="gap-2">
                                     <Plus className="h-4 w-4" /> Asignar {supplier.type === 'SERVICE' ? 'Tarea' : 'Proyecto'}
                                 </Button>
@@ -159,7 +157,12 @@ export default async function SupplierDetailPage({
                     <section className="bg-card border rounded-xl shadow-sm overflow-hidden mb-8">
                         <div className="p-6 border-b flex justify-between items-center">
                             <h2 className="font-semibold text-lg">Órdenes de Compra</h2>
-                            <SupplierOrderForm supplierId={supplier.id} products={supplier.products} projects={formattedProjects}>
+                            <SupplierOrderForm
+                                supplierId={supplier.id}
+                                products={supplier.products}
+                                projects={formattedProjects}
+                                autoOpen={newOrder === 'true'}
+                            >
                                 <Button size="sm" className="gap-2">
                                     <Plus className="h-4 w-4" /> Nueva Orden
                                 </Button>

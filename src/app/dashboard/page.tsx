@@ -23,10 +23,14 @@ export default async function DashboardPage() {
         orderBy: { name: 'asc' }
     })
 
-    // Fetch Pending Tasks
+    // Fetch Pending Tasks (not linked to COBRADO projects)
     const pendingTasks = await prisma.supplierTask.findMany({
         where: {
-            status: { in: ['PENDING', 'IN_PROGRESS'] }
+            status: { in: ['PENDING', 'IN_PROGRESS'] },
+            OR: [
+                { quoteId: null },
+                { quote: { status: { not: 'COBRADO' } } }
+            ]
         },
         include: {
             supplier: true,
@@ -71,11 +75,15 @@ export default async function DashboardPage() {
         }
     })
 
-    // Urgent Tasks are High or Urgent priority
+    // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
     const urgentTasks = await prisma.supplierTask.findMany({
         where: {
             status: { in: ['PENDING', 'IN_PROGRESS'] },
-            priority: { in: ['HIGH', 'URGENT'] }
+            priority: { in: ['HIGH', 'URGENT'] },
+            OR: [
+                { quoteId: null },
+                { quote: { status: { not: 'COBRADO' } } }
+            ]
         },
         include: {
             supplier: true,
@@ -86,11 +94,17 @@ export default async function DashboardPage() {
 
     const serializedUrgentTasks = JSON.parse(JSON.stringify(urgentTasks))
 
-    // Recent 5 quotes
-    const recentQuotes = serializedQuotes.slice(0, 5)
+    // Recent 5 active quotes (not cobradas)
+    const recentQuotes = serializedQuotes.filter((q: any) => q.status !== 'COBRADO').slice(0, 5)
 
-    // Recent 5 supplier orders
+    // Recent 5 supplier orders (not linked to COBRADO projects)
     const recentOrders = await prisma.supplierOrder.findMany({
+        where: {
+            OR: [
+                { quoteId: null },
+                { quote: { status: { not: 'COBRADO' } } }
+            ]
+        },
         include: { supplier: true },
         orderBy: { createdAt: 'desc' },
         take: 5
