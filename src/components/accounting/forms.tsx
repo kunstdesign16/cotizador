@@ -207,16 +207,66 @@ export function IncomeForm({ projects = [], onSuccess }: { projects?: any[], onS
     )
 }
 
-export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
+export function VariableExpenseForm({ projects = [], suppliers = [], onSuccess }: { projects?: any[], suppliers?: any[], onSuccess: () => void }) {
     const [loading, setLoading] = useState(false)
+    const [selectedProject, setSelectedProject] = useState<any>(null)
+    const [percentage, setPercentage] = useState('')
     const [formData, setFormData] = useState({
         description: '',
         amount: '',
         iva: '0',
         category: 'Material',
         date: new Date().toISOString().split('T')[0],
-        paymentMethod: 'TRANSFER'
+        paymentMethod: 'TRANSFER',
+        supplierId: '',
+        quoteId: ''
     })
+
+    const handleSupplierChange = (id: string) => {
+        if (id === 'none') {
+            setFormData(prev => ({ ...prev, supplierId: '' }))
+            return
+        }
+        const supplier = suppliers.find(s => s.id === id)
+        if (supplier) {
+            setFormData(prev => ({
+                ...prev,
+                supplierId: id,
+                description: prev.description || `Pago a Proveedor: ${supplier.name}`
+            }))
+        }
+    }
+
+    const handleProjectChange = (id: string) => {
+        if (id === 'none') {
+            setSelectedProject(null)
+            setFormData(prev => ({ ...prev, quoteId: '' }))
+            return
+        }
+        const project = projects.find(p => p.id === id)
+        if (project) {
+            setSelectedProject(project)
+            setFormData(prev => ({
+                ...prev,
+                quoteId: id,
+                description: prev.description || `Gasto Proyecto: ${project.project_name}`
+            }))
+            setPercentage('')
+        }
+    }
+
+    const handlePercentageApply = (pct: string) => {
+        setPercentage(pct)
+        if (selectedProject) {
+            const amount = selectedProject.subtotal * (Number(pct) / 100)
+            const iva = amount * 0.16
+            setFormData(prev => ({
+                ...prev,
+                amount: amount.toFixed(2),
+                iva: iva.toFixed(2)
+            }))
+        }
+    }
 
     const handleAmountChange = (val: string) => {
         const amount = Number(val)
@@ -238,7 +288,9 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                 iva: Number(formData.iva),
                 category: formData.category,
                 date: new Date(formData.date),
-                paymentMethod: formData.paymentMethod
+                paymentMethod: formData.paymentMethod,
+                supplierId: formData.supplierId || undefined,
+                quoteId: formData.quoteId || undefined
             })
             toast.success("Egreso registrado")
             onSuccess()
@@ -251,6 +303,60 @@ export function VariableExpenseForm({ onSuccess }: { onSuccess: () => void }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Proveedor (Opcional)</Label>
+                    <Select onValueChange={handleSupplierChange}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione proveedor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Sin proveedor</SelectItem>
+                            {suppliers.map((s: any) => (
+                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label>Proyecto (Opcional)</Label>
+                    <Select onValueChange={handleProjectChange}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccione proyecto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Sin proyecto</SelectItem>
+                            {projects.map((p: any) => (
+                                <SelectItem key={p.id} value={p.id}>{p.project_name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {selectedProject && (
+                <div className="grid grid-cols-4 gap-2">
+                    {['30', '50', '100'].map(pct => (
+                        <Button
+                            key={pct}
+                            type="button"
+                            variant={percentage === pct ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePercentageApply(pct)}
+                        >
+                            {pct}%
+                        </Button>
+                    ))}
+                    <Input
+                        placeholder="%"
+                        type="number"
+                        className="h-9"
+                        value={percentage}
+                        onChange={(e) => handlePercentageApply(e.target.value)}
+                    />
+                </div>
+            )}
+
             <div className="space-y-2">
                 <Label>Descripción</Label>
                 <Input

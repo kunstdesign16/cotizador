@@ -20,25 +20,26 @@ export default async function AccountingPage({
     try {
         const { getAccountingTrends } = await import('@/actions/accounting')
         const { getActiveProjects } = await import('@/actions/quotes')
+        const { getSuppliers } = await import('@/actions/suppliers')
         summary = await getAccountingSummary(month)
         trends = await getAccountingTrends()
         projects = await getActiveProjects()
+        const fetchedSuppliers = await getSuppliers()
+        const serializedSuppliers = JSON.parse(JSON.stringify(fetchedSuppliers))
+
+        return (
+            <div className="container mx-auto py-8">
+                <AccountingDashboard
+                    summary={JSON.parse(JSON.stringify(summary))}
+                    trends={JSON.parse(JSON.stringify(trends))}
+                    projects={JSON.parse(JSON.stringify(projects))}
+                    suppliers={serializedSuppliers}
+                    month={month}
+                />
+            </div>
+        )
     } catch (error) {
         console.error("Error fetching accounting data:", error)
+        return <div>Error al cargar datos contables</div>
     }
-
-    const serializedSummary = JSON.parse(JSON.stringify(summary))
-    const serializedTrends = JSON.parse(JSON.stringify(trends))
-    const serializedProjects = JSON.parse(JSON.stringify(projects))
-
-    return (
-        <div className="container mx-auto py-8">
-            <AccountingDashboard
-                summary={serializedSummary}
-                trends={serializedTrends}
-                projects={serializedProjects}
-                month={month}
-            />
-        </div>
-    )
 }

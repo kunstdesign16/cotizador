@@ -56,7 +56,7 @@ function KPICard({ title, amount, icon: Icon, trend, color }: any) {
     )
 }
 
-export function AccountingDashboard({ summary, trends, projects, month }: { summary: any, trends: any[], projects: any[], month: string }) {
+export function AccountingDashboard({ summary, trends, projects, suppliers, month }: { summary: any, trends: any[], projects: any[], suppliers: any[], month: string }) {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("overview")
     const [localMonth, setLocalMonth] = useState(month)
@@ -195,7 +195,7 @@ export function AccountingDashboard({ summary, trends, projects, month }: { summ
                                 <DialogHeader>
                                     <DialogTitle>Registrar Egreso Manual</DialogTitle>
                                 </DialogHeader>
-                                <VariableExpenseForm onSuccess={() => window.location.reload()} />
+                                <VariableExpenseForm projects={projects} suppliers={suppliers} onSuccess={() => window.location.reload()} />
                             </DialogContent>
                         </Dialog>
                     </div>
