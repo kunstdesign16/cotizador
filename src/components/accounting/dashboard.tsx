@@ -2,7 +2,7 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -59,10 +59,16 @@ function KPICard({ title, amount, icon: Icon, trend, color }: any) {
 export function AccountingDashboard({ summary, trends, projects, month }: { summary: any, trends: any[], projects: any[], month: string }) {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("overview")
+    const [localMonth, setLocalMonth] = useState(month)
+
+    useEffect(() => {
+        setLocalMonth(month)
+    }, [month])
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newMonth = e.target.value
-        router.push(`/accounting?month=${newMonth}`)
+        const val = e.target.value
+        setLocalMonth(val)
+        router.push(`/accounting?month=${val}`)
     }
 
     const totalIncome = summary.incomes.reduce((sum: number, i: any) => sum + i.amount, 0)
@@ -82,7 +88,7 @@ export function AccountingDashboard({ summary, trends, projects, month }: { summ
                 <div className="flex items-center gap-2">
                     <Input
                         type="month"
-                        value={month}
+                        value={localMonth}
                         onChange={handleMonthChange}
                         className="w-[180px]"
                     />

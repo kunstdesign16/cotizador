@@ -7,10 +7,11 @@ export const dynamic = 'force-dynamic'
 export default async function AccountingPage({
     searchParams,
 }: {
-    searchParams?: { [key: string]: string | string[] | undefined }
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+    const resolvedParams = await searchParams
     // Default to current month if not specified
-    const month = typeof searchParams?.month === 'string' ? searchParams.month : new Date().toISOString().slice(0, 7)
+    const month = typeof resolvedParams?.month === 'string' ? resolvedParams.month : new Date().toISOString().slice(0, 7)
 
     let summary: any = { incomes: [], variableExpenses: [], fixedExpenses: [] }
     let trends: any[] = []
