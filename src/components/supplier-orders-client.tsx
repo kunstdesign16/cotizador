@@ -6,14 +6,15 @@ import Link from 'next/link'
 import { Copy, Trash2, ChevronDown, ChevronRight, Package } from 'lucide-react'
 import { duplicateSupplierOrder, deleteOrder, updatePaymentStatus } from '@/actions/supplier-orders'
 import { useRouter } from 'next/navigation'
-
+import PaymentDialog from '@/components/payment-dialog'
 interface SupplierOrdersClientProps {
     initialOrders: any[]
 }
 
 const PAYMENT_STATUS_COLORS: Record<string, string> = {
     PENDING: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    PARTIAL: 'bg-orange-50 text-orange-700 border-orange-200'
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -26,6 +27,9 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
     const [orders, setOrders] = useState(initialOrders)
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set())
     const router = useRouter()
+    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+    const [selectedOrderId, setSelectedOrderId] = useState<string>('')
+
 
     const calculateTotal = (items: any[]) => {
         return items.reduce((sum, item) => sum + (item.unitCost || 0) * (item.quantity || 0), 0)
@@ -200,6 +204,7 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                                                                         >
                                                                             <option value="PENDING">Pendiente</option>
                                                                             <option value="PAID">Pagado</option>
+                                                                            <option value="PARTIAL">Parcial</option>
                                                                         </select>
                                                                     </td>
                                                                     <td className="py-3 px-4 text-right font-medium whitespace-nowrap">
@@ -225,6 +230,20 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                                                                             >
                                                                                 <Trash2 className="h-4 w-4" />
                                                                             </Button>
+                                                                            {order.paymentStatus !== 'PAID' && (
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant="default"
+                                                                                    className="h-8 w-auto px-2"
+                                                                                    onClick={() => {
+                                                                                        setSelectedOrderId(order.id);
+                                                                                        setPaymentDialogOpen(true);
+                                                                                    }}
+                                                                                    title="Registrar Pago"
+                                                                                >
+                                                                                    Registrar Pago
+                                                                                </Button>
+                                                                            )}
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -241,6 +260,11 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                     )}
                 </div>
             </div>
+            <PaymentDialog
+                open={paymentDialogOpen}
+                setOpen={setPaymentDialogOpen}
+                orderId={selectedOrderId}
+            />
         </div>
     )
 }
