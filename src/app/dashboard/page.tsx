@@ -121,16 +121,6 @@ export default async function DashboardPage() {
                     </div>
                 </header>
 
-                {/* DB SESSION DEBUG */}
-                <div className="p-4 bg-slate-900 text-white rounded-lg text-xs font-mono border-2 border-amber-500">
-                    <div className="text-amber-500 font-bold mb-2">DEBUG DE SESIÓN (SERVIDOR)</div>
-                    <pre>{JSON.stringify({
-                        cookies: (await (await import('next/headers')).cookies()).getAll().map(c => c.name),
-                        email: (await (await import('next/headers')).cookies()).get('user_email')?.value || 'N/A',
-                        role: (await (await import('next/headers')).cookies()).get('user_role')?.value || 'N/A'
-                    }, null, 2)}</pre>
-                </div>
-
                 {/* Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">

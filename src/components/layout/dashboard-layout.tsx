@@ -1,17 +1,16 @@
-'use client'
 import { Sidebar } from './sidebar'
-import { usePathname } from 'next/navigation'
+import { DashboardContent } from './dashboard-content'
+import { getCurrentUser } from '@/actions/users'
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const pathname = usePathname()
-    const isLoginPage = pathname === '/login'
+export async function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const user = await getCurrentUser()
 
     return (
         <div className="min-h-screen bg-background">
-            <Sidebar />
-            <main className={`${isLoginPage ? 'w-full' : 'pt-16 lg:pt-0 lg:pl-64'} min-h-screen transition-all duration-300`}>
+            <Sidebar initialUser={user} />
+            <DashboardContent>
                 {children}
-            </main>
+            </DashboardContent>
         </div>
     )
 }
