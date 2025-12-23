@@ -66,16 +66,8 @@ export function UserNav({ userName, userRole, userEmail }: UserNavProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Preferencias de usuario</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Contraseña y seguridad</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
-                        <Phone className="mr-2 h-4 w-4" />
-                        <span>Información de contacto</span>
+                        <UserCog className="mr-2 h-4 w-4" />
+                        <span>Configuración de perfil</span>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
