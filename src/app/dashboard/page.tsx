@@ -17,7 +17,8 @@ export default async function DashboardPage() {
         include: {
             client: true,
             expenses: true,
-            items: true
+            items: true,
+            project: true
         },
         orderBy: { updatedAt: 'desc' }
     })

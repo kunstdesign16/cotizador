@@ -169,6 +169,89 @@ export async function duplicateSupplierOrder(id: string) {
     }
 }
 
+/**
+ * NEW: Register a payment for an order and sync status.
+ * This is the ONLY source of truth for order payments.
+ */
+export async function registerOrderPayment(orderId: string, amount: number, description?: string, paymentMethod?: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        const order = await prisma.supplierOrder.findUnique({
+            where: { id: orderId },
+            include: {
+                expenses: true,
+                supplier: true
+            }
+        }) as any
+
+        if (!order) return { success: false, error: 'Orden no encontrada' }
+        if (order.projectId) {
+            const project = await (prisma as any).project.findUnique({ where: { id: order.projectId } })
+            if (project?.status === 'CERRADO') return { success: false, error: 'El proyecto está CERRADO. No se pueden registrar pagos.' }
+        }
+
+        // 1. Calculate Total Ordered
+        const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
+        const totalOrdered = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
+            sum + (item.unitCost || 0) * (item.quantity || 0), 0
+        ) : 0
+
+        // 2. Calculate Total already paid (from VariableExpense)
+        const totalPaidSoFar = order.expenses.reduce((sum: number, exp: any) => sum + exp.amount, 0)
+        const pendingBalance = totalOrdered - totalPaidSoFar
+
+        // 3. Validation
+        if (amount <= 0) return { success: false, error: 'El monto debe ser mayor a cero' }
+        if (amount > pendingBalance + 0.01) { // Small epsilon
+            return {
+                success: false,
+                error: `El pago ($${amount}) excede el saldo pendiente ($${pendingBalance.toFixed(2)})`
+            }
+        }
+
+        // 4. Create the expense in a transaction
+        await prisma.$transaction(async (tx) => {
+            // A. Create Expense
+            await tx.variableExpense.create({
+                data: {
+                    description: description || `Pago Orden: ${order.supplier.name}`,
+                    amount: amount,
+                    iva: amount * 0.16, // Consistent with our tax policy
+                    category: 'Material',
+                    date: new Date(),
+                    supplierId: order.supplierId,
+                    supplierOrderId: order.id,
+                    projectId: order.projectId,
+                    quoteId: order.quoteId,
+                    paymentMethod: paymentMethod || 'TRANSFER'
+                } as any
+            })
+
+            // B. Determine new status
+            const newTotalPaid = totalPaidSoFar + amount
+            let newStatus = 'PARTIAL'
+            if (newTotalPaid >= totalOrdered - 0.01) {
+                newStatus = 'PAID'
+            }
+
+            // C. Update Order status
+            await tx.supplierOrder.update({
+                where: { id: order.id },
+                data: { paymentStatus: newStatus }
+            })
+        })
+
+        revalidatePath(`/projects/${order.projectId}`)
+        revalidatePath('/supplier-orders')
+        revalidatePath('/accounting')
+
+        return { success: true }
+    } catch (error) {
+        console.error('Error registering order payment:', error)
+        return { success: false, error: 'Error al registrar el pago' }
+    }
+}
+
 export async function updatePaymentStatus(id: string, paymentStatus: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
@@ -177,6 +260,8 @@ export async function updatePaymentStatus(id: string, paymentStatus: string) {
             data: { paymentStatus }
         })
 
+        // NOTE: Manual sync is now secondary to registerOrderPayment logic
+        // But we keep it for backwards compatibility for now
         if (paymentStatus === 'PAID') {
             await syncExpenseFromOrder(id, paymentStatus)
         }
@@ -191,6 +276,85 @@ export async function updatePaymentStatus(id: string, paymentStatus: string) {
     }
 }
 
+export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        // 1. Fetch the quote item with its quote and project info
+        const item = await prisma.quoteItem.findUnique({
+            where: { id: quoteItemId },
+            include: {
+                quote: {
+                    include: {
+                        project: true
+                    }
+                }
+            }
+        }) as any
+
+        if (!item) return { success: false, error: 'Ítem no encontrado' }
+        if (!item.quote.project) return { success: false, error: 'El ítem no está ligado a un proyecto' }
+
+        // 0. CHECK: Block if CERRADO
+        if (item.quote.project.status === 'CERRADO') {
+            return { success: false, error: 'El proyecto está CERRADO. No se pueden generar nuevas órdenes.' }
+        }
+
+        // 2. CHECK: Only allow if project is APROBADO or higher
+        const projectStatus = item.quote.project.status
+        if (projectStatus === 'COTIZANDO') {
+            return {
+                success: false,
+                error: 'El proyecto debe estar APROBADO para generar órdenes de compra operativos.'
+            }
+        }
+
+        if (item.orderCreated) {
+            return { success: false, error: 'Ya existe una orden para este ítem.' }
+        }
+
+        // 3. Create Supplier Order using a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // A. Create Order
+            const order = await tx.supplierOrder.create({
+                data: {
+                    supplierId,
+                    projectId: item.quote.projectId,
+                    quoteId: item.quoteId,
+                    quoteItemId: item.id,
+                    status: 'PENDING',
+                    paymentStatus: 'PENDING',
+                    items: [{
+                        code: item.productCode || 'N/A',
+                        name: item.concept,
+                        quantity: item.quantity,
+                        unitCost: item.cost_article // Use the quote baseline cost
+                    }] as any
+                } as any
+            })
+
+            // B. Update QuoteItem to mark as ordered
+            await tx.quoteItem.update({
+                where: { id: item.id },
+                data: {
+                    orderCreated: true,
+                    supplierOrderId: order.id
+                } as any
+            })
+
+            return order
+        })
+
+        revalidatePath(`/projects/${item.quote.projectId}`)
+        revalidatePath(`/quotes/${item.quoteId}`)
+        revalidatePath('/supplier-orders')
+
+        return { success: true, id: result.id }
+    } catch (error) {
+        console.error('Error creating order from item:', error)
+        return { success: false, error: 'Error al generar la orden de compra.' }
+    }
+}
+
 // Internal helper to sync expense
 async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
     const { prisma } = await import('@/lib/prisma')
@@ -200,7 +364,7 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
     const order = await prisma.supplierOrder.findUnique({
         where: { id: orderId },
         include: { supplier: true }
-    })
+    }) as any
 
     if (!order) return
 
@@ -226,8 +390,9 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
                 date: new Date(),
                 supplierId: order.supplierId,
                 supplierOrderId: order.id,
-                quoteId: order.quoteId
-            }
+                quoteId: order.quoteId,
+                projectId: order.projectId
+            } as any
         })
     }
 }

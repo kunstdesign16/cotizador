@@ -21,7 +21,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 orderBy: { version: 'desc' }
             },
             supplierOrders: {
-                include: { supplier: true }
+                include: {
+                    supplier: true,
+                    expenses: true
+                }
             },
             supplierTasks: {
                 include: { supplier: true }

@@ -25,11 +25,21 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
     const { id } = await params
     const quote = await prisma.quote.findUnique({
         where: { id },
-        include: { client: true, items: true, supplierTasks: true }
+        include: {
+            client: true,
+            items: {
+                include: {
+                    supplierOrder: true
+                }
+            },
+            supplierTasks: true,
+            project: true
+        }
     }) as any // Workaround for TS
 
     if (!quote) return <div>Cotización no encontrada</div>
 
+    const suppliers = await prisma.supplier.findMany({ orderBy: { name: 'asc' } })
     const serializedQuote = JSON.parse(JSON.stringify(quote))
 
     return (
@@ -47,7 +57,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
                     </div>
                 </header>
 
-                <QuoteProjectManager quote={serializedQuote} />
+                <QuoteProjectManager quote={serializedQuote} suppliers={suppliers} />
             </div>
         </div>
     )

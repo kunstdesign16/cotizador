@@ -28,27 +28,31 @@ export async function registerPayment({
         let finalDescription = description
 
         if (orderId) {
-            const order = await prisma.supplierOrder.findUnique({
-                where: { id: orderId },
-                include: { supplier: true }
-            })
+            // Redirect to the specialized order payment logic
+            const { registerOrderPayment } = await import('./supplier-orders')
+            return await registerOrderPayment(orderId, amount, description)
+        }
 
-            if (!order) {
-                return { success: false, error: 'Orden no encontrada' }
-            }
-
-            finalQuoteId = order.quoteId || finalQuoteId
-            finalSupplierId = order.supplierId
-            finalDescription = finalDescription || `Anticipo Orden: ${order.supplier.name}`
-
-            if (type === 'TOTAL') {
-                const result = await updatePaymentStatus(orderId, 'PAID')
-                return result
+        if (finalQuoteId) {
+            const quote = await (prisma as any).quote.findUnique({
+                where: { id: finalQuoteId },
+                include: { project: true }
+            }) as any
+            if (quote?.project?.status === 'CERRADO') {
+                return { success: false, error: 'El proyecto está CERRADO. No se pueden registrar pagos.' }
             }
         }
 
         // Create VariableExpense
-        await prisma.variableExpense.create({
+        let projectId = null
+        if (finalQuoteId) {
+            const quote = await (prisma as any).quote.findUnique({
+                where: { id: finalQuoteId }
+            })
+            projectId = quote?.projectId
+        }
+
+        await (prisma as any).variableExpense.create({
             data: {
                 description: finalDescription || 'Pago registrado',
                 amount: amount,
@@ -57,8 +61,9 @@ export async function registerPayment({
                 date: new Date(),
                 supplierId: finalSupplierId,
                 supplierOrderId: orderId,
-                quoteId: finalQuoteId
-            }
+                quoteId: finalQuoteId,
+                projectId: projectId
+            } as any
         })
 
         if (orderId) {

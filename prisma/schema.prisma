@@ -93,6 +93,8 @@ model Quote {
   
   items        QuoteItem[]
 
+  isApproved    Boolean   @default(false)
+
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   
@@ -132,6 +134,11 @@ model QuoteItem {
   
   unit_cost         Float    @default(0) // Client facing price (Calculated)
   subtotal          Float    @default(0) // quantity * unit_cost
+
+  // Order linkage
+  orderCreated      Boolean  @default(false)
+  supplierOrderId   String?  @unique
+  supplierOrder     SupplierOrder? @relation("QuoteItemToOrder", fields: [supplierOrderId], references: [id])
 }
 
 
@@ -173,6 +180,10 @@ model SupplierOrder {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   expenses     VariableExpense[]
+
+  // Link to source quote item
+  quoteItemId  String?   @unique
+  quoteItem    QuoteItem? @relation("QuoteItemToOrder")
 }
 
 model SupplierTask {

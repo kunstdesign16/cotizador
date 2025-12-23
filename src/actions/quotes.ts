@@ -8,7 +8,7 @@ export async function saveQuote(data: any) {
     // data is the JSON payload from the client state
     // In a real app we should validate this with Zod again
 
-    const { client, project, items, iva_rate, clientId } = data
+    const { client, project, items, iva_rate, clientId, projectId } = data
 
     const subtotal = items.reduce((acc: number, item: any) => acc + item.subtotal, 0)
     const iva_amount = subtotal * 0.16
@@ -52,6 +52,7 @@ export async function saveQuote(data: any) {
             isr_rate: Number(data.isr_rate || 0),
             total: total,
             clientId: finalClientId,
+            projectId: projectId || null,
             items: {
                 create: data.items.map((item: any) => ({
                     concept: item.concept,
@@ -88,9 +89,27 @@ export async function updateQuote(id: string, data: any) {
     // Actually, modifying the client here might affect other quotes if we reused clients.
     // For now, let's just update the client info because in this MVP clients are likely 1:1 or we want to update the master record.
 
-    // First get the quote to find the clientId
-    const existingQuote = await prisma.quote.findUnique({ where: { id } })
+    // First get the quote to find the clientId and project status
+    const existingQuote = await (prisma as any).quote.findUnique({
+        where: { id },
+        include: { project: true }
+    }) as any
     if (!existingQuote) return { success: false, error: 'Quote not found' }
+
+    // Project Status Guards
+    if (existingQuote.project && existingQuote.project.status === 'CERRADO') {
+        return {
+            success: false,
+            error: 'El proyecto está CERRADO. No se permiten ediciones.'
+        }
+    }
+
+    if (existingQuote.project && existingQuote.project.status !== 'COTIZANDO') {
+        return {
+            success: false,
+            error: `El proyecto está en estado ${existingQuote.project.status}. No se permiten ediciones. Por favor, duplique la cotización para crear una nueva versión.`
+        }
+    }
 
     await prisma.client.update({
         where: { id: existingQuote.clientId },
@@ -190,7 +209,7 @@ export async function getActiveProjects() {
 export async function updateQuoteStatus(id: string, status: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
-        await prisma.quote.update({
+        const quote = await prisma.quote.update({
             where: { id },
             data: { status }
         })
@@ -201,11 +220,56 @@ export async function updateQuoteStatus(id: string, status: string) {
 
         revalidatePath('/dashboard')
         revalidatePath('/projects')
+        if (quote.projectId) revalidatePath(`/projects/${quote.projectId}`)
         revalidatePath('/accounting')
         revalidatePath(`/quotes/${id}`)
         return { success: true }
     } catch (e) {
         return { success: false, error: 'Error modifying status' }
+    }
+}
+
+export async function approveQuote(quoteId: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        const quote = await (prisma as any).quote.findUnique({
+            where: { id: quoteId },
+            include: { project: true }
+        }) as any
+
+        if (!quote || !quote.projectId) return { success: false, error: 'Cotización o Proyecto no encontrado' }
+
+        if (quote.project && quote.project.status === 'CERRADO') {
+            return { success: false, error: 'El proyecto está CERRADO. No se pueden aprobar cotizaciones.' }
+        }
+
+        await prisma.$transaction([
+            // 1. Mark this quote as approved and all others as not approved for this project
+            prisma.quote.updateMany({
+                where: { projectId: quote.projectId },
+                data: { isApproved: false }
+            }),
+            prisma.quote.update({
+                where: { id: quoteId },
+                data: { isApproved: true, status: 'APPROVED' }
+            }),
+            // 2. Update project status and snapshot financial totals from this quote
+            (prisma as any).project.update({
+                where: { id: quote.projectId },
+                data: {
+                    status: 'APROBADO',
+                    totalCotizado: quote.total
+                }
+            })
+        ])
+
+        revalidatePath('/projects')
+        revalidatePath(`/projects/${quote.projectId}`)
+        revalidatePath(`/quotes/${quoteId}`)
+        return { success: true }
+    } catch (e) {
+        console.error('Error approving quote:', e)
+        return { success: false, error: 'Error al aprobar la cotización' }
     }
 }
 
@@ -243,6 +307,15 @@ async function syncIncomeFromQuote(quoteId: string) {
 export async function deleteQuote(id: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
+        const existing = await prisma.quote.findUnique({
+            where: { id },
+            include: { project: true }
+        })
+
+        if (existing?.project && existing.project.status !== 'COTIZANDO') {
+            return { success: false, error: 'No se puede eliminar una cotización de un proyecto aprobado o en ejecución.' }
+        }
+
         await prisma.quote.delete({
             where: { id }
         })
@@ -264,14 +337,28 @@ export async function duplicateQuote(id: string) {
 
         if (!original) return { success: false, error: 'Original quote not found' }
 
-        // 2. Create new quote based on original
+        // 2. Determine next version number
+        let nextVersion = 1
+        if (original.projectId) {
+            const lastQuote = await prisma.quote.findFirst({
+                where: { projectId: original.projectId },
+                orderBy: { version: 'desc' },
+                select: { version: true }
+            })
+            nextVersion = (lastQuote?.version || 0) + 1
+        }
+
+        // 3. Create new quote based on original
         const newQuote = await prisma.quote.create({
             data: {
-                project_name: `${original.project_name} (Copia)`,
+                project_name: original.project_name,
+                version: nextVersion,
                 date: new Date(),
                 status: 'DRAFT',
                 clientId: original.clientId,
                 userId: original.userId,
+                projectId: original.projectId,
+                isApproved: false,
 
                 subtotal: original.subtotal,
                 iva_rate: original.iva_rate,
@@ -306,6 +393,8 @@ export async function duplicateQuote(id: string) {
         })
 
         revalidatePath('/dashboard')
+        if (original.projectId) revalidatePath(`/projects/${original.projectId}`)
+
         return { success: true, id: newQuote.id }
     } catch (error) {
         console.error('Error duplicating quote:', error)
@@ -313,10 +402,11 @@ export async function duplicateQuote(id: string) {
     }
 }
 
+
 export async function updateProjectDate(id: string, date: Date | null) {
     const { prisma } = await import('@/lib/prisma')
     try {
-        await prisma.quote.update({
+        await (prisma as any).quote.update({
             where: { id },
             data: { deliveryDate: date }
         })

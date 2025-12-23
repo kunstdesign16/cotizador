@@ -19,7 +19,8 @@ import { DollarSign } from "lucide-react"
 type QuoteWithClient = Quote & {
     client: Client,
     expenses: any[],
-    items: any[]
+    items: any[],
+    project: any
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -206,7 +207,12 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                                 <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
                                                             </div>
                                                             <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                                <QuoteStatusSelector id={quote.id} currentStatus={quote.status} compact />
+                                                                <QuoteStatusSelector
+                                                                    id={quote.id}
+                                                                    currentStatus={quote.status}
+                                                                    compact
+                                                                    disabled={quote.project?.status !== 'COTIZANDO'}
+                                                                />
                                                             </div>
                                                         </div>
 
@@ -262,17 +268,21 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                             </div>
 
                                                             <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                                                    onClick={() => router.push(`/quotes/${quote.id}/edit`)}
-                                                                    title="Editar Cotización"
-                                                                >
-                                                                    <Pencil className="h-4 w-4" />
-                                                                </Button>
-                                                                <DuplicateQuoteButton id={quote.id} iconOnly />
-                                                                <DeleteQuoteButton id={quote.id} iconOnly />
+                                                                {quote.project?.status === 'COTIZANDO' && (
+                                                                    <>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                                            onClick={() => router.push(`/quotes/${quote.id}/edit`)}
+                                                                            title="Editar Cotización"
+                                                                        >
+                                                                            <Pencil className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <DuplicateQuoteButton id={quote.id} iconOnly />
+                                                                        <DeleteQuoteButton id={quote.id} iconOnly />
+                                                                    </>
+                                                                )}
 
                                                                 <Button
                                                                     variant="ghost"

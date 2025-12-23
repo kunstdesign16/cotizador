@@ -8,8 +8,27 @@ import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import QuotePDFClient from '@/app/quotes/[id]/pdf-client'
-import { Pencil, FileText, CheckSquare } from 'lucide-react'
+import { Pencil, FileText, CheckSquare, Truck, ExternalLink, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { createOrderFromQuoteItem } from '@/actions/supplier-orders'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 // Define types based on serialized data
 interface QuoteData {
@@ -32,25 +51,53 @@ interface QuoteData {
 }
 
 interface QuoteProjectManagerProps {
-    quote: QuoteData
+    quote: QuoteData & { project?: any }
+    suppliers?: any[]
 }
 
-export function QuoteProjectManager({ quote }: QuoteProjectManagerProps) {
+export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManagerProps) {
+    const router = useRouter()
+    const [isCreatingOrder, setIsCreatingOrder] = useState<string | null>(null)
+    const [selectedSupplier, setSelectedSupplier] = useState<string>('')
+
     // Calculate total internal cost and profit
     const totalInternalCost = quote.items.reduce((acc, item) => {
         const itemInternal = (
-            item.cost_article +
-            item.cost_workforce +
-            item.cost_packaging +
-            item.cost_transport +
-            item.cost_equipment +
-            item.cost_other
+            (item.cost_article || 0) +
+            (item.cost_workforce || 0) +
+            (item.cost_packaging || 0) +
+            (item.cost_transport || 0) +
+            (item.cost_equipment || 0) +
+            (item.cost_other || 0)
         ) * item.quantity
         return acc + itemInternal
     }, 0)
 
     const grossProfit = quote.subtotal - totalInternalCost
     const marginPercent = quote.subtotal > 0 ? (grossProfit / quote.subtotal) * 100 : 0
+
+    const handleCreateOrder = async (quoteItemId: string) => {
+        if (!selectedSupplier) {
+            toast.error('Por favor seleccione un proveedor')
+            return
+        }
+
+        setIsCreatingOrder(quoteItemId)
+        try {
+            const res = await createOrderFromQuoteItem(quoteItemId, selectedSupplier)
+            if (res.success) {
+                toast.success('Orden de compra generada exitosamente')
+                router.refresh()
+            } else {
+                toast.error(res.error || 'Error al generar orden')
+            }
+        } catch (error) {
+            toast.error('Error de red al generar orden')
+        } finally {
+            setIsCreatingOrder(null)
+            setSelectedSupplier('')
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -151,28 +198,93 @@ export function QuoteProjectManager({ quote }: QuoteProjectManagerProps) {
                                             <th className="p-3 text-right font-medium text-muted-foreground">Costo Int. Total</th>
                                             <th className="p-3 text-right font-medium">Precio Venta Unit.</th>
                                             <th className="p-3 text-right font-medium">Precio Venta Total</th>
+                                            <th className="p-3 text-center font-medium">Operación</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y">
                                         {quote.items.map((item: any) => {
                                             const itemInternalUnit = (
-                                                item.cost_article +
-                                                item.cost_workforce +
-                                                item.cost_packaging +
-                                                item.cost_transport +
-                                                item.cost_equipment +
-                                                item.cost_other
+                                                (item.cost_article || 0) +
+                                                (item.cost_workforce || 0) +
+                                                (item.cost_packaging || 0) +
+                                                (item.cost_transport || 0) +
+                                                (item.cost_equipment || 0) +
+                                                (item.cost_other || 0)
                                             )
                                             const itemInternalTotal = itemInternalUnit * item.quantity
 
                                             return (
                                                 <tr key={item.id} className="hover:bg-muted/50">
-                                                    <td className="p-3 font-medium">{item.concept}</td>
+                                                    <td className="p-3 font-medium">
+                                                        <div className="flex flex-col">
+                                                            {item.concept}
+                                                            {item.productCode && <span className="text-[10px] text-muted-foreground">{item.productCode}</span>}
+                                                        </div>
+                                                    </td>
                                                     <td className="p-3 text-right">{item.quantity}</td>
                                                     <td className="p-3 text-right text-muted-foreground">${itemInternalUnit.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                                                     <td className="p-3 text-right text-muted-foreground">${itemInternalTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                                                     <td className="p-3 text-right">${item.unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                                                     <td className="p-3 text-right font-bold">${item.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                                                    <td className="p-3 text-center whitespace-nowrap">
+                                                        {item.orderCreated ? (
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100 text-[9px] py-0 h-4">
+                                                                    ORDEN GENERADA
+                                                                </Badge>
+                                                                {item.supplierOrder && (
+                                                                    <Link href={`/supplier-orders/${item.supplierOrderId}`} className="text-[10px] text-primary hover:underline flex items-center gap-0.5">
+                                                                        Ver {item.supplierOrderId.slice(-4)}
+                                                                        <ExternalLink className="h-2.5 w-2.5" />
+                                                                    </Link>
+                                                                )}
+                                                            </div>
+                                                        ) : quote.project?.status !== 'COTIZANDO' ? (
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 px-2 border-primary/20 text-primary hover:bg-primary/5">
+                                                                        <Plus className="h-3 w-3" />
+                                                                        Generar Orden
+                                                                    </Button>
+                                                                </DialogTrigger>
+                                                                <DialogContent>
+                                                                    <DialogHeader>
+                                                                        <DialogTitle>Generar Orden de Compra</DialogTitle>
+                                                                        <DialogDescription>
+                                                                            Se creará una Orden de Compra para "{item.concept}" basada en el costo cotizado de <strong>${item.cost_article.toLocaleString('es-MX')}</strong>.
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <div className="py-4 space-y-4">
+                                                                        <div className="space-y-2">
+                                                                            <label className="text-sm font-medium">Seleccionar Proveedor</label>
+                                                                            <Select onValueChange={setSelectedSupplier}>
+                                                                                <SelectTrigger>
+                                                                                    <SelectValue placeholder="Seleccione un proveedor..." />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    {suppliers.map((s: any) => (
+                                                                                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                                                                    ))}
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <DialogFooter>
+                                                                        <Button
+                                                                            onClick={() => handleCreateOrder(item.id)}
+                                                                            disabled={isCreatingOrder === item.id || !selectedSupplier}
+                                                                        >
+                                                                            {isCreatingOrder === item.id ? 'Generando...' : 'Confirmar Orden'}
+                                                                        </Button>
+                                                                    </DialogFooter>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-[9px] py-0 h-4 opacity-50">
+                                                                PENDIENTE
+                                                            </Badge>
+                                                        )}
+                                                    </td>
                                                 </tr>
                                             )
                                         })}

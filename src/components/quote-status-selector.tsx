@@ -22,7 +22,7 @@ const STATUS_COLORS: Record<string, string> = {
     'COBRADO': 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
 }
 
-export function QuoteStatusSelector({ id, currentStatus, compact = false }: { id: string, currentStatus: string, compact?: boolean }) {
+export function QuoteStatusSelector({ id, currentStatus, compact = false, disabled = false }: { id: string, currentStatus: string, compact?: boolean, disabled?: boolean }) {
     const [status, setStatus] = useState(currentStatus)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
@@ -48,7 +48,7 @@ export function QuoteStatusSelector({ id, currentStatus, compact = false }: { id
             onMouseDown={(e) => {
                 e.stopPropagation()
             }}
-            disabled={loading}
+            disabled={loading || disabled}
             className={`rounded-full border-0 text-[10px] font-medium ring-1 ring-inset focus:ring-2 focus:ring-primary ${STATUS_COLORS[status] || 'bg-gray-100'} ${compact ? 'py-0.5 px-2 h-auto w-auto' : 'h-8 py-1 px-3 text-xs'}`}
         >
             {Object.entries(STATUSES).map(([key, label]) => (
