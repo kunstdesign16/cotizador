@@ -11,7 +11,8 @@ const PUBLIC_ROUTES = ['/login', '/register']
 const ADMIN_EMAILS = [
     'kunstdesign16@gmail.com',
     'direccion@kunstdesign.com.mx',
-    'dirección@kunstdesign.com.mx'
+    'dirección@kunstdesign.com.mx',
+    'admin@kunst.mx'
 ]
 
 export function middleware(request: NextRequest) {
