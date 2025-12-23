@@ -207,11 +207,43 @@ export default async function DashboardPage() {
                 </div>
             </div>
         )
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error loading dashboard:', error)
         return (
-            <div className="p-8 text-center text-red-600">
-                Hubo un error al cargar el tablero de control. Por favor, intente de nuevo más tarde o contacte a soporte.
+            <div className="p-8 max-w-2xl mx-auto space-y-4">
+                <div className="p-6 border border-red-200 bg-red-50 rounded-xl">
+                    <h2 className="text-red-800 font-bold text-lg mb-2">Error de Carga</h2>
+                    <p className="text-red-600 text-sm">
+                        Ocurrió un error al cargar los datos del tablero. Esto suele deberse a cambios en la base de datos que aún no se han sincronizado.
+                    </p>
+
+                    <div className="mt-6 space-y-2">
+                        <p className="text-[10px] font-mono text-red-500 uppercase tracking-wider">Detalle Técnico:</p>
+                        <pre className="p-3 bg-white border rounded text-[10px] font-mono text-gray-700 overflow-auto max-h-[200px]">
+                            {error.message || 'No se proporcionó mensaje de error'}
+                            {"\n\n"}
+                            {error.stack}
+                        </pre>
+                    </div>
+
+                    <div className="mt-6 flex gap-3">
+                        <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => window.location.reload()}
+                        >
+                            Reintentar
+                        </Button>
+                        <Link href="/accounting">
+                            <Button variant="outline" size="sm">Ir a Contabilidad</Button>
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    <p className="font-semibold mb-1">💡 Sugerencia:</p>
+                    Asegúrate de haber ejecutado <code>npx prisma db push</code> para sincronizar los nuevos campos de la Fase 9 (Cierre de Proyectos).
+                </div>
             </div>
         )
     }
