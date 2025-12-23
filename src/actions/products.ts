@@ -22,6 +22,14 @@ export async function searchProducts(query: string) {
     return products
 }
 
+export async function getProductsBySupplier(supplierId: string) {
+    const products = await prisma.product.findMany({
+        where: { supplierId },
+        orderBy: { name: 'asc' }
+    })
+    return products
+}
+
 export async function createProduct(supplierId: string, data: {
     code: string
     name: string

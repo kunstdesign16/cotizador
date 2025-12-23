@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckSquare, Pencil, Trash2 } from 'lucide-react'
+import { CheckSquare, Pencil, Trash2, ShoppingCart } from 'lucide-react'
 import { NewTaskDialog } from './new-task-dialog'
 import { EditTaskDialog } from './edit-task-dialog'
 import { updateTaskStatus, deleteTask } from '@/actions/supplier-tasks'
+import { getProductsBySupplier } from '@/actions/products'
+import { SupplierOrderForm } from './supplier-order-form'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface TasksPageClientProps {
     initialTasks: any[]
@@ -19,7 +22,23 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
     const [tasks, setTasks] = useState(initialTasks)
     const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED' | 'URGENT'>('PENDING')
     const [editingTask, setEditingTask] = useState<any | null>(null)
+    const [convertingTask, setConvertingTask] = useState<any | null>(null)
+    const [supplierProducts, setSupplierProducts] = useState<any[]>([])
+    const [loadingProducts, setLoadingProducts] = useState(false)
     const router = useRouter()
+
+    const handleConvertToOrder = async (task: any) => {
+        setLoadingProducts(true)
+        try {
+            const products = await getProductsBySupplier(task.supplierId)
+            setSupplierProducts(products)
+            setConvertingTask(task)
+        } catch (error) {
+            toast.error('Error al cargar productos del proveedor')
+        } finally {
+            setLoadingProducts(false)
+        }
+    }
 
     const filteredTasks = tasks.filter((task: any) => {
         if (filter === 'ALL') return true
@@ -160,6 +179,19 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
+                                                className={cn(
+                                                    "h-8 w-8 p-0 text-primary hover:text-primary hover:bg-primary/5",
+                                                    loadingProducts && convertingTask?.id === task.id && "animate-pulse"
+                                                )}
+                                                onClick={() => handleConvertToOrder(task)}
+                                                title="Generar Orden de Compra"
+                                                disabled={loadingProducts}
+                                            >
+                                                <ShoppingCart className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 className="h-8 w-8 p-0"
                                                 onClick={() => setEditingTask(task)}
                                                 title="Editar tarea"
@@ -188,6 +220,25 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
                         task={editingTask}
                         onClose={() => setEditingTask(null)}
                     />
+                )}
+
+                {convertingTask && (
+                    <SupplierOrderForm
+                        supplierId={convertingTask.supplierId}
+                        products={supplierProducts}
+                        projects={quotes}
+                        tasks={tasks}
+                        autoOpen={true}
+                        initialData={{
+                            id: '',
+                            items: [],
+                            quoteId: convertingTask.quoteId,
+                            taskId: convertingTask.id
+                        }}
+                    >
+                        {/* Hidden trigger since we use autoOpen */}
+                        <div className="hidden" />
+                    </SupplierOrderForm>
                 )}
             </div>
         </div>
