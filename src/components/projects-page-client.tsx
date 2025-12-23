@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { FileText, Eye } from 'lucide-react'
+import { QuoteStatusSelector } from './quote-status-selector'
 
 interface ProjectsPageClientProps {
     initialQuotes: any[]
@@ -20,46 +21,12 @@ const STATUS_OPTIONS = [
     { value: 'COBRADO', label: 'Cobrado' }
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-    DRAFT: 'bg-gray-100 text-gray-800 border-gray-200',
-    SAVED: 'bg-blue-100 text-blue-800 border-blue-200',
-    SENT: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    APPROVED: 'bg-green-100 text-green-800 border-green-200',
-    FACTURADO: 'bg-purple-100 text-purple-800 border-purple-200',
-    COBRADO: 'bg-emerald-100 text-emerald-800 border-emerald-200'
-}
-
 export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
-    const [quotes, setQuotes] = useState(initialQuotes)
     const [filter, setFilter] = useState('ALL')
 
     const filteredQuotes = filter === 'ALL'
-        ? quotes
-        : quotes.filter((q: any) => q.status === filter)
-
-    const handleStatusChange = async (quoteId: string, newStatus: string) => {
-        // Optimistic update
-        setQuotes(quotes.map((q: any) =>
-            q.id === quoteId ? { ...q, status: newStatus } : q
-        ))
-
-        try {
-            const response = await fetch(`/api/quotes/${quoteId}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            })
-
-            if (!response.ok) {
-                // Revert on error
-                setQuotes(initialQuotes)
-                alert('Error al actualizar el estatus')
-            }
-        } catch (error) {
-            setQuotes(initialQuotes)
-            alert('Error al actualizar el estatus')
-        }
-    }
+        ? initialQuotes
+        : initialQuotes.filter((q: any) => q.status === filter)
 
     return (
         <div className="min-h-screen bg-background p-8">
@@ -113,7 +80,7 @@ export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
                                     {filteredQuotes.map((quote: any) => (
                                         <tr key={quote.id} className="hover:bg-muted/50 transition-colors">
                                             <td className="px-4 py-3 font-medium">{quote.project_name}</td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">{quote.client.name}</td>
+                                            <td className="px-4 py-3 text-sm text-muted-foreground">{quote?.client?.name || 'Sin cliente'}</td>
                                             <td className="px-4 py-3 text-sm text-muted-foreground">
                                                 {new Date(quote.date).toLocaleDateString('es-MX')}
                                             </td>
@@ -121,23 +88,11 @@ export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
                                                 ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <select
-                                                    value={quote.status}
-                                                    onChange={(e) => handleStatusChange(quote.id, e.target.value)}
-                                                    className={`text-xs px-2 py-1 rounded-full border font-medium ${STATUS_COLORS[quote.status] || 'bg-gray-100'}`}
-                                                >
-                                                    {STATUS_OPTIONS.filter(s => s.value !== 'ALL').map((status) => (
-                                                        <option key={status.value} value={status.value}>
-                                                            {status.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <QuoteStatusSelector id={quote.id} currentStatus={quote.status} />
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                                 <Link href={`/quotes/${quote.id}`}>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
+                                                    <Eye className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
                                                 </Link>
                                             </td>
                                         </tr>
