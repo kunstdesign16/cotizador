@@ -4,7 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, FileText, Calendar, Search, ChevronDown, ChevronRight } from "lucide-react"
+import { Plus, FileText, Calendar, Search, ChevronDown, ChevronRight, Pencil } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Client, Quote } from "@prisma/client"
@@ -38,6 +39,7 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
     const [selectedCompany, setSelectedCompany] = useState<string>("all")
     const [selectedStatus, setSelectedStatus] = useState<string>("all")
     const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
+    const router = useRouter()
 
     // Get unique companies from clients, filtering out empty ones
     const companies = Array.from(new Set(clients.map(c => c.company).filter(Boolean))).sort()
@@ -218,6 +220,15 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                                                             </div>
 
                                                             <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                                    onClick={() => router.push(`/quotes/${quote.id}/edit`)}
+                                                                    title="Editar Cotización"
+                                                                >
+                                                                    <Pencil className="h-4 w-4" />
+                                                                </Button>
                                                                 <DuplicateQuoteButton id={quote.id} iconOnly />
                                                                 <DeleteQuoteButton id={quote.id} iconOnly />
                                                             </div>

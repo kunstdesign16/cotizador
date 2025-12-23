@@ -29,6 +29,7 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
     const router = useRouter()
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
     const [selectedOrderId, setSelectedOrderId] = useState<string>('')
+    const [selectedOrderTotal, setSelectedOrderTotal] = useState<number>(0)
 
 
     const calculateTotal = (items: any[]) => {
@@ -237,6 +238,7 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                                                                                     className="h-8 w-auto px-2"
                                                                                     onClick={() => {
                                                                                         setSelectedOrderId(order.id);
+                                                                                        setSelectedOrderTotal(total);
                                                                                         setPaymentDialogOpen(true);
                                                                                     }}
                                                                                     title="Registrar Pago"
@@ -264,6 +266,7 @@ export function SupplierOrdersClient({ initialOrders }: SupplierOrdersClientProp
                 open={paymentDialogOpen}
                 setOpen={setPaymentDialogOpen}
                 orderId={selectedOrderId}
+                orderTotal={selectedOrderTotal}
             />
         </div>
     )

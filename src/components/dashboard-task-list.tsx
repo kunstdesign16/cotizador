@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/select"
 import { updateTaskStatus, updateTaskPriority } from "@/actions/supplier-tasks"
 import { toast } from "sonner"
+
 import { useRouter } from "next/navigation"
+import { Pencil } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { EditTaskDialog } from "@/components/edit-task-dialog"
 
 interface Task {
     id: string
@@ -46,6 +50,7 @@ const priorityMap: Record<string, string> = {
 
 export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
     const router = useRouter()
+    const [editingTask, setEditingTask] = useState<Task | null>(null)
 
     const handleStatusChange = async (taskId: string, newStatus: string) => {
         try {
@@ -78,7 +83,7 @@ export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
     return (
         <div className="divide-y max-h-[500px] overflow-y-auto">
             {tasks.map((task) => (
-                <div key={task.id} className="p-4 hover:bg-muted/50 transition-colors">
+                <div key={task.id} className="p-4 hover:bg-muted/50 transition-colors relative group">
                     <div className="flex justify-between items-start mb-2 gap-2">
                         <Link href="/tasks" className="flex-1">
                             <span className="font-semibold text-sm block">{task.supplier.name}</span>
@@ -108,6 +113,15 @@ export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
                         </div>
                     </div>
 
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 absolute top-4 right-2 text-muted-foreground hover:text-foreground hidden group-hover:block"
+                        onClick={() => setEditingTask(tasks.find(t => t.id === task.id) as any)}
+                    >
+                        <Pencil className="h-3 w-3" />
+                    </Button>
+
                     <div className="flex justify-between items-center text-xs mt-3">
                         <span className="text-muted-foreground truncate max-w-[120px]">{task.quote?.project_name || 'Sin proyecto'}</span>
 
@@ -134,6 +148,13 @@ export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
                     )}
                 </div>
             ))}
+
+            {editingTask && (
+                <EditTaskDialog
+                    task={editingTask}
+                    onClose={() => setEditingTask(null)}
+                />
+            )}
         </div>
     )
 }

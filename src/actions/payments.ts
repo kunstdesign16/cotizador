@@ -6,11 +6,13 @@ import { updatePaymentStatus } from './supplier-orders'
 export async function registerPayment({
     orderId,
     type,
-    amount
+    amount,
+    iva = 0
 }: {
     orderId: string
     type: 'ANTICIPO' | 'TOTAL'
     amount: number
+    iva?: number
 }) {
     const { prisma } = await import('@/lib/prisma')
 
@@ -33,7 +35,7 @@ export async function registerPayment({
                 data: {
                     description: `Anticipo Orden: ${order.supplier.name}`,
                     amount: amount,
-                    iva: 0, // Assuming 0 for simple advance logic or should calculate? Keeping simple as per request to just log amount.
+                    iva: iva,
                     category: 'Material',
                     date: new Date(),
                     supplierId: order.supplierId,
