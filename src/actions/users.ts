@@ -4,6 +4,12 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
+const ADMIN_EMAILS = [
+    'kunstdesign16@gmail.com',
+    'direccion@kunstdesign.com.mx',
+    'dirección@kunstdesign.com.mx'
+]
+
 export async function createUser(data: {
     email: string
     password: string
@@ -25,12 +31,13 @@ export async function createUser(data: {
             return { success: false, error: 'El email ya está registrado' }
         }
 
+        const isAlwaysAdmin = ADMIN_EMAILS.includes(data.email.toLowerCase().trim())
         const user = await prisma.user.create({
             data: {
                 email: data.email,
                 password: data.password, // TODO: Hash with bcrypt in production
                 name: data.name || null,
-                role: data.role || 'staff'
+                role: isAlwaysAdmin ? 'admin' : (data.role || 'staff')
             }
         })
         revalidatePath('/users')
