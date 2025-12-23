@@ -13,8 +13,14 @@ import DeleteQuoteButton from "./delete-quote-button"
 import DuplicateQuoteButton from "./duplicate-quote-button"
 import { QuoteStatusSelector } from "./quote-status-selector"
 import { ProjectDeliveryDate } from "./project-delivery-date"
+import PaymentDialog from "./payment-dialog"
+import { DollarSign } from "lucide-react"
 
-type QuoteWithClient = Quote & { client: Client }
+type QuoteWithClient = Quote & {
+    client: Client,
+    expenses: any[],
+    items: any[]
+}
 
 const STATUS_LABELS: Record<string, string> = {
     'DRAFT': 'Borrador',
@@ -34,11 +40,20 @@ const STATUS_COLORS: Record<string, string> = {
     'COBRADO': 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
 }
 
-export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[], clients: Client[] }) {
+export function DashboardClient({ quotes, clients, suppliers }: {
+    quotes: QuoteWithClient[],
+    clients: Client[],
+    suppliers: { id: string, name: string }[]
+}) {
     const [search, setSearch] = useState("")
     const [selectedCompany, setSelectedCompany] = useState<string>("all")
     const [selectedStatus, setSelectedStatus] = useState<string>("all")
     const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
+
+    // Payment Dialog state
+    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+    const [selectedQuote, setSelectedQuote] = useState<QuoteWithClient | null>(null)
+
     const router = useRouter()
 
     // Get unique companies from clients, filtering out empty ones
@@ -217,6 +232,33 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                                                                 <span className="font-medium text-base mt-1">
                                                                     ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                                                 </span>
+
+                                                                {/* Progress Bar */}
+                                                                <div className="mt-2 space-y-1">
+                                                                    {(() => {
+                                                                        const totalPaid = quote.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0;
+                                                                        const totalCost = quote.items?.reduce((sum: number, i: any) => sum + (i.internal_unit_cost || 0) * (i.quantity || 1), 0) || 0;
+                                                                        const progress = totalCost > 0 ? (totalPaid / totalCost) * 100 : 0;
+
+                                                                        return (
+                                                                            <>
+                                                                                <div className="flex justify-between text-[10px] text-muted-foreground uppercase font-bold">
+                                                                                    <span>Pagos Proveedores</span>
+                                                                                    <span>{progress.toFixed(0)}%</span>
+                                                                                </div>
+                                                                                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                                                                    <div
+                                                                                        className={`h-full transition-all ${progress >= 100 ? 'bg-emerald-500' : progress > 0 ? 'bg-blue-500' : 'bg-muted'}`}
+                                                                                        style={{ width: `${Math.min(progress, 100)}%` }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="text-[10px] text-muted-foreground text-right italic">
+                                                                                    ${totalPaid.toLocaleString('es-MX')} / ${totalCost.toLocaleString('es-MX')}
+                                                                                </div>
+                                                                            </>
+                                                                        );
+                                                                    })()}
+                                                                </div>
                                                             </div>
 
                                                             <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
@@ -231,6 +273,19 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                                                                 </Button>
                                                                 <DuplicateQuoteButton id={quote.id} iconOnly />
                                                                 <DeleteQuoteButton id={quote.id} iconOnly />
+
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                                    onClick={() => {
+                                                                        setSelectedQuote(quote);
+                                                                        setPaymentDialogOpen(true);
+                                                                    }}
+                                                                    title="Registrar Pago"
+                                                                >
+                                                                    <DollarSign className="h-4 w-4 text-emerald-600" />
+                                                                </Button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -244,6 +299,16 @@ export function DashboardClient({ quotes, clients }: { quotes: QuoteWithClient[]
                     })
                 )}
             </div>
+
+            {selectedQuote && (
+                <PaymentDialog
+                    open={paymentDialogOpen}
+                    setOpen={setPaymentDialogOpen}
+                    quoteId={selectedQuote.id}
+                    orderTotal={selectedQuote.items?.reduce((sum, i) => sum + (i.internal_unit_cost || 0) * (i.quantity || 1), 0) || 0}
+                    suppliers={suppliers}
+                />
+            )}
         </div>
     )
 }

@@ -11,6 +11,9 @@ import {
 import { updateSupplierOrderStatus, updateSupplierOrderPaymentStatus } from "@/actions/supplier-orders"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import PaymentDialog from '@/components/payment-dialog'
 
 interface Order {
     id: string
@@ -21,7 +24,7 @@ interface Order {
     createdAt: Date
     items: any
     status: 'PENDING' | 'ORDERED' | 'RECEIVED' | 'CANCELLED'
-    paymentStatus: 'PENDING' | 'PAID'
+    paymentStatus: 'PENDING' | 'PAID' | 'PARTIAL'
 }
 
 interface DashboardOrderListProps {
@@ -37,6 +40,9 @@ const statusOptions = [
 
 export function DashboardOrderList({ orders }: DashboardOrderListProps) {
     const router = useRouter()
+    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+    const [selectedOrderId, setSelectedOrderId] = useState<string>('')
+    const [selectedOrderTotal, setSelectedOrderTotal] = useState<number>(0)
 
     const handleStatusChange = async (orderId: string, newStatus: string) => {
         try {
@@ -103,7 +109,7 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                             <div className="w-[110px]">
                                 <Select
                                     defaultValue={order.status}
-                                    onValueChange={(val) => handleStatusChange(order.id, val)}
+                                    onValueChange={(val: string) => handleStatusChange(order.id, val)}
                                 >
                                     <SelectTrigger className={`h-6 text-[10px] border-0 px-2 rounded-full
                                         ${order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-600' :
@@ -124,25 +130,48 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                             <div className="w-[100px]">
                                 <Select
                                     defaultValue={order.paymentStatus}
-                                    onValueChange={(val) => handlePaymentStatusChange(order.id, val)}
+                                    onValueChange={(val: string) => handlePaymentStatusChange(order.id, val)}
                                 >
                                     <SelectTrigger className={`h-6 text-[10px] border-0 px-2 rounded-full
                                         ${order.paymentStatus === 'PAID'
                                             ? 'bg-emerald-50 text-emerald-700'
-                                            : 'bg-yellow-50 text-yellow-700'
+                                            : order.paymentStatus === 'PARTIAL'
+                                                ? 'bg-orange-50 text-orange-700'
+                                                : 'bg-yellow-50 text-yellow-700'
                                         }`}>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="PENDING">Pendiente</SelectItem>
+                                        <SelectItem value="PARTIAL">Parcial</SelectItem>
                                         <SelectItem value="PAID">Pagado</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
+
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 text-[10px] px-2"
+                                onClick={() => {
+                                    setSelectedOrderId(order.id);
+                                    setSelectedOrderTotal(total);
+                                    setPaymentDialogOpen(true);
+                                }}
+                            >
+                                Pagar
+                            </Button>
                         </div>
                     </div>
                 )
             })}
+
+            <PaymentDialog
+                open={paymentDialogOpen}
+                setOpen={setPaymentDialogOpen}
+                orderId={selectedOrderId}
+                orderTotal={selectedOrderTotal}
+            />
         </div>
     )
 }

@@ -14,7 +14,11 @@ export default async function DashboardPage() {
 
     // Fetch Quotes
     const quotes = await prisma.quote.findMany({
-        include: { client: true },
+        include: {
+            client: true,
+            expenses: true,
+            items: true
+        },
         orderBy: { updatedAt: 'desc' }
     })
 
@@ -56,6 +60,10 @@ export default async function DashboardPage() {
     // Fetch Supplier Orders for payment tracking
     const supplierOrders = await prisma.supplierOrder.findMany({
         include: { supplier: true }
+    })
+
+    const suppliers = await prisma.supplier.findMany({
+        orderBy: { name: 'asc' }
     })
 
     const paidOrders = supplierOrders.filter(o => o.paymentStatus === 'PAID').length
@@ -178,7 +186,11 @@ export default async function DashboardPage() {
                                 </Button>
                             </Link>
                         </div>
-                        <DashboardClient quotes={recentQuotes} clients={serializedClients} />
+                        <DashboardClient
+                            quotes={recentQuotes}
+                            clients={serializedClients}
+                            suppliers={JSON.parse(JSON.stringify(suppliers))}
+                        />
                     </div>
 
                     {/* Sidebar: Urgent Tasks */}
