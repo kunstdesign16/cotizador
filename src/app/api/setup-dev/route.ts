@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 
 export async function GET() {
     try {
+        const bcrypt = await import('bcryptjs')
         const email = 'admin@kunst.mx'
         const hashedPassword = await bcrypt.hash('password123', 10)
 
