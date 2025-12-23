@@ -178,15 +178,25 @@ export function Sidebar() {
                 </div>
 
                 {/* Temp Diagnostic Debug - Only for troubleshooting */}
-                <div className="mx-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] space-y-1">
-                    <div className="font-bold flex justify-between">
-                        <span>ESTADO DE SESIÓN</span>
-                        <span className={isAdmin ? "text-green-600" : "text-amber-600"}>
+                <div className="mx-2 p-2 rounded bg-slate-900 text-white text-[9px] font-mono leading-tight space-y-1 border border-amber-500">
+                    <div className="text-amber-400 font-bold border-b border-amber-500/30 pb-1 mb-1">🔍 DIAGNÓSTICO DE SESIÓN</div>
+                    <div className="flex justify-between">
+                        <span>DETECCIÓN:</span>
+                        <span className={isAdmin ? "text-green-400" : "text-amber-400"}>
                             {isAdmin ? "ADMIN" : "STAFF"}
                         </span>
                     </div>
-                    <div className="truncate opacity-70">{userEmail || "Sin correo"}</div>
-                    <div className="opacity-70 text-[9px]">Vercel: {new Date().toLocaleTimeString()}</div>
+                    <div className="text-slate-400">Email detectado:</div>
+                    <div className="truncate text-blue-300 bg-slate-800 p-0.5 rounded">{userEmail || "NO DETECTADO"}</div>
+
+                    <div className="mt-1 border-t border-slate-700 pt-1">
+                        <div>Match k16: {userEmail.toLowerCase().trim() === 'kunstdesign16@gmail.com' ? 'SI' : 'NO'}</div>
+                        <div>Match kDir: {userEmail.toLowerCase().trim() === 'direccion@kunstdesign.com.mx' ? 'SI' : 'NO'}</div>
+                    </div>
+
+                    <div className="mt-1 text-[8px] opacity-50 italic">
+                        Ref: {new Date().toLocaleTimeString()}
+                    </div>
                 </div>
 
                 <div className="bg-muted/30 rounded-lg p-4 text-xs text-muted-foreground">
