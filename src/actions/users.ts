@@ -93,27 +93,32 @@ export async function deleteUser(id: string) {
 }
 
 export async function getCurrentUser() {
-    const cookieStore = await cookies()
-    const userEmail = cookieStore.get('user_email')?.value
+    try {
+        const cookieStore = await cookies()
+        const userEmail = cookieStore.get('user_email')?.value
 
-    if (!userEmail) {
-        return null
+        if (!userEmail) {
+            return null
+        }
+
+        const emailLower = userEmail.toLowerCase().trim()
+        const user = await prisma.user.findUnique({
+            where: { email: emailLower },
+            select: { id: true, email: true, name: true, role: true }
+        })
+
+        if (!user) return null
+
+        // Enforce admin role for specific emails even if DB says otherwise
+        if (ADMIN_EMAILS.includes(emailLower)) {
+            user.role = 'admin'
+        }
+
+        return user
+    } catch (error) {
+        console.error('Error in getCurrentUser:', error)
+        return null // Fail silently to allow landing pages/login to load
     }
-
-    const emailLower = userEmail.toLowerCase().trim()
-    const user = await prisma.user.findUnique({
-        where: { email: emailLower },
-        select: { id: true, email: true, name: true, role: true }
-    })
-
-    if (!user) return null
-
-    // Enforce admin role for specific emails even if DB says otherwise
-    if (ADMIN_EMAILS.includes(emailLower)) {
-        user.role = 'admin'
-    }
-
-    return user
 }
 
 export async function getUserRole() {
