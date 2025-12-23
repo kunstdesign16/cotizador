@@ -198,7 +198,7 @@ export function SupplierOrderForm({ supplierId, products, projects = [], tasks =
                                     <option value="">-- Sin Proyecto (Stock) --</option>
                                     {projects.map(p => (
                                         <option key={p.id} value={p.id}>
-                                            {p.project_name} - {p.client.company || p.client.name}
+                                            {p.project_name} - {p?.client?.company || p?.client?.name || 'Cliente no especificado'}
                                         </option>
                                     ))}
                                 </select>

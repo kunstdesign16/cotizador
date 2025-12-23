@@ -22,6 +22,7 @@ export default async function TasksPage() {
     // Fetch Active Quotes for the "New Task" dialog
     const quotes = await prisma.quote.findMany({
         where: { status: { not: 'COBRADO' } },
+        include: { client: true },
         orderBy: { updatedAt: 'desc' }
     })
 
