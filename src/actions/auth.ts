@@ -6,9 +6,7 @@ import { prisma } from '@/lib/prisma'
 
 const ADMIN_EMAILS = [
     'kunstdesign16@gmail.com',
-    'direccion@kunstdesign.com.mx',
-    'dirección@kunstdesign.com.mx',
-    'admin@kunst.mx'
+    'direccion@kunstdesign.com.mx'
 ]
 
 export async function login(prevState: any, formData: FormData) {

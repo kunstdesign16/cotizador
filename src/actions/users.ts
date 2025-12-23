@@ -6,8 +6,7 @@ import { cookies } from 'next/headers'
 
 const ADMIN_EMAILS = [
     'kunstdesign16@gmail.com',
-    'direccion@kunstdesign.com.mx',
-    'dirección@kunstdesign.com.mx'
+    'direccion@kunstdesign.com.mx'
 ]
 
 export async function createUser(data: {
