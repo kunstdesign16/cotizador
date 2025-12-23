@@ -17,12 +17,12 @@ export default async function DashboardPage() {
             </div>
 
             <div className="flex justify-center gap-4 pt-4">
-                <Button asChild>
-                    <Link href="/projects">Ver Proyectos</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                    <Link href="/quotes/new">Nueva Cotización</Link>
-                </Button>
+                <Link href="/projects">
+                    <Button>Ver Proyectos</Button>
+                </Link>
+                <Link href="/quotes/new">
+                    <Button variant="outline">Nueva Cotización</Button>
+                </Link>
             </div>
         </div>
     )
