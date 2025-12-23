@@ -8,9 +8,8 @@ import { DashboardOrderList } from "@/components/dashboard-order-list"
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-    const { prisma } = await import('@/lib/prisma')
-
     try {
+        const { prisma } = await import('@/lib/prisma')
         const quotes = await (prisma as any).quote.findMany({
             include: {
                 client: true,

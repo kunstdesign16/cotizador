@@ -2,7 +2,6 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 
 const ADMIN_EMAILS = [
     'kunstdesign16@gmail.com',
@@ -27,6 +26,7 @@ export async function login(prevState: any, formData: FormData) {
     const email = emailInput.toLowerCase().trim()
 
     try {
+        const { prisma } = await import('@/lib/prisma')
         const user = await prisma.user.findUnique({
             where: { email }
         })
@@ -102,6 +102,7 @@ export async function register(prevState: any, formData: FormData) {
     const email = emailInput.toLowerCase().trim()
 
     try {
+        const { prisma } = await import('@/lib/prisma')
         const existingUser = await prisma.user.findUnique({
             where: { email }
         })

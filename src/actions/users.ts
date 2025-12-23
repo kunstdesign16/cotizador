@@ -1,6 +1,5 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
@@ -22,6 +21,7 @@ export async function createUser(data: {
     }
 
     try {
+        const { prisma } = await import('@/lib/prisma')
         // Check if email already exists
         const existing = await prisma.user.findUnique({
             where: { email: data.email }
@@ -60,6 +60,7 @@ export async function updateUser(id: string, data: {
     }
 
     try {
+        const { prisma } = await import('@/lib/prisma')
         await prisma.user.update({
             where: { id },
             data
@@ -80,6 +81,7 @@ export async function deleteUser(id: string) {
     }
 
     try {
+        const { prisma } = await import('@/lib/prisma')
         await prisma.user.delete({
             where: { id }
         })
@@ -101,6 +103,7 @@ export async function getCurrentUser() {
         }
 
         const emailLower = userEmail.toLowerCase().trim()
+        const { prisma } = await import('@/lib/prisma')
         const user = await prisma.user.findUnique({
             where: { email: emailLower },
             select: { id: true, email: true, name: true, role: true }
