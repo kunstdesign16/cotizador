@@ -5,12 +5,23 @@ export const dynamic = 'force-dynamic'
 export default async function ProjectsPage() {
     const { prisma } = await import('@/lib/prisma')
 
-    const quotes = await prisma.quote.findMany({
-        include: { client: true },
+    const projects = await prisma.project.findMany({
+        include: {
+            client: true,
+            quotes: {
+                orderBy: { version: 'desc' },
+                take: 1
+            }
+        },
         orderBy: { updatedAt: 'desc' }
     })
 
-    const serializedQuotes = JSON.parse(JSON.stringify(quotes))
+    const clients = await prisma.client.findMany({
+        orderBy: { name: 'asc' }
+    })
 
-    return <ProjectsPageClient initialQuotes={serializedQuotes} />
+    const serializedProjects = JSON.parse(JSON.stringify(projects))
+    const serializedClients = JSON.parse(JSON.stringify(clients))
+
+    return <ProjectsPageClient initialProjects={serializedProjects} clients={serializedClients} />
 }

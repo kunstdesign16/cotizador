@@ -4,29 +4,31 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { FileText, Eye } from 'lucide-react'
+import { FileText, Eye, Plus } from 'lucide-react'
 import { QuoteStatusSelector } from './quote-status-selector'
+import { cn } from '@/lib/utils'
+import { CreateProjectDialog } from './create-project-dialog'
 
 interface ProjectsPageClientProps {
-    initialQuotes: any[]
+    initialProjects: any[]
+    clients: any[]
 }
 
 const STATUS_OPTIONS = [
     { value: 'ALL', label: 'Todos' },
-    { value: 'DRAFT', label: 'Borrador' },
-    { value: 'SAVED', label: 'Guardado' },
-    { value: 'SENT', label: 'Enviado' },
-    { value: 'APPROVED', label: 'Aprobado' },
-    { value: 'FACTURADO', label: 'Facturado' },
-    { value: 'COBRADO', label: 'Cobrado' }
+    { value: 'COTIZANDO', label: 'Cotizando' },
+    { value: 'APROBADO', label: 'Aprobado' },
+    { value: 'PRODUCCION', label: 'En producción' },
+    { value: 'ENTREGADO', label: 'Entregado' },
+    { value: 'CERRADO', label: 'Cerrado' }
 ]
 
-export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
+export function ProjectsPageClient({ initialProjects, clients }: ProjectsPageClientProps) {
     const [filter, setFilter] = useState('ALL')
 
-    const filteredQuotes = filter === 'ALL'
-        ? initialQuotes
-        : initialQuotes.filter((q: any) => q.status === filter)
+    const filteredProjects = filter === 'ALL'
+        ? initialProjects
+        : initialProjects.filter((p: any) => p.status === filter)
 
     return (
         <div className="min-h-screen bg-background p-8">
@@ -34,13 +36,16 @@ export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
                 <header className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Proyectos</h1>
-                        <p className="text-muted-foreground">Gestión de cotizaciones y estatus</p>
+                        <p className="text-muted-foreground">Panel de gestión y control financiero</p>
                     </div>
-                    <Link href="/quotes/new">
-                        <Button className="gap-2">
-                            <FileText className="h-4 w-4" /> Nueva Cotización
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link href="/quotes/new">
+                            <Button variant="outline" className="gap-2">
+                                <FileText className="h-4 w-4" /> Nueva Cotización
+                            </Button>
+                        </Link>
+                        <CreateProjectDialog clients={clients} />
+                    </div>
                 </header>
 
                 {/* Status Filter */}
@@ -59,7 +64,7 @@ export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
 
                 {/* Projects Table */}
                 <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                    {filteredQuotes.length === 0 ? (
+                    {filteredProjects.length === 0 ? (
                         <div className="p-12 text-center text-muted-foreground">
                             No hay proyectos en esta vista.
                         </div>
@@ -70,29 +75,40 @@ export function ProjectsPageClient({ initialQuotes }: ProjectsPageClientProps) {
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-medium uppercase">Proyecto</th>
                                         <th className="px-4 py-3 text-left text-xs font-medium uppercase">Cliente</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase">Fecha</th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase">Total</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase">Última Actividad</th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase">Total Cotizado</th>
                                         <th className="px-4 py-3 text-left text-xs font-medium uppercase">Estatus</th>
                                         <th className="px-4 py-3 text-center text-xs font-medium uppercase">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y">
-                                    {filteredQuotes.map((quote: any) => (
-                                        <tr key={quote.id} className="hover:bg-muted/50 transition-colors">
-                                            <td className="px-4 py-3 font-medium">{quote.project_name}</td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">{quote?.client?.name || 'Sin cliente'}</td>
+                                    {filteredProjects.map((project: any) => (
+                                        <tr key={project.id} className="hover:bg-muted/50 transition-colors">
+                                            <td className="px-4 py-3">
+                                                <div className="font-medium">{project.name}</div>
+                                                <div className="text-[10px] text-muted-foreground uppercase">{project.quotes?.[0]?.project_name || 'Sin cotización'}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-muted-foreground">{project?.client?.company || project?.client?.name || 'Sin cliente'}</td>
                                             <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                {new Date(quote.date).toLocaleDateString('es-MX')}
+                                                {new Date(project.updatedAt).toLocaleDateString('es-MX')}
                                             </td>
                                             <td className="px-4 py-3 text-right font-medium">
-                                                ${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                ${project.totalCotizado?.toLocaleString('es-MX', { minimumFractionDigits: 2 }) || '0.00'}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <QuoteStatusSelector id={quote.id} currentStatus={quote.status} />
+                                                <Badge variant="outline" className={cn(
+                                                    project.status === 'APROBADO' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                        project.status === 'PRODUCCION' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            'bg-gray-50 text-gray-700 border-gray-200'
+                                                )}>
+                                                    {STATUS_OPTIONS.find(o => o.value === project.status)?.label || project.status}
+                                                </Badge>
                                             </td>
                                             <td className="px-4 py-3 text-center">
-                                                <Link href={`/quotes/${quote.id}`}>
-                                                    <Eye className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                                                <Link href={`/projects/${project.id}`}>
+                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
                                                 </Link>
                                             </td>
                                         </tr>

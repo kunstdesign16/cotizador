@@ -19,6 +19,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   quotes    Quote[]
+  projects  Project[]
 }
 
 model Client {
@@ -30,7 +31,36 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   quotes    Quote[]
+  projects  Project[]
   incomes   Income[]
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  status       String    @default("COTIZANDO") // COTIZANDO, APROBADO, PRODUCCION, ENTREGADO, CERRADO
+  isArchived   Boolean   @default(false)
+  
+  // Financials (Calculated or snapshotted)
+  totalCotizado Float    @default(0)
+  totalIngresado Float   @default(0)
+  totalEgresado  Float   @default(0)
+
+  // Relations
+  clientId     String
+  client       Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?     @relation(fields: [userId], references: [id])
+  
+  quotes       Quote[]
+  supplierOrders SupplierOrder[]
+  supplierTasks  SupplierTask[]
+  incomes        Income[]
+  expenses       VariableExpense[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Quote {
@@ -40,6 +70,7 @@ model Quote {
   status       String      @default("DRAFT") // DRAFT, SAVED, SENT, APPROVED, FACTURADO, COBRADO
   // Financials
   deliveryDate DateTime?
+  version      Int         @default(1)
   
   // Financials
   subtotal     Float       @default(0)
@@ -56,6 +87,9 @@ model Quote {
   client       Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   userId       String?
   user         User?       @relation(fields: [userId], references: [id])
+  
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
   items        QuoteItem[]
 
@@ -132,6 +166,10 @@ model SupplierOrder {
   paymentStatus String   @default("PENDING") // PENDING, PAID
   expectedDate DateTime?
   items        Json      // [{ code, quantity, name }]
+  
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id])
+  
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   expenses     VariableExpense[]
@@ -149,6 +187,10 @@ model SupplierTask {
   priority     String    @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
   expectedDate DateTime?
   deliveryDate DateTime?
+  
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id])
+  
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -201,6 +243,7 @@ model Income {
     
     // For manual entries not linked to a quote
     projectId     String?  // Optional external project reference if no quote exists
+    project       Project? @relation(fields: [projectId], references: [id])
     
     notes         String?
     createdAt     DateTime @default(now())
@@ -225,6 +268,9 @@ model VariableExpense {
     // Link to project
     quoteId       String?
     quote         Quote?   @relation(fields: [quoteId], references: [id])
+    
+    projectId     String?
+    project       Project? @relation(fields: [projectId], references: [id])
     
     proofFile     String?  // URL to receipt/invoice
     

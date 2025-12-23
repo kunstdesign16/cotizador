@@ -23,13 +23,11 @@ import { UserNav } from '@/components/user-nav'
 
 const navigation = [
     { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Proyectos', href: '/projects', icon: Package },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare },
+    { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Clientes', href: '/clients', icon: Users },
     { name: 'Proveedores', href: '/suppliers', icon: Truck },
-    { name: 'Reportes', href: '/reports', icon: BarChart },
-    { name: 'Configuración', href: '/settings', icon: Settings },
 ]
 
 const adminNavigation = [
