@@ -58,21 +58,36 @@ export function Sidebar() {
         const updateSession = (email: string, role: string, name: string) => {
             const emailLower = email.toLowerCase().trim()
             const isForcedAdmin = ADMIN_EMAILS.includes(emailLower)
+            const finalRole = isForcedAdmin ? 'admin' : role
 
-            setUserEmail(email)
-            setUserRole(isForcedAdmin ? 'admin' : role)
+            setUserEmail(emailLower)
+            setUserRole(finalRole)
             setUserName(name)
+
+            // Cache in localStorage for aggressive persistence
+            if (emailLower) {
+                localStorage.setItem('cached_role', finalRole)
+                localStorage.setItem('cached_email', emailLower)
+            }
         }
 
-        // 1. Try reading from cookies first (fastest)
+        // 0. Try reading from localStorage first (Instant UI update)
+        const cachedRole = localStorage.getItem('cached_role')
+        const cachedEmail = localStorage.getItem('cached_email')
+        if (cachedRole && cachedEmail) {
+            setUserRole(cachedRole)
+            setUserEmail(cachedEmail)
+        }
+
+        // 1. Try reading from cookies (fastest)
         const cookies = document.cookie.split(';')
         const roleCookie = cookies.find(c => c.trim().startsWith('user_role='))
         const nameCookie = cookies.find(c => c.trim().startsWith('user_name='))
         const emailCookie = cookies.find(c => c.trim().startsWith('user_email='))
 
-        const cRole = roleCookie ? roleCookie.split('=')[1] : 'staff'
+        const cRole = roleCookie ? roleCookie.split('=')[1] : (cachedRole || 'staff')
         const cName = nameCookie ? decodeURIComponent(nameCookie.split('=')[1]) : 'Usuario'
-        const cEmail = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]) : ''
+        const cEmail = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]) : (cachedEmail || '')
 
         if (cEmail) {
             updateSession(cEmail, cRole, cName)
@@ -181,20 +196,30 @@ export function Sidebar() {
                 <div className="mx-2 p-2 rounded bg-slate-900 text-white text-[9px] font-mono leading-tight space-y-1 border border-amber-500">
                     <div className="text-amber-400 font-bold border-b border-amber-500/30 pb-1 mb-1">🔍 DIAGNÓSTICO DE SESIÓN</div>
                     <div className="flex justify-between">
-                        <span>DETECCIÓN:</span>
+                        <span>DETECCIÓN UI:</span>
                         <span className={isAdmin ? "text-green-400" : "text-amber-400"}>
                             {isAdmin ? "ADMIN" : "STAFF"}
                         </span>
                     </div>
-                    <div className="text-slate-400">Email detectado:</div>
+                    <div className="text-slate-400">Email UI:</div>
                     <div className="truncate text-blue-300 bg-slate-800 p-0.5 rounded">{userEmail || "NO DETECTADO"}</div>
 
-                    <div className="mt-1 border-t border-slate-700 pt-1">
-                        <div>Match k16: {userEmail.toLowerCase().trim() === 'kunstdesign16@gmail.com' ? 'SI' : 'NO'}</div>
-                        <div>Match kDir: {userEmail.toLowerCase().trim() === 'direccion@kunstdesign.com.mx' ? 'SI' : 'NO'}</div>
+                    <div className="mt-1 border-t border-slate-700 pt-1 space-y-0.5">
+                        <div className="flex justify-between">
+                            <span>Cookie Email:</span>
+                            <span className="text-blue-300">{(typeof document !== 'undefined' && document.cookie.includes('user_email')) ? 'OK' : 'FALTA'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Cookie Role:</span>
+                            <span className="text-blue-300">{(typeof document !== 'undefined' && document.cookie.includes('user_role')) ? 'OK' : 'FALTA'}</span>
+                        </div>
+                        <div className="flex justify-between border-t border-slate-800 pt-0.5 mt-0.5">
+                            <span>L.Storage Cache:</span>
+                            <span className="text-blue-300">{(typeof window !== 'undefined' && localStorage.getItem('cached_role')) ? 'OK' : 'FALTA'}</span>
+                        </div>
                     </div>
 
-                    <div className="mt-1 text-[8px] opacity-50 italic">
+                    <div className="mt-1 text-[8px] opacity-50 italic border-t border-slate-700 pt-1">
                         Ref: {new Date().toLocaleTimeString()}
                     </div>
                 </div>
