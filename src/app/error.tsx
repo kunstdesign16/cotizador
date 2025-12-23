@@ -32,6 +32,15 @@ export default function Error({
                     </div>
                 )}
 
+                <div className="text-left space-y-4">
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Detalle del Error:</p>
+                    <pre className="p-4 bg-muted/30 border rounded-lg text-[10px] font-mono text-gray-700 overflow-auto max-h-[300px] whitespace-pre-wrap">
+                        {error.message || 'No se proporcionó mensaje público de error.'}
+                        {"\n\n"}
+                        {error.stack || 'No hay stack trace disponible.'}
+                    </pre>
+                </div>
+
                 <div className="flex justify-center gap-4">
                     <Button onClick={() => reset()} variant="default">
                         Reintentar
