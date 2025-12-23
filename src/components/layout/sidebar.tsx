@@ -176,6 +176,19 @@ export function Sidebar() {
                 <div className="px-2">
                     <UserNav userName={userName} userRole={userRole} userEmail={userEmail} />
                 </div>
+
+                {/* Temp Diagnostic Debug - Only for troubleshooting */}
+                <div className="mx-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] space-y-1">
+                    <div className="font-bold flex justify-between">
+                        <span>ESTADO DE SESIÓN</span>
+                        <span className={isAdmin ? "text-green-600" : "text-amber-600"}>
+                            {isAdmin ? "ADMIN" : "STAFF"}
+                        </span>
+                    </div>
+                    <div className="truncate opacity-70">{userEmail || "Sin correo"}</div>
+                    <div className="opacity-70 text-[9px]">Vercel: {new Date().toLocaleTimeString()}</div>
+                </div>
+
                 <div className="bg-muted/30 rounded-lg p-4 text-xs text-muted-foreground">
                     <p className="font-semibold mb-1">Cotizador v2.0</p>
                     <p>Sistema de Gestión</p>

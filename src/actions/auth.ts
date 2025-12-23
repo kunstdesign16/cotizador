@@ -38,7 +38,7 @@ export async function login(prevState: any, formData: FormData) {
 
         let isCorrectPassword = false
 
-        // 1. Try bcrypt comparison if bcrypt is available
+        // 1. Try bcrypt comparison
         if (bcrypt) {
             try {
                 isCorrectPassword = await bcrypt.compare(password, user.password)
@@ -47,7 +47,7 @@ export async function login(prevState: any, formData: FormData) {
             }
         }
 
-        // 2. Fallback: Plain text comparison (especially for main admin or if bcrypt failed)
+        // 2. Fallback: Plain text comparison
         if (!isCorrectPassword) {
             if (password === user.password) {
                 isCorrectPassword = true
@@ -58,22 +58,23 @@ export async function login(prevState: any, formData: FormData) {
             return { error: 'Credenciales inválidas' }
         }
 
-        // Force 'admin' role for specific emails
+        // FORCE ADMIN ROLE in the session logic
         let finalRole = user.role
-        if (ADMIN_EMAILS.includes(email)) {
+        if (ADMIN_EMAILS.some(e => e.toLowerCase().trim() === email)) {
             finalRole = 'admin'
         }
 
         const cookieStore = await cookies()
 
-        // Ensure cookies are NOT httpOnly so the Sidebar can read them
+        // EXTREMELY EXPLICIT COOKIE SETTINGS
         const cookieOptions = {
             httpOnly: false,
             path: '/',
             sameSite: 'lax' as const,
-            secure: process.env.NODE_ENV === 'production'
+            maxAge: 60 * 60 * 24 * 7 // 7 days
         }
 
+        // We set both the original and forced values
         cookieStore.set('user_email', user.email, cookieOptions)
         cookieStore.set('user_role', finalRole, cookieOptions)
         cookieStore.set('user_name', user.name || 'Usuario', cookieOptions)
@@ -85,24 +86,25 @@ export async function login(prevState: any, formData: FormData) {
             throw error
         }
         console.error('Login error:', error)
-        return { error: 'Ocurrió un error al iniciar sesión: ' + (error.message || 'Error desconocido') }
+        return { error: 'Ocurrió un error: ' + error.message }
     }
 }
 
 export async function register(prevState: any, formData: FormData) {
     const bcrypt = await import('bcryptjs')
     const name = formData.get('name') as string
-    const email = formData.get('email') as string
+    const emailInput = formData.get('email') as string
     const password = formData.get('password') as string
 
-    if (!name || !email || !password) {
+    if (!name || !emailInput || !password) {
         return { error: 'Por favor complete todos los campos' }
     }
 
+    const email = emailInput.toLowerCase().trim()
+
     try {
-        const emailLower = email.toLowerCase().trim()
         const existingUser = await prisma.user.findUnique({
-            where: { email: emailLower }
+            where: { email }
         })
 
         if (existingUser) {
@@ -111,12 +113,12 @@ export async function register(prevState: any, formData: FormData) {
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        const role = ADMIN_EMAILS.includes(emailLower) ? 'admin' : 'staff'
+        const role = ADMIN_EMAILS.some(e => e.toLowerCase().trim() === email) ? 'admin' : 'staff'
 
         await prisma.user.create({
             data: {
                 name,
-                email: emailLower,
+                email,
                 password: hashedPassword,
                 role
             }
@@ -128,7 +130,7 @@ export async function register(prevState: any, formData: FormData) {
             throw error
         }
         console.error('Register error:', error)
-        return { error: 'Ocurrió un error al crear la cuenta' }
+        return { error: 'Error: ' + error.message }
     }
 }
 
