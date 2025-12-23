@@ -237,7 +237,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                                 <div className="mt-2 space-y-1">
                                                                     {(() => {
                                                                         const totalPaid = quote.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0;
-                                                                        const totalCost = quote.items?.reduce((sum: number, i: any) => sum + (i.internal_unit_cost || 0) * (i.quantity || 1), 0) || 0;
+                                                                        const totalCost = quote.items?.reduce((sum: number, i: any) => sum + (Number(i.internal_unit_cost) || Number(i.unit_cost) || 0) * (i.quantity || 1), 0) || 0;
                                                                         const progress = totalCost > 0 ? (totalPaid / totalCost) * 100 : 0;
 
                                                                         return (

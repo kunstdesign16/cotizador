@@ -1,9 +1,9 @@
+import { prisma } from '@/lib/prisma'
 import { ProjectsPageClient } from '@/components/projects-page-client'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectsPage() {
-    const { prisma } = await import('@/lib/prisma')
 
     const projects = await prisma.project.findMany({
         include: {
