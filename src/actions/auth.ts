@@ -12,43 +12,56 @@ const ADMIN_EMAILS = [
 
 export async function login(prevState: any, formData: FormData) {
     const bcrypt = await import('bcryptjs')
-    const email = formData.get('email') as string
+    const emailInput = formData.get('email') as string
     const password = formData.get('password') as string
 
-    if (!email || !password) {
+    if (!emailInput || !password) {
         return { error: 'Por favor complete todos los campos' }
     }
 
+    const email = emailInput.toLowerCase().trim()
+
     try {
         const user = await prisma.user.findUnique({
-            where: { email: email.toLowerCase().trim() }
+            where: { email }
         })
 
         if (!user) {
             return { error: 'Credenciales inválidas' }
         }
 
-        const isMainAdmin = email.toLowerCase().trim() === 'kunstdesign16@gmail.com'
-        const isCorrectPassword = await bcrypt.compare(password, user.password) || (isMainAdmin && password === user.password)
+        let isCorrectPassword = false
+        try {
+            // Attempt bcrypt comparison
+            isCorrectPassword = await bcrypt.compare(password, user.password)
+        } catch (e) {
+            // If bcrypt fails (e.g. malformed hash), it might be a plain text password
+            console.log('Bcrypt comparison failed, checking plain text fallback for admin')
+        }
+
+        // Special fallback for main admin if password is plain text
+        if (!isCorrectPassword && email === 'kunstdesign16@gmail.com') {
+            if (password === user.password) {
+                isCorrectPassword = true
+            }
+        }
 
         if (!isCorrectPassword) {
             return { error: 'Credenciales inválidas' }
         }
 
-        const userEmailLower = user.email.toLowerCase().trim()
-
         let finalRole = user.role
-        if (ADMIN_EMAILS.includes(userEmailLower)) {
+        if (ADMIN_EMAILS.includes(email)) {
             finalRole = 'admin'
         }
 
         const cookieStore = await cookies()
 
         // Use httpOnly: false for cookies that need to be read by client-side Sidebar
-        cookieStore.set('user_email', user.email, { httpOnly: false, path: '/' })
-        cookieStore.set('user_role', finalRole, { httpOnly: false, path: '/' })
-        cookieStore.set('user_name', user.name || 'Usuario', { httpOnly: false, path: '/' })
-        cookieStore.set('auth_refresh', Date.now().toString(), { httpOnly: false, path: '/' })
+        cookieStore.set('user_email', user.email, { httpOnly: false, path: '/', sameSite: 'lax' })
+        cookieStore.set('user_role', finalRole, { httpOnly: false, path: '/', sameSite: 'lax' })
+        cookieStore.set('user_name', user.name || 'Usuario', { httpOnly: false, path: '/', sameSite: 'lax' })
+        cookieStore.set('auth_refresh', Date.now().toString(), { httpOnly: false, path: '/', sameSite: 'lax' })
 
         redirect('/dashboard')
     } catch (error: any) {

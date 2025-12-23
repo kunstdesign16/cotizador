@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { logout } from '@/actions/auth'
 import { UserNav } from '@/components/user-nav'
+import { getCurrentUser } from '@/actions/users'
 
 const navigation = [
     { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
@@ -48,24 +49,24 @@ export function Sidebar() {
     const [userEmail, setUserEmail] = useState<string>('')
 
     useEffect(() => {
-        // Read role from cookie on client side
+        // 1. Try reading from cookies first (fastest)
         const cookies = document.cookie.split(';')
         const roleCookie = cookies.find(c => c.trim().startsWith('user_role='))
         const nameCookie = cookies.find(c => c.trim().startsWith('user_name='))
         const emailCookie = cookies.find(c => c.trim().startsWith('user_email='))
 
-        if (roleCookie) {
-            const role = roleCookie.split('=')[1]
-            setUserRole(role)
-        }
-        if (nameCookie) {
-            const name = decodeURIComponent(nameCookie.split('=')[1])
-            setUserName(name)
-        }
-        if (emailCookie) {
-            const email = decodeURIComponent(emailCookie.split('=')[1])
-            setUserEmail(email)
-        }
+        if (roleCookie) setUserRole(roleCookie.split('=')[1])
+        if (nameCookie) setUserName(decodeURIComponent(nameCookie.split('=')[1]))
+        if (emailCookie) setUserEmail(decodeURIComponent(emailCookie.split('=')[1]))
+
+        // 2. Always verify with server to be sure (Source of truth)
+        getCurrentUser().then(user => {
+            if (user) {
+                setUserRole(user.role)
+                setUserName(user.name || 'Usuario')
+                setUserEmail(user.email)
+            }
+        })
     }, [])
 
     if (pathname === '/login') return null

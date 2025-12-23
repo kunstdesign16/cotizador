@@ -100,15 +100,35 @@ export async function getCurrentUser() {
         return null
     }
 
+    const emailLower = userEmail.toLowerCase().trim()
     const user = await prisma.user.findUnique({
-        where: { email: userEmail },
+        where: { email: emailLower },
         select: { id: true, email: true, name: true, role: true }
     })
+
+    if (!user) return null
+
+    // Enforce admin role for specific emails even if DB says otherwise
+    if (ADMIN_EMAILS.includes(emailLower)) {
+        user.role = 'admin'
+    }
 
     return user
 }
 
 export async function getUserRole() {
+    const cookieStore = await cookies()
+    const roleCookie = cookieStore.get('user_role')?.value
+    const emailCookie = cookieStore.get('user_email')?.value
+
+    // Check if it's one of the forced admin emails first
+    if (emailCookie && ADMIN_EMAILS.includes(emailCookie.toLowerCase().trim())) {
+        return 'admin'
+    }
+
+    // Otherwise trust the cookie (if it's not tampered) or fall back to DB via getCurrentUser
+    if (roleCookie) return roleCookie
+
     const user = await getCurrentUser()
     return user?.role || 'staff'
 }
