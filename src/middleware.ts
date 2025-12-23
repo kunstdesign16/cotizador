@@ -7,6 +7,13 @@ const ADMIN_ROUTES = ['/accounting', '/expenses', '/users']
 // Public routes (no auth needed)
 const PUBLIC_ROUTES = ['/login', '/register']
 
+// Forced Admin Emails
+const ADMIN_EMAILS = [
+    'kunstdesign16@gmail.com',
+    'direccion@kunstdesign.com.mx',
+    'dirección@kunstdesign.com.mx'
+]
+
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
@@ -17,11 +24,16 @@ export function middleware(request: NextRequest) {
 
     // Check authentication
     const userEmail = request.cookies.get('user_email')?.value
-    const userRole = request.cookies.get('user_role')?.value
+    let userRole = request.cookies.get('user_role')?.value
 
     // Redirect to login if not authenticated
     if (!userEmail) {
         return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // HARD ENFORCEMENT for designated admins
+    if (ADMIN_EMAILS.includes(userEmail.toLowerCase().trim())) {
+        userRole = 'admin'
     }
 
     // Check admin routes

@@ -11,7 +11,13 @@ const ADMIN_EMAILS = [
 ]
 
 export async function login(prevState: any, formData: FormData) {
-    const bcrypt = await import('bcryptjs')
+    let bcrypt;
+    try {
+        bcrypt = await import('bcryptjs');
+    } catch (e) {
+        console.error('Failed to load bcryptjs');
+    }
+
     const emailInput = formData.get('email') as string
     const password = formData.get('password') as string
 
@@ -31,16 +37,18 @@ export async function login(prevState: any, formData: FormData) {
         }
 
         let isCorrectPassword = false
-        try {
-            // Attempt bcrypt comparison
-            isCorrectPassword = await bcrypt.compare(password, user.password)
-        } catch (e) {
-            // If bcrypt fails (e.g. malformed hash), it might be a plain text password
-            console.log('Bcrypt comparison failed, checking plain text fallback for admin')
+
+        // 1. Try bcrypt comparison if bcrypt is available
+        if (bcrypt) {
+            try {
+                isCorrectPassword = await bcrypt.compare(password, user.password)
+            } catch (e) {
+                // Not a bcrypt hash
+            }
         }
 
-        // Special fallback for main admin if password is plain text
-        if (!isCorrectPassword && email === 'kunstdesign16@gmail.com') {
+        // 2. Fallback: Plain text comparison (especially for main admin or if bcrypt failed)
+        if (!isCorrectPassword) {
             if (password === user.password) {
                 isCorrectPassword = true
             }
@@ -50,6 +58,7 @@ export async function login(prevState: any, formData: FormData) {
             return { error: 'Credenciales inválidas' }
         }
 
+        // Force 'admin' role for specific emails
         let finalRole = user.role
         if (ADMIN_EMAILS.includes(email)) {
             finalRole = 'admin'
@@ -57,11 +66,18 @@ export async function login(prevState: any, formData: FormData) {
 
         const cookieStore = await cookies()
 
-        // Use httpOnly: false for cookies that need to be read by client-side Sidebar
-        cookieStore.set('user_email', user.email, { httpOnly: false, path: '/', sameSite: 'lax' })
-        cookieStore.set('user_role', finalRole, { httpOnly: false, path: '/', sameSite: 'lax' })
-        cookieStore.set('user_name', user.name || 'Usuario', { httpOnly: false, path: '/', sameSite: 'lax' })
-        cookieStore.set('auth_refresh', Date.now().toString(), { httpOnly: false, path: '/', sameSite: 'lax' })
+        // Ensure cookies are NOT httpOnly so the Sidebar can read them
+        const cookieOptions = {
+            httpOnly: false,
+            path: '/',
+            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production'
+        }
+
+        cookieStore.set('user_email', user.email, cookieOptions)
+        cookieStore.set('user_role', finalRole, cookieOptions)
+        cookieStore.set('user_name', user.name || 'Usuario', cookieOptions)
+        cookieStore.set('auth_refresh', Date.now().toString(), cookieOptions)
 
         redirect('/dashboard')
     } catch (error: any) {
@@ -69,7 +85,7 @@ export async function login(prevState: any, formData: FormData) {
             throw error
         }
         console.error('Login error:', error)
-        return { error: 'Ocurrió un error al iniciar sesión' }
+        return { error: 'Ocurrió un error al iniciar sesión: ' + (error.message || 'Error desconocido') }
     }
 }
 

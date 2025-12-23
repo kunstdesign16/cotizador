@@ -48,23 +48,40 @@ export function Sidebar() {
     const [userName, setUserName] = useState<string>('')
     const [userEmail, setUserEmail] = useState<string>('')
 
+    const ADMIN_EMAILS = [
+        'kunstdesign16@gmail.com',
+        'direccion@kunstdesign.com.mx',
+        'dirección@kunstdesign.com.mx'
+    ]
+
     useEffect(() => {
+        const updateSession = (email: string, role: string, name: string) => {
+            const emailLower = email.toLowerCase().trim()
+            const isForcedAdmin = ADMIN_EMAILS.includes(emailLower)
+
+            setUserEmail(email)
+            setUserRole(isForcedAdmin ? 'admin' : role)
+            setUserName(name)
+        }
+
         // 1. Try reading from cookies first (fastest)
         const cookies = document.cookie.split(';')
         const roleCookie = cookies.find(c => c.trim().startsWith('user_role='))
         const nameCookie = cookies.find(c => c.trim().startsWith('user_name='))
         const emailCookie = cookies.find(c => c.trim().startsWith('user_email='))
 
-        if (roleCookie) setUserRole(roleCookie.split('=')[1])
-        if (nameCookie) setUserName(decodeURIComponent(nameCookie.split('=')[1]))
-        if (emailCookie) setUserEmail(decodeURIComponent(emailCookie.split('=')[1]))
+        const cRole = roleCookie ? roleCookie.split('=')[1] : 'staff'
+        const cName = nameCookie ? decodeURIComponent(nameCookie.split('=')[1]) : 'Usuario'
+        const cEmail = emailCookie ? decodeURIComponent(emailCookie.split('=')[1]) : ''
+
+        if (cEmail) {
+            updateSession(cEmail, cRole, cName)
+        }
 
         // 2. Always verify with server to be sure (Source of truth)
         getCurrentUser().then(user => {
             if (user) {
-                setUserRole(user.role)
-                setUserName(user.name || 'Usuario')
-                setUserEmail(user.email)
+                updateSession(user.email, user.role, user.name || 'Usuario')
             }
         })
     }, [])
