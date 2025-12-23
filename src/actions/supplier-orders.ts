@@ -103,9 +103,7 @@ export async function updateSupplierOrder(
     }
 }
 
-// ALIASES FOR CONSITENCY
-export const updateSupplierOrderStatus = updateOrderStatus
-export const updateSupplierOrderPaymentStatus = updatePaymentStatus
+
 
 export async function updateOrderStatus(id: string, status: string) {
     const { prisma } = await import('@/lib/prisma')
@@ -396,3 +394,7 @@ async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
         })
     }
 }
+
+// ALIASES FOR CONSITENCY
+export const updateSupplierOrderStatus = updateOrderStatus
+export const updateSupplierOrderPaymentStatus = updatePaymentStatus
