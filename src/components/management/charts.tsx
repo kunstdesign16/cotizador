@@ -32,7 +32,7 @@ export function ManagementCharts({ data }: ManagementChartsProps) {
                             <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value / 1000}k`} />
                             <Tooltip
-                                formatter={(value: number) => [`$${value.toLocaleString()}`, '']}
+                                formatter={(value: any) => [`$${(Number(value) || 0).toLocaleString()}`, '']}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                             />
                             <Legend />
@@ -54,7 +54,7 @@ export function ManagementCharts({ data }: ManagementChartsProps) {
                             <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value / 1000}k`} />
                             <Tooltip
-                                formatter={(value: number) => [`$${value.toLocaleString()}`, 'Utilidad']}
+                                formatter={(value: any) => [`$${(Number(value) || 0).toLocaleString()}`, 'Utilidad']}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                             />
                             <Legend />
