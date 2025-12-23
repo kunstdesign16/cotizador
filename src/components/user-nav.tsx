@@ -29,6 +29,7 @@ import {
     Shield,
     Phone
 } from 'lucide-react'
+import { useRouter } from "next/navigation"
 import { logout } from "@/actions/auth"
 
 interface UserNavProps {
@@ -38,6 +39,8 @@ interface UserNavProps {
 }
 
 export function UserNav({ userName, userRole, userEmail }: UserNavProps) {
+    const router = useRouter()
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -62,23 +65,15 @@ export function UserNav({ userName, userRole, userEmail }: UserNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    {/*
-                    {userRole === 'admin' && (
-                        <DropdownMenuItem onClick={() => router.push('/admin/users')}>
-                            <Users className="mr-2 h-4 w-4" />
-                            <span>Gestión de Usuarios</span>
-                        </DropdownMenuItem>
-                    )}
-                    */}
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
                         <User className="mr-2 h-4 w-4" />
                         <span>Preferencias de usuario</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
                         <Shield className="mr-2 h-4 w-4" />
                         <span>Contraseña y seguridad</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
                         <Phone className="mr-2 h-4 w-4" />
                         <span>Información de contacto</span>
                     </DropdownMenuItem>
