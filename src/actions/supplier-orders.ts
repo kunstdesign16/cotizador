@@ -332,6 +332,25 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
             return { success: false, error: 'Ya existe una orden para este ítem.' }
         }
 
+        // ✅ NUEVA VALIDACIÓN: Verificar que el ítem tenga costo
+        if (!item.internal_unit_cost || item.internal_unit_cost <= 0) {
+            return {
+                success: false,
+                error: `El ítem "${item.concept}" no tiene un costo interno definido. Por favor, edita la cotización y asigna costos antes de generar órdenes.`
+            }
+        }
+
+        // ✅ NUEVA VALIDACIÓN: Verificar cantidad válida
+        if (!item.quantity || item.quantity <= 0) {
+            return {
+                success: false,
+                error: `El ítem "${item.concept}" no tiene una cantidad válida.`
+            }
+        }
+
+        // ✅ Calcular total de la orden
+        const orderTotal = item.internal_unit_cost * item.quantity
+
         // 3. Create Supplier Order using a transaction
         const result = await prisma.$transaction(async (tx) => {
             // A. Create Order
@@ -347,7 +366,8 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
                         code: item.productCode || 'N/A',
                         name: item.concept,
                         quantity: item.quantity,
-                        unitCost: item.cost_article // Use the quote baseline cost
+                        unitCost: item.internal_unit_cost, // ✅ CORREGIDO: Usar costo total (suma de todos los componentes)
+                        totalCost: orderTotal // ✅ NUEVO: Total calculado
                     }] as any
                 } as any
             })
@@ -364,16 +384,20 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
             return order
         })
 
+        // Log para auditoría
+        console.log(`✅ Orden creada: ${result.id}, Total: $${orderTotal.toFixed(2)}`)
+
         revalidatePath(`/projects/${item.quote.projectId}`)
         revalidatePath(`/quotes/${item.quoteId}`)
         revalidatePath('/supplier-orders')
 
-        return { success: true, id: result.id }
+        return { success: true, id: result.id, total: orderTotal }
     } catch (error) {
         console.error('Error creating order from item:', error)
         return { success: false, error: 'Error al generar la orden de compra.' }
     }
 }
+
 
 // Internal helper to sync expense
 async function syncExpenseFromOrder(orderId: string, paymentStatus: string) {
