@@ -22,12 +22,34 @@ export default function QuotePDFClient({ quote }: { quote: any }) {
             document={<QuoteDocument quote={quote} />}
             fileName={`cotizacion-${quote.project_name}.pdf`}
         >
-            {({ blob, url, loading, error }) => (
-                <Button variant="default" className="gap-2" disabled={loading}>
-                    <Download className="h-4 w-4" />
-                    {loading ? 'Generando...' : 'Descargar PDF'}
-                </Button>
-            )}
+            {({ blob, url, loading, error }) => {
+                if (error) {
+                    console.error('PDF Generation Error:', error)
+                    return (
+                        <Button variant="default" className="gap-2 bg-red-600 hover:bg-red-700">
+                            Error al generar
+                        </Button>
+                    )
+                }
+
+                if (loading) {
+                    return (
+                        <Button variant="outline" className="gap-2" disabled>
+                            <Download className="h-4 w-4 animate-pulse" />
+                            Generando PDF...
+                        </Button>
+                    )
+                }
+
+                return (
+                    <a href={url || '#'} download={`cotizacion-${quote.project_name}.pdf`} target="_blank" rel="noopener noreferrer">
+                        <Button variant="default" className="gap-2">
+                            <Download className="h-4 w-4" />
+                            Descargar PDF
+                        </Button>
+                    </a>
+                )
+            }}
         </PDFDownloadLink>
     )
 }
