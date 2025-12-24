@@ -1,23 +1,23 @@
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 // Register Custom Fonts
-Font.register({
-    family: 'Bebas Neue',
-    src: 'https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.ttf'
-});
+// Font.register({
+//     family: 'Bebas Neue',
+//     src: 'https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.ttf'
+// });
 
-Font.register({
-    family: 'Fira Sans',
-    fonts: [
-        { src: 'https://fonts.gstatic.com/s/firasans/v17/va9E4kDNxMZdWfMOD5Vvl4jL.ttf' }, // Regular
-        { src: 'https://fonts.gstatic.com/s/firasans/v17/va9B4kDNxMZdWfMOD5VnRExD6XlD.ttf', fontWeight: 'bold' } // Bold
-    ]
-});
+// Font.register({
+//     family: 'Fira Sans',
+//     fonts: [
+//         { src: 'https://fonts.gstatic.com/s/firasans/v17/va9E4kDNxMZdWfMOD5Vvl4jL.ttf' }, // Regular
+//         { src: 'https://fonts.gstatic.com/s/firasans/v17/va9B4kDNxMZdWfMOD5VnRExD6XlD.ttf', fontWeight: 'bold' } // Bold
+//     ]
+// });
 
 const styles = StyleSheet.create({
     page: {
         paddingGlobal: 40,
-        fontFamily: 'Fira Sans', // Fuente base por defecto
+        fontFamily: 'Helvetica', // Reverted to standard font due to load error
         paddingTop: 40,
         paddingBottom: 60,
         paddingLeft: 40,
@@ -50,7 +50,8 @@ const styles = StyleSheet.create({
         color: '#E11D48', // Rose-600
         opacity: 0.1,
         transform: 'rotate(-45deg)',
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
+        fontWeight: 'bold',
         width: 800,
         textAlign: 'center',
         top: 300,
@@ -92,7 +93,8 @@ const styles = StyleSheet.create({
         flex: 1
     },
     projectTitle: {
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
+        fontWeight: 'bold', // Replacement for Bebas style
         fontSize: 24,
         color: '#284960', // Azul Institucional
         marginBottom: 4,
@@ -126,7 +128,8 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 4
     },
     tableHeaderText: {
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
+        fontWeight: 'bold',
         fontSize: 12,
         letterSpacing: 0.5
     },
@@ -162,7 +165,8 @@ const styles = StyleSheet.create({
         borderBottomColor: '#F1F5F9'
     },
     totalLabel: {
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
+        fontWeight: 'bold',
         fontSize: 12,
         color: '#545555',
         textAlign: 'right',
@@ -186,7 +190,8 @@ const styles = StyleSheet.create({
         borderRadius: 4
     },
     totalFinalLabel: {
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
+        fontWeight: 'bold',
         fontSize: 14,
         color: '#FFFFFF',
         textAlign: 'right',
@@ -212,7 +217,7 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     footerText: {
-        fontFamily: 'Bebas Neue',
+        // fontFamily: 'Bebas Neue',
         fontSize: 12,
         color: '#284960',
         letterSpacing: 1
