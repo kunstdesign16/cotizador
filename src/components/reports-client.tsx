@@ -206,16 +206,26 @@ export function ReportsClient() {
                                             <Loader2 className="h-6 w-6 animate-spin text-primary" />
                                         </div>
                                     ) : filteredProjects.length === 0 ? (
-                                        <div className="text-center p-8 text-primary/40">
-                                            <p className="text-sm">No se encontraron proyectos</p>
+                                        <div className="text-center p-8 text-primary/40 space-y-2">
+                                            {projectSearch ? (
+                                                <>
+                                                    <p className="text-sm font-brand-header uppercase tracking-wide">No hay proyectos que coincidan con la búsqueda</p>
+                                                    <p className="text-xs">Intenta con otro término de búsqueda</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p className="text-sm font-brand-header uppercase tracking-wide">Aún no hay proyectos disponibles</p>
+                                                    <p className="text-xs">Los proyectos aparecerán aquí una vez que estén creados</p>
+                                                </>
+                                            )}
                                         </div>
                                     ) : (
                                         filteredProjects.map((project) => (
                                             <div
                                                 key={project.id}
                                                 className={`p-4 rounded-2xl border transition-all cursor-pointer group ${selectedProject?.id === project.id
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-secondary hover:bg-secondary/20'
+                                                    ? 'border-primary bg-primary/5'
+                                                    : 'border-secondary hover:bg-secondary/20'
                                                     }`}
                                                 onClick={() => handleSelectProject(project)}
                                             >
@@ -251,8 +261,8 @@ export function ReportsClient() {
                                         </div>
                                     ) : !projectReport ? (
                                         <div className="flex flex-col items-center justify-center h-full text-center">
-                                            <FileText className="h-20 w-20 text-primary/10 mb-6" />
-                                            <p className="text-lg font-brand-header text-primary/40 uppercase tracking-widest">Selecciona un proyecto para previsualizar el documento oficial</p>
+                                            <FileText className="h-20 w-20 text-primary/10 mb-6 pointer-events-none" />
+                                            <p className="text-lg font-brand-header text-primary/40 uppercase tracking-widest">Selecciona un proyecto para visualizar su reporte oficial</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-6">
@@ -331,7 +341,10 @@ export function ReportsClient() {
                                     <Button
                                         disabled={!projectReport}
                                         onClick={() => projectReport && generateProjectPDF(projectReport)}
-                                        className="rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 px-8 shadow-xl"
+                                        className={`rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 px-8 transition-all ${!projectReport
+                                                ? 'bg-secondary/30 text-primary/30 cursor-not-allowed shadow-none hover:bg-secondary/30'
+                                                : 'bg-primary text-white shadow-xl hover:shadow-2xl hover:bg-primary/90'
+                                            }`}
                                     >
                                         <Download className="h-4 w-4 mr-2" /> Descargar PDF Oficial
                                     </Button>
