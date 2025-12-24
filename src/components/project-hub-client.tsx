@@ -100,12 +100,32 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         Proyectos
                     </Link>
                     <div className="flex gap-2">
-                        {project.status !== 'CERRADO' && (
+                        {project.status === 'COTIZANDO' && (
+                            <>
+                                {project.quotes?.length === 0 ? (
+                                    <Link href={`/quotes/new?projectId=${project.id}`}>
+                                        <Button className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20 gap-2">
+                                            <Plus className="h-4 w-4" /> Crear Cotización
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <Link href={`/quotes/${project.quotes[0].id}/edit`}>
+                                        <Button className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20 gap-2">
+                                            <FileText className="h-4 w-4" /> Gestionar Cotización
+                                        </Button>
+                                    </Link>
+                                )}
+                                <Button variant="outline" size="sm" className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
+                                    Editar Proyecto
+                                </Button>
+                            </>
+                        )}
+                        {project.status !== 'CERRADO' && project.status !== 'COTIZANDO' && (
                             <>
                                 <Button variant="outline" size="sm" onClick={handleCloseProject} disabled={isClosing} className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
                                     {isClosing ? 'Cerrando...' : 'Cerrar Obra'}
                                 </Button>
-                                <Button size="sm" className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20">Editar</Button>
+                                <Button size="sm" className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20">Editar Proyecto</Button>
                             </>
                         )}
                         {project.status === 'CERRADO' && (
@@ -133,6 +153,15 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 </Badge>
                             </div>
                             <p className="text-foreground/70 max-w-2xl font-brand-ui text-sm leading-relaxed">{project.description || 'Sin descripción adicional disponible para este proyecto.'}</p>
+                            {project.status === 'COTIZANDO' && (
+                                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl max-w-2xl">
+                                    <p className="text-xs text-blue-700 font-brand-ui">
+                                        <strong>Siguiente paso:</strong> {project.quotes?.length === 0
+                                            ? 'Crea una cotización para este proyecto.'
+                                            : 'Aprueba una cotización para continuar el flujo.'}
+                                    </p>
+                                </div>
+                            )}
                             <div className="flex flex-wrap gap-4 text-sm pt-2">
                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Users className="h-4 w-4" />
@@ -300,6 +329,13 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     </div>
 
                                     <div className="pt-4 space-y-3">
+                                        {project.status === 'COTIZANDO' && project.quotes?.length === 0 && (
+                                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <p className="text-xs text-blue-700">
+                                                    <strong>Acción requerida:</strong> Crea una cotización para activar el flujo del proyecto.
+                                                </p>
+                                            </div>
+                                        )}
                                         <Link href={`/projects/${project.id}/report`} className="w-full">
                                             <Button className="w-full justify-start text-xs h-9" variant="outline">
                                                 <FileText className="mr-2 h-4 w-4" /> Descargar Status PDF
@@ -372,10 +408,23 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                     <TabsContent value="orders" className="m-0 pt-6">
                         <div className="space-y-4">
                             {!project.supplierOrders || project.supplierOrders.length === 0 ? (
-                                <div className="bg-card border rounded-2xl p-12 text-center text-muted-foreground shadow-sm">
-                                    <Truck className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                                    <p>No hay órdenes de compra generadas para este proyecto.</p>
-                                    <p className="text-sm mt-2">Ve a la pestaña de Cotizaciones y genera órdenes desde los costos internos.</p>
+                                <div className="bg-card border rounded-2xl p-12 text-center shadow-sm space-y-4">
+                                    <Truck className="h-12 w-12 mx-auto mb-4 opacity-20 text-muted-foreground" />
+                                    <div className="space-y-2">
+                                        <p className="text-muted-foreground">No hay órdenes de compra generadas para este proyecto.</p>
+                                        {project.status === 'COTIZANDO' ? (
+                                            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl max-w-md mx-auto">
+                                                <p className="text-sm text-amber-800 font-medium">
+                                                    ⚠️ No puedes crear órdenes sin una cotización aprobada.
+                                                </p>
+                                                <p className="text-xs text-amber-700 mt-2">
+                                                    Ve a la pestaña de <strong>Cotizaciones</strong> y aprueba una para continuar.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm mt-2 text-muted-foreground">Ve a la pestaña de Cotizaciones y genera órdenes desde los costos internos.</p>
+                                        )}
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
