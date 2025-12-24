@@ -19,7 +19,10 @@ export default function LoginPage() {
                 className="w-full max-w-md space-y-8 rounded-3xl border border-secondary bg-white p-10 shadow-2xl"
             >
                 <div className="text-center flex flex-col items-center">
-                    <img src="/logo.svg" alt="Kunst Design" className="h-28 w-auto mb-8" />
+                    <img src="/logo.svg" alt="Kunst Design" className="h-36 w-auto mb-4" />
+                    <p className="text-[10px] font-brand-ui text-foreground/40 uppercase tracking-[0.2em] mb-8">
+                        Desarrollando ideas, creando sueños.
+                    </p>
                     <h1 className="text-4xl font-brand-header text-primary tracking-wide">Acceso al Sistema</h1>
                     <p className="text-sm text-foreground mt-2 font-light">Gestión de Cotizaciones y Proyectos</p>
                 </div>
@@ -61,8 +64,8 @@ export default function LoginPage() {
                     </Button>
 
                     <div className="text-center pt-2">
-                        <Link href="/register" className="text-xs text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest font-semibold">
-                            Soporte Técnico
+                        <Link href="/register" className="text-xs text-primary hover:text-primary/80 transition-colors font-semibold">
+                            ¿No tienes cuenta? <span className="underline underline-offset-4">Regístrate aquí</span>
                         </Link>
                     </div>
                 </form>
