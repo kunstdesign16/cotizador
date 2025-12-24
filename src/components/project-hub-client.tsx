@@ -15,11 +15,15 @@ import {
     Lock,
     ExternalLink,
     Plus,
-    History
+    History,
+    Trash2,
+    Info,
+    X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -27,7 +31,7 @@ import { approveQuote } from '@/actions/quotes'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { RegisterOrderPaymentDialog } from './register-order-payment-dialog'
-import { closeProject, getProjectClosureEligibility } from '@/actions/projects'
+import { closeProject, getProjectClosureEligibility, deleteProject } from '@/actions/projects'
 
 interface ProjectHubClientProps {
     project: any
@@ -38,6 +42,15 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const [activeTab, setActiveTab] = useState('resumen')
     const [isApproving, setIsApproving] = useState<string | null>(null)
     const [isClosing, setIsClosing] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    // Income dialog states
+    const [showIncomeDialog, setShowIncomeDialog] = useState(false)
+    const [incomeAmount, setIncomeAmount] = useState('')
+    const [incomeDescription, setIncomeDescription] = useState('')
+    const [incomePaymentMethod, setIncomePaymentMethod] = useState('')
+    const [incomeDate, setIncomeDate] = useState(new Date().toISOString().split('T')[0])
+    const [loadingIncome, setLoadingIncome] = useState(false)
 
     // Calculated metrics
     const approvedQuote = project.quotes?.find((q: any) => q.isApproved) || project.quotes?.[0]
@@ -45,6 +58,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const totalIngresado = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
     const totalEgresado = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0
     const utilidad = totalIngresado - totalEgresado
+    const totalCobrado = totalIngresado // Alias for clarity in financials tab
 
     const handleApprove = async (quoteId: string) => {
         if (!confirm('¿Está seguro de aprobar esta cotización? Esto marcará el proyecto como APROBADO y bloqueará ediciones en esta versión.')) return
@@ -90,6 +104,68 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
         }
     }
 
+    const handleDeleteProject = async () => {
+        const confirmed = confirm(
+            `¿Estás seguro de eliminar el proyecto "${project.name}"?\n\n` +
+            'Esta acción no se puede deshacer. Las cotizaciones en borrador también serán eliminadas.'
+        )
+
+        if (!confirmed) return
+
+        setIsDeleting(true)
+        try {
+            const result = await deleteProject(project.id)
+
+            if (result.success) {
+                toast.success('Proyecto eliminado correctamente')
+                router.push('/projects')
+                router.refresh()
+            } else {
+                toast.error(result.error || 'Error al eliminar proyecto')
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            toast.error('Error al eliminar proyecto')
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
+    const handleIncomeSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoadingIncome(true)
+
+        try {
+            const { createIncome } = await import('@/actions/accounting')
+            const result = await createIncome({
+                amount: parseFloat(incomeAmount),
+                description: incomeDescription || 'Pago del cliente',
+                date: new Date(incomeDate),
+                projectId: project.id,
+                quoteId: approvedQuote?.id,
+                paymentMethod: incomePaymentMethod || undefined
+            })
+
+            if (result.success) {
+                toast.success('Ingreso registrado correctamente')
+                setShowIncomeDialog(false)
+                setIncomeAmount('')
+                setIncomeDescription('')
+                setIncomePaymentMethod('')
+                setIncomeDate(new Date().toISOString().split('T')[0])
+                router.refresh()
+            } else {
+                toast.error(result.error || 'Error al registrar ingreso')
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            toast.error('Error al registrar ingreso')
+        } finally {
+            setLoadingIncome(false)
+        }
+    }
+
+
     return (
         <div className="min-h-screen bg-muted/30 p-4 sm:p-8">
             <div className="mx-auto max-w-7xl space-y-6">
@@ -117,6 +193,16 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 )}
                                 <Button variant="outline" size="sm" className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
                                     Editar Proyecto
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleDeleteProject}
+                                    disabled={isDeleting}
+                                    className="rounded-xl font-brand-header uppercase tracking-wider text-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                                    {isDeleting ? 'Eliminando...' : 'Eliminar'}
                                 </Button>
                             </>
                         )}

@@ -69,3 +69,83 @@ export async function closeProject(projectId: string) {
         return { success: false, error: 'Error al cerrar el proyecto' }
     }
 }
+
+export async function deleteProject(projectId: string) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+        // Verificar proyecto existe
+        const project = await (prisma as any).project.findUnique({
+            where: { id: projectId },
+            include: {
+                quotes: true,
+                supplierOrders: true,
+                incomes: true,
+                expenses: true
+            }
+        })
+
+        if (!project) {
+            return { success: false, error: 'Proyecto no encontrado' }
+        }
+
+        // VALIDACIÓN 1: Cotizaciones aprobadas
+        const approvedQuotes = project.quotes.filter((q: any) => q.isApproved)
+        if (approvedQuotes.length > 0) {
+            return {
+                success: false,
+                error: `No se puede eliminar el proyecto porque tiene ${approvedQuotes.length} cotización(es) aprobada(s). Esto indica que ya hay compromisos con el cliente.`,
+                reason: 'approved_quotes'
+            }
+        }
+
+        // VALIDACIÓN 2: Órdenes de compra
+        if (project.supplierOrders.length > 0) {
+            return {
+                success: false,
+                error: `No se puede eliminar el proyecto porque tiene ${project.supplierOrders.length} orden(es) de compra. Esto indica que ya hay compromisos con proveedores.`,
+                reason: 'supplier_orders'
+            }
+        }
+
+        // VALIDACIÓN 3: Ingresos registrados
+        if (project.incomes.length > 0) {
+            return {
+                success: false,
+                error: `No se puede eliminar el proyecto porque tiene ${project.incomes.length} ingreso(s) registrado(s). Esto indica que ya hay movimientos financieros.`,
+                reason: 'incomes'
+            }
+        }
+
+        // VALIDACIÓN 4: Gastos variables
+        if (project.expenses.length > 0) {
+            return {
+                success: false,
+                error: `No se puede eliminar el proyecto porque tiene ${project.expenses.length} gasto(s) registrado(s). Esto indica que ya hay movimientos financieros.`,
+                reason: 'expenses'
+            }
+        }
+
+        // VALIDACIÓN 5: Cotizaciones en borrador (eliminar en cascada)
+        if (project.quotes.length > 0) {
+            await (prisma as any).quote.deleteMany({
+                where: { projectId: projectId }
+            })
+        }
+
+        // Eliminar proyecto
+        await (prisma as any).project.delete({
+            where: { id: projectId }
+        })
+
+        revalidatePath('/projects')
+        revalidatePath('/dashboard')
+
+        return { success: true }
+    } catch (error) {
+        console.error('Error deleting project:', error)
+        return {
+            success: false,
+            error: 'Error al eliminar el proyecto. Por favor, contacta al administrador.'
+        }
+    }
+}
