@@ -599,9 +599,108 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                     </TabsContent>
 
                     <TabsContent value="financials" className="m-0">
-                        <div className="bg-card border rounded-2xl p-6 shadow-sm text-center py-12 text-muted-foreground">
-                            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                            <p>Control de Caja y Balance de Proyecto próximamente.</p>
+                        <div className="space-y-6">
+                            {/* Header con CTA */}
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
+                                <div className="flex items-start justify-between gap-4 flex-col md:flex-row">
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-brand-header font-semibold text-green-900 mb-2">
+                                            Cobros al Cliente (Ingresos)
+                                        </h3>
+                                        <p className="text-sm text-green-700 mb-4">
+                                            Registra aquí los pagos que <strong>recibes del cliente</strong> por este proyecto.
+                                            Estos ingresos impactan directamente la utilidad del proyecto y los reportes financieros.
+                                        </p>
+                                        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-100 rounded-lg px-3 py-2 w-fit">
+                                            <Info className="h-4 w-4" />
+                                            <span>Diferente a pagos a proveedores (ver pestaña Órdenes)</span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={() => setShowIncomeDialog(true)}
+                                        className="rounded-xl font-brand-header uppercase tracking-wider text-xs bg-green-600 hover:bg-green-700 shadow-lg whitespace-nowrap"
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Registrar Ingreso
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Lista de Ingresos */}
+                            <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
+                                <div className="bg-muted/30 px-6 py-4 border-b">
+                                    <h4 className="font-brand-header font-semibold text-sm uppercase tracking-wide">
+                                        Historial de Cobros
+                                    </h4>
+                                </div>
+
+                                {project.incomes && project.incomes.length > 0 ? (
+                                    <div className="divide-y">
+                                        {project.incomes.map((income: any) => (
+                                            <div key={income.id} className="px-6 py-4 hover:bg-muted/20 transition-colors">
+                                                <div className="flex items-center justify-between flex-col sm:flex-row gap-3">
+                                                    <div className="flex-1 w-full">
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                                            <span className="font-medium text-sm">
+                                                                {income.description || 'Pago del cliente'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs text-muted-foreground ml-7">
+                                                            <span>{new Date(income.date).toLocaleDateString('es-MX')}</span>
+                                                            {income.paymentMethod && (
+                                                                <span className="bg-muted px-2 py-0.5 rounded">
+                                                                    {income.paymentMethod}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right w-full sm:w-auto">
+                                                        <p className="text-lg font-bold text-green-600">
+                                                            ${income.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="px-6 py-12 text-center text-muted-foreground">
+                                        <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                        <p className="text-sm">Aún no hay cobros registrados para este proyecto</p>
+                                        <p className="text-xs mt-1">Los ingresos aparecerán aquí una vez que registres pagos del cliente</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Resumen Financiero */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                                    <p className="text-xs text-green-700 uppercase tracking-wide mb-1">Total Cobrado</p>
+                                    <p className="text-2xl font-bold text-green-900">
+                                        ${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </p>
+                                </div>
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                    <p className="text-xs text-blue-700 uppercase tracking-wide mb-1">Total Cotizado</p>
+                                    <p className="text-2xl font-bold text-blue-900">
+                                        ${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </p>
+                                </div>
+                                <div className={`border rounded-xl p-4 ${totalCobrado >= totalCotizado
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-orange-50 border-orange-200'
+                                    }`}>
+                                    <p className={`text-xs uppercase tracking-wide mb-1 ${totalCobrado >= totalCotizado ? 'text-green-700' : 'text-orange-700'
+                                        }`}>
+                                        Saldo Pendiente
+                                    </p>
+                                    <p className={`text-2xl font-bold ${totalCobrado >= totalCotizado ? 'text-green-900' : 'text-orange-900'
+                                        }`}>
+                                        ${(totalCotizado - totalCobrado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </TabsContent>
                     <TabsContent value="closure" className="m-0 space-y-6">
@@ -713,6 +812,99 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                     </TabsContent>
                 </Tabs>
             </div>
+
+            {/* Diálogo de Registro de Ingreso */}
+            {showIncomeDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 text-white">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-brand-header font-semibold">
+                                    Registrar Cobro al Cliente
+                                </h2>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setShowIncomeDialog(false)}
+                                    className="text-white hover:bg-white/20 h-8 w-8"
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <p className="text-xs text-green-100 mt-1">
+                                Ingreso que recibes del cliente por este proyecto
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleIncomeSubmit} className="p-6 space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Monto Recibido *</label>
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    placeholder="0.00"
+                                    value={incomeAmount}
+                                    onChange={(e) => setIncomeAmount(e.target.value)}
+                                    className="text-lg"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Descripción</label>
+                                <Input
+                                    type="text"
+                                    placeholder="Ej: Anticipo 50%, Pago final, etc."
+                                    value={incomeDescription}
+                                    onChange={(e) => setIncomeDescription(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Método de Pago</label>
+                                <select
+                                    value={incomePaymentMethod}
+                                    onChange={(e) => setIncomePaymentMethod(e.target.value)}
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                    <option value="">Seleccionar...</option>
+                                    <option value="TRANSFERENCIA">Transferencia</option>
+                                    <option value="EFECTIVO">Efectivo</option>
+                                    <option value="CHEQUE">Cheque</option>
+                                    <option value="TARJETA">Tarjeta</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Fecha</label>
+                                <Input
+                                    type="date"
+                                    value={incomeDate}
+                                    onChange={(e) => setIncomeDate(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowIncomeDialog(false)}
+                                    className="flex-1"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={loadingIncome}
+                                    className="flex-1 bg-green-600 hover:bg-green-700"
+                                >
+                                    {loadingIncome ? 'Guardando...' : 'Registrar Ingreso'}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
