@@ -95,43 +95,44 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             <div className="mx-auto max-w-7xl space-y-6">
                 {/* Breadcrumbs & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <Link href="/projects" className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link href="/projects" className="flex items-center text-xs font-brand-header uppercase tracking-widest text-primary/60 hover:text-primary transition-colors">
                         <ChevronLeft className="h-4 w-4 mr-1" />
-                        Volver a Proyectos
+                        Proyectos
                     </Link>
                     <div className="flex gap-2">
                         {project.status !== 'CERRADO' && (
                             <>
-                                <Button variant="outline" size="sm" onClick={handleCloseProject} disabled={isClosing}>
-                                    {isClosing ? 'Cerrando...' : 'Cerrar Proyecto'}
+                                <Button variant="outline" size="sm" onClick={handleCloseProject} disabled={isClosing} className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
+                                    {isClosing ? 'Cerrando...' : 'Cerrar Obra'}
                                 </Button>
-                                <Button size="sm">Editar Proyecto</Button>
+                                <Button size="sm" className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20">Editar</Button>
                             </>
                         )}
                         {project.status === 'CERRADO' && (
-                            <Badge className="bg-slate-900 text-white gap-1.5 px-4 py-1">
-                                <Lock className="h-4 w-4" /> PROYECTO CERRADO
+                            <Badge className="bg-primary text-white gap-1.5 px-4 py-1.5 font-brand-header tracking-widest uppercase">
+                                <Lock className="h-3 w-3" /> CERRADO
                             </Badge>
                         )}
                     </div>
                 </div>
 
                 {/* Header Card */}
-                <div className="bg-card border rounded-2xl p-6 shadow-sm border-l-4 border-l-primary">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-                                <Badge variant="secondary" className={`uppercase text-[10px] px-3 font-bold flex items-center gap-1 ${project.status === 'COTIZANDO' ? 'bg-blue-50 text-blue-700' :
-                                    project.status === 'APROBADO' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                        project.status === 'CERRADO' ? 'bg-slate-900 text-white border-transparent' :
-                                            'bg-amber-50 text-amber-700 border-amber-200'
+                <div className="bg-white border border-secondary rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                        <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-4">
+                                <h1 className="text-5xl font-brand-header text-primary tracking-tight leading-none">{project.name}</h1>
+                                <Badge className={`uppercase text-[11px] px-3 py-1 font-brand-header tracking-widest border-0 flex items-center gap-1.5 ${project.status === 'COTIZANDO' ? 'bg-secondary text-primary' :
+                                    project.status === 'APROBADO' ? 'bg-primary text-white' :
+                                        project.status === 'CERRADO' ? 'bg-primary/20 text-primary' :
+                                            'bg-secondary text-primary'
                                     }`}>
                                     {project.status !== 'COTIZANDO' && <Lock className="h-3 w-3" />}
                                     {project.status}
                                 </Badge>
                             </div>
-                            <p className="text-muted-foreground max-w-2xl">{project.description || 'Sin descripción adicional.'}</p>
+                            <p className="text-foreground/70 max-w-2xl font-brand-ui text-sm leading-relaxed">{project.description || 'Sin descripción adicional disponible para este proyecto.'}</p>
                             <div className="flex flex-wrap gap-4 text-sm pt-2">
                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Users className="h-4 w-4" />
@@ -145,18 +146,18 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         </div>
 
                         {/* Quick Stats Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:border-l md:pl-8">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 md:border-l md:border-secondary md:pl-10">
                             <div className="space-y-1">
-                                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Total Cotizado</span>
-                                <div className="text-xl font-bold">${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Total Cotizado</span>
+                                <div className="text-3xl font-brand-header text-primary">${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Cobrao (Ingresos)</span>
-                                <div className="text-xl font-bold text-emerald-600">${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Cobrado (Ing)</span>
+                                <div className="text-3xl font-brand-header text-primary">${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Pagado (Egresos)</span>
-                                <div className="text-xl font-bold text-rose-600">${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Pagado (Egr)</span>
+                                <div className="text-3xl font-brand-header text-primary">${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
                             </div>
                         </div>
                     </div>
@@ -199,52 +200,52 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                     <TabsContent value="resumen" className="m-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* Detailed Balance Card */}
-                            <div className="md:col-span-2 bg-card border rounded-2xl p-6 shadow-sm space-y-6">
-                                <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <TrendingUp className="h-5 w-5 text-primary" />
-                                    Balance del Proyecto
+                            <div className="md:col-span-2 bg-white border border-secondary rounded-3xl p-8 shadow-lg space-y-8">
+                                <h3 className="text-3xl font-brand-header text-primary flex items-center gap-3 tracking-wide">
+                                    <TrendingUp className="h-6 w-6" />
+                                    Balance Operativo
                                 </h3>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
                                     <div className="space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-xs text-muted-foreground uppercase font-semibold">Ingresos Reales</span>
-                                            <div className="text-2xl font-bold text-emerald-600">${totalIngresado.toLocaleString('es-MX')}</div>
+                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Ingresos Totales</span>
+                                            <div className="text-4xl font-brand-header text-primary">${totalIngresado.toLocaleString('es-MX')}</div>
                                         </div>
-                                        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                        <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-emerald-500 transition-all"
+                                                className="h-full bg-primary transition-all"
                                                 style={{ width: `${Math.min((totalIngresado / (totalCotizado || 1)) * 100, 100)}%` }}
                                             />
                                         </div>
-                                        <p className="text-[10px] text-muted-foreground italic">
-                                            {((totalIngresado / (totalCotizado || 1)) * 100).toFixed(1)}% del total cotizado cobrado.
+                                        <p className="text-[10px] text-foreground/60 font-medium">
+                                            {((totalIngresado / (totalCotizado || 1)) * 100).toFixed(1)}% RECAUDADO DEL TOTAL
                                         </p>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-xs text-muted-foreground uppercase font-semibold">Egresos Reales</span>
-                                            <div className="text-2xl font-bold text-rose-600">${totalEgresado.toLocaleString('es-MX')}</div>
+                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Egresos Ejecutados</span>
+                                            <div className="text-4xl font-brand-header text-primary">${totalEgresado.toLocaleString('es-MX')}</div>
                                         </div>
-                                        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                        <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-rose-500 transition-all"
+                                                className="h-full bg-primary/60 transition-all shadow-[0_0_8px_rgba(40,73,96,0.2)]"
                                                 style={{ width: `${Math.min((totalEgresado / (totalIngresado || 1)) * 100, 100)}%` }}
                                             />
                                         </div>
-                                        <p className="text-[10px] text-muted-foreground italic">
-                                            {totalIngresado > 0 ? ((totalEgresado / totalIngresado) * 100).toFixed(1) : 0}% del ingreso ejecutado.
+                                        <p className="text-[10px] text-foreground/60 font-medium">
+                                            {totalIngresado > 0 ? ((totalEgresado / totalIngresado) * 100).toFixed(1) : 0}% DEL CAPITAL ABSORBIDO
                                         </p>
                                     </div>
 
-                                    <div className="space-y-4 bg-primary/5 p-4 rounded-xl border border-primary/10">
+                                    <div className="space-y-4 bg-primary text-white p-6 rounded-2xl shadow-xl shadow-primary/10">
                                         <div className="space-y-1">
-                                            <span className="text-xs text-primary uppercase font-bold">Utilidad Actual</span>
-                                            <div className="text-2xl font-black text-primary">${utilidad.toLocaleString('es-MX')}</div>
+                                            <span className="text-[11px] text-white/70 uppercase font-brand-header tracking-widest">Utilidad Obra</span>
+                                            <div className="text-4xl font-brand-header tracking-wider">${utilidad.toLocaleString('es-MX')}</div>
                                         </div>
-                                        <div className="text-[10px] font-bold text-primary/70 uppercase">
-                                            Margen: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%
+                                        <div className="text-[11px] font-brand-header tracking-widest uppercase border-t border-white/20 pt-2">
+                                            MARGEN: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%
                                         </div>
                                     </div>
                                 </div>
