@@ -32,6 +32,7 @@ const navigation = [
 
 const adminNavigation = [
     { name: 'Direccion', href: '/management', icon: BarChart },
+    { name: 'Reportes', href: '/reports', icon: FileText },
     { name: 'Contabilidad', href: '/accounting', icon: Calculator },
     { name: 'Usuarios', href: '/users', icon: UserCog },
 ]
