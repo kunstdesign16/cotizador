@@ -250,10 +250,17 @@ export const QuoteDocument = ({ quote }: { quote: any }) => (
 
             {/* Header */}
             <View style={styles.headerContainer}>
-                <Image src="/logo.svg" style={styles.logo} />
-                <View style={styles.headerInfo}>
-                    <Text style={styles.headerCityDate}>Guadalajara, Jalisco</Text>
-                    <Text style={styles.headerCityDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                <Image src="/logo_header.svg" style={styles.logo} />
+
+                {/* Contact Info in Header */}
+                <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#545555', marginBottom: 4 }}>
+                        mayelam@kunstdesign.com.mx | +52 33 51 18 11 22 | @kunstanddesign
+                    </Text>
+                    <View style={styles.headerInfo}>
+                        <Text style={styles.headerCityDate}>Guadalajara, Jalisco</Text>
+                        <Text style={styles.headerCityDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                    </View>
                 </View>
             </View>
 
@@ -283,14 +290,13 @@ export const QuoteDocument = ({ quote }: { quote: any }) => (
                     <Text style={[styles.colTotal, styles.tableHeaderText]}>IMPORTE</Text>
                 </View>
 
-                {quote.items?.map((item: any, i: number) => (
-                    <View style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} key={i}>
-                        <Text style={styles.colQty}>{item.quantity}</Text>
-                        <Text style={styles.colDesc}>{item.concept}</Text>
-                        <Text style={styles.colUnit}>{formatCurrency(item.unit_cost)}</Text>
-                        <Text style={styles.colTotal}>{formatCurrency(item.subtotal)}</Text>
-                    </View>
-                ))}
+                {/* Single Consolidated Row */}
+                <View style={[styles.tableRow, styles.tableRowAlt]}>
+                    <Text style={[styles.colQty, { fontWeight: 'bold' }]}>1</Text>
+                    <Text style={[styles.colDesc, { fontWeight: 'bold' }]}>{quote.project_name}</Text>
+                    <Text style={styles.colUnit}>{formatCurrency(quote.subtotal)}</Text>
+                    <Text style={styles.colTotal}>{formatCurrency(quote.subtotal)}</Text>
+                </View>
             </View>
 
             {/* Totals */}
@@ -320,19 +326,9 @@ export const QuoteDocument = ({ quote }: { quote: any }) => (
                 </View>
             </View>
 
-            {/* Custom Footer */}
+            {/* Footer */}
             <View style={styles.footer}>
-                <Text style={[styles.footerText, { marginRight: 6 }]}>mayelam@kunstdesign.com.mx</Text>
-                <Text style={[styles.footerText, { marginRight: 6 }]}>|</Text>
-                <Text style={[styles.footerText, { marginRight: 6 }]}>+52 33 51 18 11 22</Text>
-                <Text style={[styles.footerText, { marginRight: 6 }]}>|</Text>
-
-                {/* IG Icon */}
-                <Svg width="12" height="12" viewBox="0 0 24 24" style={{ marginRight: 2 }}>
-                    <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="#545555" strokeWidth="2" fill="none" />
-                    <Path d="M23 4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4z" stroke="#545555" strokeWidth="2" fill="none" />
-                </Svg>
-                <Text style={styles.footerText}>@kunstanddesign</Text>
+                <Text style={styles.footerText}>Desarrollando ideas, creando sueños.</Text>
             </View>
         </Page>
     </Document>
