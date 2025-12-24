@@ -265,7 +265,7 @@ export function generateFinancialCSV(kardexData: any) {
 
     const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map((row: any[]) => row.map(cell => `"${cell}"`).join(','))
     ].join('\n')
 
     // Download
