@@ -1,4 +1,4 @@
-import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image, Font, Svg, Path } from '@react-pdf/renderer';
 
 // Register Custom Fonts
 // Font.register({
@@ -36,19 +36,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1,
-        opacity: 0.03 // Muy sutil
+        opacity: 0.08 // 8% opacity as requested
     },
     watermark: {
-        width: 500,
-        height: 500,
+        width: 400,
+        height: 400,
         objectFit: 'contain'
     },
     // Draft Watermark
     draftWatermark: {
         position: 'absolute',
-        fontSize: 120,
-        color: '#E11D48', // Rose-600
-        opacity: 0.1,
+        fontSize: 100,
+        color: '#94A3B8', // Slate-400 (Light Gray)
+        opacity: 0.15,
         transform: 'rotate(-45deg)',
         // fontFamily: 'Bebas Neue',
         fontWeight: 'bold',
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20
     },
     logo: {
-        width: 160, // Aumentado para protagonismo
+        width: 140, // Slightly reduced to "medio" size
         height: 'auto'
     },
     headerInfo: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     projectTitle: {
         // fontFamily: 'Bebas Neue',
         fontWeight: 'bold', // Replacement for Bebas style
-        fontSize: 24,
+        fontSize: 18, // Reduced from 24
         color: '#284960', // Azul Institucional
         marginBottom: 4,
         textTransform: 'uppercase'
@@ -214,13 +214,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         borderTopWidth: 1,
         borderTopColor: '#E2E8F0',
-        paddingTop: 10
+        paddingTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     footerText: {
         // fontFamily: 'Bebas Neue',
-        fontSize: 12,
-        color: '#284960',
-        letterSpacing: 1
+        fontSize: 9, // Smaller font for clean look
+        color: '#545555',
+        letterSpacing: 0.5
     }
 });
 
@@ -233,12 +236,14 @@ export const QuoteDocument = ({ quote }: { quote: any }) => (
         <Page size="A4" style={styles.page}>
             {/* Watermark */}
             <View style={styles.watermarkContainer}>
-                <Image src="/logo.svg" style={styles.watermark} />
+                {/* Changed to Imagotipo as requested */}
+                <Image src="/imagotipo.svg" style={styles.watermark} />
             </View>
 
-            {/* Draft Status Watermark */}
+            {/* Draft Status Watermark Text - Overlay on graphic watermark */}
             {quote.status !== 'APPROVED' && (
-                <View style={styles.watermarkContainer}>
+                <View style={[styles.watermarkContainer, { zIndex: -1 }]}>
+                    {/* Using separate container to ensure proper stacking if needed, though absolute handles it */}
                     <Text style={styles.draftWatermark}>PRELIMINAR</Text>
                 </View>
             )}
@@ -315,9 +320,19 @@ export const QuoteDocument = ({ quote }: { quote: any }) => (
                 </View>
             </View>
 
-            {/* Footer */}
+            {/* Custom Footer */}
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Desarrollando ideas, creando sueños.</Text>
+                <Text style={[styles.footerText, { marginRight: 6 }]}>mayelam@kunstdesign.com.mx</Text>
+                <Text style={[styles.footerText, { marginRight: 6 }]}>|</Text>
+                <Text style={[styles.footerText, { marginRight: 6 }]}>+52 33 51 18 11 22</Text>
+                <Text style={[styles.footerText, { marginRight: 6 }]}>|</Text>
+
+                {/* IG Icon */}
+                <Svg width="12" height="12" viewBox="0 0 24 24" style={{ marginRight: 2 }}>
+                    <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="#545555" strokeWidth="2" fill="none" />
+                    <Path d="M23 4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4z" stroke="#545555" strokeWidth="2" fill="none" />
+                </Svg>
+                <Text style={styles.footerText}>@kunstanddesign</Text>
             </View>
         </Page>
     </Document>
