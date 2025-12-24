@@ -60,8 +60,8 @@ export function Sidebar({ initialUser }: SidebarProps) {
                 </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
-                <div className="text-xs font-semibold text-muted-foreground mb-2 px-2 uppercase tracking-wider">
-                    Menu Principal
+                <div className="text-xs font-brand-header text-primary/60 mb-3 px-2 uppercase tracking-widest border-b border-secondary pb-1">
+                    Menú Principal
                 </div>
                 {navigation.map((item) => {
                     const isActive = pathname === item.href || (item.match && pathname.startsWith(item.match))
@@ -74,10 +74,10 @@ export function Sidebar({ initialUser }: SidebarProps) {
                                 href={item.href}
                                 onClick={() => setMobileOpen(false)}
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                                    "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all",
                                     isActive
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "bg-primary text-white shadow-md shadow-primary/20"
+                                        : "text-primary/70 hover:bg-secondary/40 hover:text-primary"
                                 )}
                             >
                                 <Icon className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function Sidebar({ initialUser }: SidebarProps) {
                 {/* Admin Section */}
                 {isAdmin && (
                     <>
-                        <div className="text-xs font-semibold text-muted-foreground mt-4 mb-2 px-2 uppercase tracking-wider">
+                        <div className="text-xs font-brand-header text-primary/60 mt-6 mb-3 px-2 uppercase tracking-widest border-b border-secondary pb-1">
                             Administración
                         </div>
                         {adminNavigation.map((item) => {
@@ -119,10 +119,10 @@ export function Sidebar({ initialUser }: SidebarProps) {
                                     href={item.href}
                                     onClick={() => setMobileOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                                        "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all",
                                         isActive
-                                            ? "bg-primary/10 text-primary"
-                                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                            ? "bg-primary text-white shadow-md shadow-primary/20"
+                                            : "text-primary/70 hover:bg-secondary/40 hover:text-primary"
                                     )}
                                 >
                                     <Icon className="h-4 w-4" />
@@ -133,13 +133,13 @@ export function Sidebar({ initialUser }: SidebarProps) {
                     </>
                 )}
             </nav>
-            <div className="p-4 border-t space-y-3">
+            <div className="p-4 border-t border-secondary space-y-3 bg-secondary/10">
                 <div className="px-2">
                     <UserNav userName={userName} userRole={userRole} userEmail={userEmail} />
                 </div>
-                <div className="bg-muted/30 rounded-lg p-4 text-xs text-muted-foreground">
-                    <p className="font-semibold mb-1">Cotizador v2.0</p>
-                    <p>Sistema de Gestión</p>
+                <div className="bg-white/50 rounded-lg p-4 text-[10px] text-primary/70 border border-secondary/50">
+                    <p className="font-brand-header text-xs tracking-wider mb-1">PROYECTOS v2.5</p>
+                    <p className="font-medium">Kunst & Design ®</p>
                 </div>
             </div>
         </>

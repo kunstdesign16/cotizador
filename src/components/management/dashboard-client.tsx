@@ -21,71 +21,79 @@ export function ManagementDashboardClient({ data }: ManagementDashboardClientPro
     const currentMonth = data.monthlyStats[data.monthlyStats.length - 1] || { ingresos: 0, egresos: 0, utilidad: 0 }
 
     return (
-        <div className="space-y-8">
-            <header>
-                <h1 className="text-3xl font-bold tracking-tight">Panel de Dirección</h1>
-                <p className="text-muted-foreground">Análisis estratégico y control de proyectos</p>
+        <div className="space-y-10">
+            <header className="border-b border-secondary pb-6">
+                <h1 className="text-5xl font-brand-header text-primary tracking-tight">Panel de Dirección</h1>
+                <p className="text-base text-foreground/70 font-brand-ui">Análisis estratégico y control de proyectos Kunst & Design</p>
             </header>
 
             {/* Quick Metrics */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="rounded-xl border shadow-sm bg-emerald-50/20">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Ingresos Mes</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-emerald-600" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="rounded-2xl border-none shadow-xl bg-primary text-white overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+                        <TrendingUp className="h-16 w-16" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-brand-header tracking-widest text-white/70 uppercase">Ingresos Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-emerald-700">${currentMonth.ingresos.toLocaleString()}</div>
+                        <div className="text-3xl font-brand-header tracking-wider">${currentMonth.ingresos.toLocaleString()}</div>
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-xl border shadow-sm bg-rose-50/20">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Egresos Mes</CardTitle>
-                        <TrendingDown className="h-4 w-4 text-rose-600" />
+                <Card className="rounded-2xl border border-secondary bg-white shadow-lg overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:scale-110 transition-transform text-rose-600">
+                        <TrendingDown className="h-16 w-16" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-brand-header tracking-widest text-primary/60 uppercase">Egresos Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-rose-700">${currentMonth.egresos.toLocaleString()}</div>
+                        <div className="text-3xl font-brand-header tracking-wider text-rose-600">${currentMonth.egresos.toLocaleString()}</div>
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-xl border shadow-sm bg-indigo-50/20">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Utilidad Mes</CardTitle>
-                        <BarChart3 className="h-4 w-4 text-indigo-600" />
+                <Card className="rounded-2xl border-none shadow-xl bg-secondary text-primary overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+                        <BarChart3 className="h-16 w-16" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-brand-header tracking-widest text-primary/70 uppercase">Utilidad Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-indigo-700">${currentMonth.utilidad.toLocaleString()}</div>
+                        <div className="text-3xl font-brand-header tracking-wider">${currentMonth.utilidad.toLocaleString()}</div>
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-xl border shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Proyectos</CardTitle>
-                        <div className="flex gap-2">
-                            <Clock className="h-4 w-4 text-blue-500" />
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        </div>
+                <Card className="rounded-2xl border border-secondary bg-white shadow-lg overflow-hidden relative group">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-brand-header tracking-widest text-primary/60 uppercase">Proyectos</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold">{data.activeProjects}</span>
-                            <span className="text-xs text-muted-foreground">activos /</span>
-                            <span className="text-lg font-semibold text-muted-foreground">{data.closedProjects}</span>
-                            <span className="text-xs text-muted-foreground">cerrados</span>
+                            <span className="text-3xl font-brand-header text-primary">{data.activeProjects}</span>
+                            <span className="text-[10px] font-brand-header text-primary/40 uppercase tracking-tighter">activos /</span>
+                            <span className="text-xl font-brand-header text-primary/30">{data.closedProjects}</span>
+                            <span className="text-[10px] font-brand-header text-primary/40 uppercase tracking-tighter">cerrados</span>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Visual Charts */}
-            <ManagementCharts data={data.monthlyStats} />
+            <section className="space-y-6">
+                <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                    <h2 className="text-3xl font-brand-header text-primary tracking-wide">Tendencias Financieras</h2>
+                </div>
+                <ManagementCharts data={data.monthlyStats} />
+            </section>
 
             {/* Critical Control Lists */}
-            <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    <h2 className="text-xl font-bold">Listas de Control Crítico</h2>
+            <section className="space-y-6 pt-4">
+                <div className="flex items-center gap-3 border-l-4 border-rose-500 pl-4">
+                    <Target className="h-6 w-6 text-rose-500" />
+                    <h2 className="text-3xl font-brand-header text-primary tracking-wide uppercase">Listas de Control Crítico</h2>
                 </div>
                 <ControlLists
                     negativeUtilityProjects={data.negativeUtilityProjects}

@@ -16,69 +16,68 @@
   --color-ring: var(--ring);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Brand Fonts */
+  --font-sans: var(--font-fira-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-header: var(--font-bebas-neue), sans-serif;
 }
 
 :root {
-  /* Minimal Premium Palette - Slate/Zinc + Indigo */
-  --background: #f8fafc;
-  /* Slate 50 */
-  --foreground: #0f172a;
-  /* Slate 900 */
+  /* Kunst & Design Brand Palette */
+  --background: #FFFFFF;
+  --foreground: #545555;
+  /* Dark Gray */
 
-  --primary: #4f46e5;
-  /* Indigo 600 */
-  --primary-foreground: #ffffff;
+  --primary: #284960;
+  /* Institutional Blue */
+  --primary-foreground: #FFFFFF;
 
-  --secondary: #e2e8f0;
-  /* Slate 200 */
-  --secondary-foreground: #1e293b;
-  /* Slate 800 */
+  --secondary: #D2D2D2;
+  /* Light Gray */
+  --secondary-foreground: #284960;
 
-  --accent: #f1f5f9;
-  /* Slate 100 */
-  --accent-foreground: #0f172a;
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
 
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
+  --accent: #E5E7EB;
+  --accent-foreground: #284960;
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #4f46e5;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
 
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --border: #D2D2D2;
+  --input: #D2D2D2;
+  --ring: #284960;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #545555;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    /* Slate 900 */
-    --foreground: #f8fafc;
-    /* Slate 50 */
+/* Specific Utilities for Brand Fonts */
+.font-brand-header {
+  font-family: var(--font-bebas-neue), sans-serif;
+  letter-spacing: 0.05em;
+}
 
-    --primary: #6366f1;
-    /* Indigo 500 */
-    --primary-foreground: #ffffff;
-
-    --secondary: #1e293b;
-    /* Slate 800 */
-    --secondary-foreground: #f8fafc;
-
-    --accent: #1e293b;
-    --accent-foreground: #f8fafc;
-
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #6366f1;
-
-    --popover: #0f172a;
-    --popover-foreground: #f8fafc;
-  }
+.font-brand-ui {
+  font-family: var(--font-fira-sans), sans-serif;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-fira-sans), ui-sans-serif, system-ui, sans-serif;
   @apply antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-bebas-neue), sans-serif;
+  letter-spacing: 0.02em;
 }
