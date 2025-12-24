@@ -44,6 +44,7 @@ export type QuoteFormData = {
         phone: string
     }
     clientId?: string // Added clientId to initialData
+    projectId?: string // Added projectId for linking to existing projects
     project: {
         name: string
         date: string
@@ -67,6 +68,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [editingCostId, setEditingCostId] = useState<string | null>(null)
     const [isrRate, setIsrRate] = useState(initialData?.isr_rate || 0)
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
+    const [projectId] = useState<string | null>(initialData?.projectId || null) // Store projectId from initialData
     const [showNewClientDialog, setShowNewClientDialog] = useState(false)
 
     const [client, setClient] = useState(initialData?.client || { name: '', company: '', email: '', phone: '' })
@@ -118,7 +120,8 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                 items,
                 iva_rate: 0.16,
                 isr_rate: isrRate / 100,
-                clientId: selectedClientId
+                clientId: selectedClientId,
+                projectId: projectId // Pass projectId to action
             })
             if (result && result.success) {
                 // Determine redirect based on context or return value

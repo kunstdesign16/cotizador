@@ -10,6 +10,20 @@ export async function saveQuote(data: any) {
 
     const { client, project, items, iva_rate, clientId, projectId } = data
 
+    // VALIDATION: If projectId is provided, verify the project exists
+    if (projectId) {
+        const projectExists = await (prisma as any).project.findUnique({
+            where: { id: projectId }
+        })
+
+        if (!projectExists) {
+            return {
+                success: false,
+                error: 'El proyecto especificado no existe'
+            }
+        }
+    }
+
     const subtotal = items.reduce((acc: number, item: any) => acc + item.subtotal, 0)
     const iva_amount = subtotal * 0.16
     const total = subtotal + iva_amount - (subtotal * Number(data.isr_rate || 0))
@@ -79,7 +93,12 @@ export async function saveQuote(data: any) {
         }
     })
 
+    // Revalidate paths
     revalidatePath('/dashboard')
+    if (projectId) {
+        revalidatePath(`/projects/${projectId}`)
+    }
+
     return { success: true, id: quote.id }
 }
 
