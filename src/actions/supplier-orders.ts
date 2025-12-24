@@ -290,7 +290,29 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
         }) as any
 
         if (!item) return { success: false, error: 'Ítem no encontrado' }
-        if (!item.quote.project) return { success: false, error: 'El ítem no está ligado a un proyecto' }
+
+        // DEFENSIVE VALIDATION: Check if quote has projectId
+        if (!item.quote.projectId) {
+            return {
+                success: false,
+                error: 'No se pueden generar órdenes de una cotización sin proyecto asociado. Por favor, contacta al administrador para corregir esta cotización.'
+            }
+        }
+
+        if (!item.quote.project) {
+            return {
+                success: false,
+                error: 'El proyecto asociado a esta cotización no existe. Por favor, contacta al administrador.'
+            }
+        }
+
+        // DEFENSIVE VALIDATION: Check if quote is approved
+        if (!item.quote.isApproved) {
+            return {
+                success: false,
+                error: 'No se pueden generar órdenes de una cotización no aprobada. Aprueba la cotización primero.'
+            }
+        }
 
         // 0. CHECK: Block if CERRADO
         if (item.quote.project.status === 'CERRADO') {
