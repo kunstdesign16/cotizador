@@ -1,17 +1,30 @@
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
-// Register a standard font if we want custom, but Helvetica is default and safe.
+// Register Custom Fonts
+Font.register({
+    family: 'Bebas Neue',
+    src: 'https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.ttf'
+});
+
+Font.register({
+    family: 'Fira Sans',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/firasans/v17/va9E4kDNxMZdWfMOD5Vvl4jL.ttf' }, // Regular
+        { src: 'https://fonts.gstatic.com/s/firasans/v17/va9B4kDNxMZdWfMOD5VnRExD6XlD.ttf', fontWeight: 'bold' } // Bold
+    ]
+});
 
 const styles = StyleSheet.create({
     page: {
-        paddingGlobal: 40, // Padding for content
-        fontFamily: 'Helvetica',
+        paddingGlobal: 40,
+        fontFamily: 'Fira Sans', // Fuente base por defecto
         paddingTop: 40,
         paddingBottom: 60,
         paddingLeft: 40,
         paddingRight: 40,
         fontSize: 10,
-        color: '#333'
+        color: '#545555', // Gris Oscuro
+        backgroundColor: '#FFFFFF'
     },
     // Background Watermark
     watermarkContainer: {
@@ -23,114 +36,186 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1,
-        opacity: 0.05 // Very faint
+        opacity: 0.03 // Muy sutil
     },
     watermark: {
-        width: 400,
-        height: 400,
+        width: 500,
+        height: 500,
         objectFit: 'contain'
+    },
+    // Draft Watermark
+    draftWatermark: {
+        position: 'absolute',
+        fontSize: 120,
+        color: '#E11D48', // Rose-600
+        opacity: 0.1,
+        transform: 'rotate(-45deg)',
+        fontFamily: 'Bebas Neue',
+        width: 800,
+        textAlign: 'center',
+        top: 300,
+        left: -100
     },
     // Header
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 30,
-        alignItems: 'flex-start'
+        marginBottom: 40,
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+        paddingBottom: 20
     },
     logo: {
-        width: 120, // Adjust based on SVG aspect ratio
+        width: 160, // Aumentado para protagonismo
         height: 'auto'
     },
     headerInfo: {
         alignItems: 'flex-end',
         textAlign: 'right'
     },
-    // Title
-    titleContainer: {
-        alignItems: 'center',
+    headerCityDate: {
+        fontSize: 9,
+        color: '#545555',
+        marginBottom: 2
+    },
+    // Project Info Block
+    projectInfoContainer: {
         marginBottom: 30,
-        marginTop: 10
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: '#F8FAFC',
+        padding: 15,
+        borderRadius: 4
     },
-    titleText: {
-        fontSize: 14,
+    projectInfoColumn: {
+        flex: 1
+    },
+    projectTitle: {
+        fontFamily: 'Bebas Neue',
+        fontSize: 24,
+        color: '#284960', // Azul Institucional
+        marginBottom: 4,
+        textTransform: 'uppercase'
+    },
+    clientName: {
+        fontSize: 12,
         fontWeight: 'bold',
-        textTransform: 'uppercase',
-        marginBottom: 4
+        color: '#284960',
+        marginBottom: 2
     },
+    clientDetail: {
+        fontSize: 10,
+        color: '#64748B'
+    },
+
     // Table
     table: {
         width: '100%',
-        marginBottom: 20
+        marginBottom: 20,
+        marginTop: 10
     },
     tableHeaderNode: {
         flexDirection: 'row',
-        backgroundColor: '#1E293B', // Dark Navy Blue from reference
+        backgroundColor: '#284960', // Azul Institucional
         color: '#FFFFFF',
-        paddingVertical: 8,
-        paddingHorizontal: 4,
-        alignItems: 'center'
+        paddingVertical: 10,
+        paddingHorizontal: 6,
+        alignItems: 'center',
+        borderTopLeftRadius: 4,
+        borderTopRightRadius: 4
+    },
+    tableHeaderText: {
+        fontFamily: 'Bebas Neue',
+        fontSize: 12,
+        letterSpacing: 0.5
     },
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
-        paddingVertical: 8,
-        paddingHorizontal: 4,
+        paddingVertical: 10,
+        paddingHorizontal: 6,
         alignItems: 'center'
     },
     tableRowAlt: {
         backgroundColor: '#F8FAFC'
     },
-    // Columns (Flexible widths)
-    colDate: { width: '15%', textAlign: 'center' },
-    colProject: { width: '45%' },
+    // Columns
     colQty: { width: '10%', textAlign: 'center' },
-    colUnit: { width: '15%', textAlign: 'right' },
-    colTotal: { width: '15%', textAlign: 'right' },
+    colDesc: { width: '50%', textAlign: 'left', paddingRight: 10 },
+    colUnit: { width: '20%', textAlign: 'right' },
+    colTotal: { width: '20%', textAlign: 'right' },
 
     // Totals Section
     totalsContainer: {
         alignItems: 'flex-end',
-        marginTop: 10
+        marginTop: 20
     },
     totalRow: {
         flexDirection: 'row',
-        width: '50%', // Occupy right half
-        justifyContent: 'flex-end',
-        paddingVertical: 4,
-        paddingHorizontal: 4
-    },
-    totalRowGray: {
-        backgroundColor: '#E2E8F0', // Light gray band from reference
-        borderRadius: 2
+        width: '40%',
+        justifyContent: 'space-between',
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9'
     },
     totalLabel: {
-        width: '60%',
+        fontFamily: 'Bebas Neue',
+        fontSize: 12,
+        color: '#545555',
         textAlign: 'right',
-        marginRight: 10,
-        fontWeight: 'bold',
-        fontSize: 9
+        width: '60%'
     },
     totalValue: {
-        width: '40%',
-        textAlign: 'right',
+        fontSize: 12,
         fontWeight: 'bold',
-        fontSize: 9
+        color: '#545555',
+        textAlign: 'right',
+        width: '40%'
     },
-    totalFinal: {
-        fontSize: 11
+    totalFinalRow: {
+        flexDirection: 'row',
+        width: '40%',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        backgroundColor: '#284960', // Azul destaque
+        marginTop: 10,
+        borderRadius: 4
+    },
+    totalFinalLabel: {
+        fontFamily: 'Bebas Neue',
+        fontSize: 14,
+        color: '#FFFFFF',
+        textAlign: 'right',
+        width: '60%'
+    },
+    totalFinalValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        textAlign: 'right',
+        width: '40%'
     },
 
     // Footer
     footer: {
         position: 'absolute',
         bottom: 30,
-        left: 0,
-        right: 0,
+        left: 40,
+        right: 40,
         textAlign: 'center',
-        color: '#64748B',
-        fontSize: 8,
-        borderTopWidth: 0 // Clean footer
+        borderTopWidth: 1,
+        borderTopColor: '#E2E8F0',
+        paddingTop: 10
+    },
+    footerText: {
+        fontFamily: 'Bebas Neue',
+        fontSize: 12,
+        color: '#284960',
+        letterSpacing: 1
     }
 });
 
@@ -141,84 +226,93 @@ const formatCurrency = (amount: number) =>
 export const QuoteDocument = ({ quote }: { quote: any }) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            {/* Watermark Background */}
+            {/* Watermark */}
             <View style={styles.watermarkContainer}>
-                {/* Reusing logo as watermark pattern */}
                 <Image src="/logo.svg" style={styles.watermark} />
             </View>
+
+            {/* Draft Status Watermark */}
+            {quote.status !== 'APPROVED' && (
+                <View style={styles.watermarkContainer}>
+                    <Text style={styles.draftWatermark}>PRELIMINAR</Text>
+                </View>
+            )}
 
             {/* Header */}
             <View style={styles.headerContainer}>
                 <Image src="/logo.svg" style={styles.logo} />
                 <View style={styles.headerInfo}>
-                    <Text style={{ fontSize: 10, fontWeight: 'bold', marginBottom: 2 }}>Guadalajara, Jalisco</Text>
-                    <Text style={{ fontSize: 10 }}>{new Date(quote.date).toLocaleDateString()}</Text>
+                    <Text style={styles.headerCityDate}>Guadalajara, Jalisco</Text>
+                    <Text style={styles.headerCityDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
                 </View>
             </View>
 
-            {/* Title */}
-            <View style={styles.titleContainer}>
-                <Text style={styles.titleText}>
-                    Cotización "{quote.project_name}" {quote.client?.company ? quote.client.company.toUpperCase() : ''}
-                </Text>
+            {/* Project Info */}
+            <View style={styles.projectInfoContainer}>
+                <View style={styles.projectInfoColumn}>
+                    <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Proyecto</Text>
+                    <Text style={styles.projectTitle}>{quote.project_name}</Text>
+                </View>
+                <View style={[styles.projectInfoColumn, { alignItems: 'flex-end' }]}>
+                    <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Cliente</Text>
+                    <Text style={styles.clientName}>
+                        {quote.client?.company || quote.client?.name}
+                    </Text>
+                    {quote.client?.company && (
+                        <Text style={styles.clientDetail}>{quote.client.name}</Text>
+                    )}
+                </View>
             </View>
 
-            {/* Table Header */}
+            {/* Table */}
             <View style={styles.table}>
                 <View style={styles.tableHeaderNode}>
-                    <Text style={styles.colDate}>Fecha solicitud</Text>
-                    <Text style={styles.colProject}>Concepto / Proyecto</Text>
-                    <Text style={styles.colQty}>Cantidad</Text>
-                    <Text style={styles.colUnit}>Costo U.</Text>
-                    <Text style={styles.colTotal}>Costo Total</Text>
+                    <Text style={[styles.colQty, styles.tableHeaderText]}>CANT.</Text>
+                    <Text style={[styles.colDesc, styles.tableHeaderText]}>CONCEPTO / DESCRIPCIÓN</Text>
+                    <Text style={[styles.colUnit, styles.tableHeaderText]}>PRECIO U.</Text>
+                    <Text style={[styles.colTotal, styles.tableHeaderText]}>IMPORTE</Text>
                 </View>
 
-                {/* Table Rows */}
                 {quote.items?.map((item: any, i: number) => (
                     <View style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} key={i}>
-                        <Text style={styles.colDate}>{new Date(quote.date).toLocaleDateString()}</Text>
-                        <Text style={styles.colProject}>{item.concept}</Text>
                         <Text style={styles.colQty}>{item.quantity}</Text>
+                        <Text style={styles.colDesc}>{item.concept}</Text>
                         <Text style={styles.colUnit}>{formatCurrency(item.unit_cost)}</Text>
                         <Text style={styles.colTotal}>{formatCurrency(item.subtotal)}</Text>
                     </View>
                 ))}
             </View>
 
-            {/* Totals Information */}
+            {/* Totals */}
             <View style={styles.totalsContainer}>
-                {/* Subtotal */}
                 <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal</Text>
                     <Text style={styles.totalValue}>{formatCurrency(quote.subtotal)}</Text>
                 </View>
 
-                {/* IVA */}
                 {quote.iva_amount > 0 && (
-                    <View style={[styles.totalRow, styles.totalRowGray]}>
-                        <Text style={styles.totalLabel}>Impuestos trasladados (IVA)</Text>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>IVA (16%)</Text>
                         <Text style={styles.totalValue}>{formatCurrency(quote.iva_amount)}</Text>
                     </View>
                 )}
 
-                {/* ISR (If applicable/existing in quote object) */}
                 {quote.isr_amount > 0 && (
-                    <View style={[styles.totalRow, styles.totalRowGray, { marginTop: 2 }]}>
-                        <Text style={styles.totalLabel}>Impuestos retenidos (ISR)</Text>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Retenciones (ISR)</Text>
                         <Text style={styles.totalValue}>{formatCurrency(quote.isr_amount)}</Text>
                     </View>
                 )}
 
-                {/* Total */}
-                <View style={[styles.totalRow, { marginTop: 10 }]}>
-                    <Text style={[styles.totalLabel, styles.totalFinal]}>Importe TOTAL</Text>
-                    <Text style={[styles.totalValue, styles.totalFinal]}>{formatCurrency(quote.total)}</Text>
+                <View style={styles.totalFinalRow}>
+                    <Text style={styles.totalFinalLabel}>IMPORTE TOTAL</Text>
+                    <Text style={styles.totalFinalValue}>{formatCurrency(quote.total)}</Text>
                 </View>
             </View>
 
             {/* Footer */}
             <View style={styles.footer}>
-                <Text>Desarrollando ideas, creando sueños.</Text>
+                <Text style={styles.footerText}>Desarrollando ideas, creando sueños.</Text>
             </View>
         </Page>
     </Document>

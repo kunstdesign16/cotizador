@@ -402,12 +402,22 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                         </CardHeader>
                         <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
                             <FileText className="h-16 w-16 text-muted-foreground/50" />
+
                             <p className="text-muted-foreground text-center max-w-md">
-                                Este es el documento que se enviará al cliente. Verifica que toda la información esté correcta antes de descargar.
+                                {quote.status === 'APPROVED'
+                                    ? "Este documento es la versión oficial aprobada."
+                                    : "Este documento es una versión preliminar para revisión del cliente."}
                             </p>
+
                             <div className="flex gap-4">
                                 <QuotePDFClient quote={quote} />
                             </div>
+
+                            {quote.status !== 'APPROVED' && (
+                                <p className="text-xs text-amber-600/80 max-w-sm text-center">
+                                    Nota: Esta cotización aún no está aprobada. El PDF incluirá una marca de "PRELIMINAR".
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
