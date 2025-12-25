@@ -38,10 +38,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1,
-        opacity: 0.05 // 5% opacity (range 4-6%)
+        // Removed opacity style since source PNG already has it
     },
     watermark: {
-        width: '80%', // 80% of width
+        width: '85%', // Slightly larger watermark
         objectFit: 'contain'
     },
     // Draft Status Watermark Text - PRELIMINAR
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         paddingBottom: 15
     },
     logo: {
-        width: '40mm', // Official width requirement 35-45mm
+        width: '48mm', // Increased by 20% (from 40mm)
         height: 'auto'
     },
     headerInfo: {
