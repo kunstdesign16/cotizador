@@ -14,19 +14,22 @@ import { Page, Text, View, Document, StyleSheet, Image, Font, Svg, Path } from '
 //     ]
 // });
 
+// Disable Hyphenation for all fonts (Prevents breaking words with hyphens)
+Font.registerHyphenationCallback(word => [word]);
+
 const styles = StyleSheet.create({
     page: {
         paddingGlobal: 40,
-        fontFamily: 'Helvetica', // Reverted to standard font due to load error
+        fontFamily: 'Helvetica',
         paddingTop: 40,
-        paddingBottom: 60,
+        paddingBottom: 90,
         paddingLeft: 40,
         paddingRight: 40,
         fontSize: 10,
-        color: '#545555', // Gris Oscuro
+        color: '#545555',
         backgroundColor: '#FFFFFF'
     },
-    // Background Watermark
+    // Background Watermark (Imagotipo)
     watermarkContainer: {
         position: 'absolute',
         top: 0,
@@ -36,39 +39,40 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1,
-        opacity: 0.08 // 8% opacity as requested
+        opacity: 0.08
     },
     watermark: {
-        width: 400,
-        height: 400,
+        width: 550,
+        height: 550,
         objectFit: 'contain'
     },
-    // Draft Watermark
+    // Draft Status Watermark Text - PRELIMINAR (Restored)
     draftWatermark: {
         position: 'absolute',
-        fontSize: 100,
-        color: '#94A3B8', // Slate-400 (Light Gray)
-        opacity: 0.15,
+        fontSize: 110,
+        color: '#94A3B8',
+        opacity: 0.12,
         transform: 'rotate(-45deg)',
-        // fontFamily: 'Bebas Neue',
         fontWeight: 'bold',
         width: 800,
         textAlign: 'center',
-        top: 300,
-        left: -100
+        top: '40%',
+        left: '50%',
+        marginLeft: -400,
+        zIndex: 50
     },
     // Header
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 40,
+        marginBottom: 30,
         alignItems: 'center',
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
-        paddingBottom: 20
+        paddingBottom: 15
     },
     logo: {
-        width: 140, // Slightly reduced to "medio" size
+        width: 160,
         height: 'auto'
     },
     headerInfo: {
@@ -76,27 +80,32 @@ const styles = StyleSheet.create({
         textAlign: 'right'
     },
     headerCityDate: {
-        fontSize: 9,
+        fontSize: 10,
         color: '#545555',
+        marginBottom: 2
+    },
+    headerDate: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#284960',
         marginBottom: 2
     },
     // Project Info Block
     projectInfoContainer: {
-        marginBottom: 30,
+        marginBottom: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
         backgroundColor: '#F8FAFC',
-        padding: 15,
+        padding: 12,
         borderRadius: 4
     },
     projectInfoColumn: {
         flex: 1
     },
     projectTitle: {
-        // fontFamily: 'Bebas Neue',
-        fontWeight: 'bold', // Replacement for Bebas style
-        fontSize: 18, // Reduced from 24
-        color: '#284960', // Azul Institucional
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: '#284960',
         marginBottom: 4,
         textTransform: 'uppercase'
     },
@@ -107,19 +116,19 @@ const styles = StyleSheet.create({
         marginBottom: 2
     },
     clientDetail: {
-        fontSize: 10,
+        fontSize: 9,
         color: '#64748B'
     },
 
     // Table
     table: {
         width: '100%',
-        marginBottom: 20,
-        marginTop: 10
+        marginBottom: 15,
+        marginTop: 5
     },
     tableHeaderNode: {
         flexDirection: 'row',
-        backgroundColor: '#284960', // Azul Institucional
+        backgroundColor: '#284960',
         color: '#FFFFFF',
         paddingVertical: 10,
         paddingHorizontal: 6,
@@ -128,9 +137,8 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 4
     },
     tableHeaderText: {
-        // fontFamily: 'Bebas Neue',
         fontWeight: 'bold',
-        fontSize: 12,
+        fontSize: 11,
         letterSpacing: 0.5
     },
     tableRow: {
@@ -141,9 +149,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         alignItems: 'center'
     },
-    tableRowAlt: {
-        backgroundColor: '#F8FAFC'
-    },
     // Columns
     colQty: { width: '10%', textAlign: 'center' },
     colDesc: { width: '50%', textAlign: 'left', paddingRight: 10 },
@@ -153,27 +158,24 @@ const styles = StyleSheet.create({
     // Totals Section
     totalsContainer: {
         alignItems: 'flex-end',
-        marginTop: 20
+        marginTop: 15
     },
     totalRow: {
         flexDirection: 'row',
         width: '40%',
         justifyContent: 'space-between',
-        paddingVertical: 6,
-        paddingHorizontal: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F1F5F9'
+        paddingVertical: 4,
+        paddingHorizontal: 8
     },
     totalLabel: {
-        // fontFamily: 'Bebas Neue',
         fontWeight: 'bold',
-        fontSize: 12,
+        fontSize: 11,
         color: '#545555',
         textAlign: 'right',
         width: '60%'
     },
     totalValue: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 'bold',
         color: '#545555',
         textAlign: 'right',
@@ -183,47 +185,64 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '40%',
         justifyContent: 'space-between',
-        paddingVertical: 10,
+        paddingVertical: 8,
         paddingHorizontal: 8,
-        backgroundColor: '#284960', // Azul destaque
-        marginTop: 10,
+        backgroundColor: '#284960',
+        marginTop: 8,
         borderRadius: 4
     },
     totalFinalLabel: {
-        // fontFamily: 'Bebas Neue',
         fontWeight: 'bold',
-        fontSize: 14,
+        fontSize: 13,
         color: '#FFFFFF',
         textAlign: 'right',
         width: '60%'
     },
     totalFinalValue: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 'bold',
         color: '#FFFFFF',
         textAlign: 'right',
         width: '40%'
     },
 
-    // Footer
-    footer: {
+    // Legal Legend
+    legalLegend: {
+        marginTop: 8,
+        fontSize: 8,
+        color: '#64748B',
+        textAlign: 'right',
+        fontStyle: 'italic'
+    },
+
+    // Footer Redesign
+    footerContainer: {
         position: 'absolute',
         bottom: 30,
         left: 40,
         right: 40,
-        textAlign: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#E2E8F0',
-        paddingTop: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
         alignItems: 'center'
     },
-    footerText: {
-        // fontFamily: 'Bebas Neue',
-        fontSize: 9, // Smaller font for clean look
+    footerContactLine: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#284960',
+        marginBottom: 8,
+        textAlign: 'center'
+    },
+    footerDivider: {
+        width: '100%',
+        borderTopWidth: 1,
+        borderTopColor: '#E2E8F0',
+        marginBottom: 10
+    },
+    footerSlogan: {
+        fontSize: 16,
+        fontWeight: 'normal', // Changed from bold to regular
         color: '#545555',
-        letterSpacing: 0.5
+        textAlign: 'center',
+        width: '100%',
+        letterSpacing: 1
     }
 });
 
@@ -231,105 +250,115 @@ const styles = StyleSheet.create({
 const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const QuoteDocument = ({ quote }: { quote: any }) => (
-    <Document>
-        <Page size="A4" style={styles.page}>
-            {/* Watermark */}
-            <View style={styles.watermarkContainer}>
-                {/* Changed to Imagotipo as requested */}
-                <Image src="/imagotipo.svg" style={styles.watermark} />
-            </View>
+export const QuoteDocument = ({ quote }: { quote: any }) => {
+    // Logic for dynamic quantities/prices
+    const items = quote.items || [];
+    const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
+    const unitPrice = quote.subtotal / totalQuantity;
 
-            {/* Draft Status Watermark Text - Overlay on graphic watermark */}
-            {quote.status !== 'APPROVED' && (
-                <View style={[styles.watermarkContainer, { zIndex: -1 }]}>
-                    {/* Using separate container to ensure proper stacking if needed, though absolute handles it */}
+    // Fix for local image accessibility in some environments
+    // Using simple paths should work in public/
+    const logoSrc = "/logo_header.svg";
+    const watermarkSrc = "/imagotipo.svg";
+
+    return (
+        <Document>
+            <Page size="A4" style={styles.page}>
+                {/* Background Watermark (Imagotipo) */}
+                <View style={styles.watermarkContainer}>
+                    <Image src={watermarkSrc} style={styles.watermark} />
+                </View>
+
+                {/* Conditional Watermark Text (PRELIMINAR) - Restored */}
+                {quote.status !== 'APPROVED' && (
                     <Text style={styles.draftWatermark}>PRELIMINAR</Text>
-                </View>
-            )}
+                )}
 
-            {/* Header */}
-            <View style={styles.headerContainer}>
-                <Image src="/logo_header.svg" style={styles.logo} />
-
-                {/* Contact Info in Header */}
-                <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#545555', marginBottom: 4 }}>
-                        mayelam@kunstdesign.com.mx | +52 33 51 18 11 22 | @kunstanddesign
-                    </Text>
+                {/* Header */}
+                <View style={styles.headerContainer}>
+                    <Image src={logoSrc} style={styles.logo} />
                     <View style={styles.headerInfo}>
-                        <Text style={styles.headerCityDate}>Guadalajara, Jalisco</Text>
-                        <Text style={styles.headerCityDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+                        <Text style={styles.headerCityDate}>Tlajomulco de Zúñiga, Jalisco</Text>
+                        <Text style={styles.headerDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
                     </View>
                 </View>
-            </View>
 
-            {/* Project Info */}
-            <View style={styles.projectInfoContainer}>
-                <View style={styles.projectInfoColumn}>
-                    <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Proyecto</Text>
-                    <Text style={styles.projectTitle}>{quote.project_name}</Text>
+                {/* Project Info */}
+                <View style={styles.projectInfoContainer}>
+                    <View style={styles.projectInfoColumn}>
+                        <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Proyecto</Text>
+                        <Text style={styles.projectTitle}>{quote.project_name}</Text>
+                    </View>
+                    <View style={[styles.projectInfoColumn, { alignItems: 'flex-end' }]}>
+                        <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Cliente</Text>
+                        <Text style={styles.clientName}>
+                            {quote.client?.company || quote.client?.name}
+                        </Text>
+                        {quote.client?.company && (
+                            <Text style={styles.clientDetail}>{quote.client.name}</Text>
+                        )}
+                    </View>
                 </View>
-                <View style={[styles.projectInfoColumn, { alignItems: 'flex-end' }]}>
-                    <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Cliente</Text>
-                    <Text style={styles.clientName}>
-                        {quote.client?.company || quote.client?.name}
-                    </Text>
-                    {quote.client?.company && (
-                        <Text style={styles.clientDetail}>{quote.client.name}</Text>
+
+                {/* Table */}
+                <View style={styles.table}>
+                    <View style={styles.tableHeaderNode}>
+                        <Text style={[styles.colQty, styles.tableHeaderText]}>CANT.</Text>
+                        <Text style={[styles.colDesc, styles.tableHeaderText]}>CONCEPTO / DESCRIPCIÓN</Text>
+                        <Text style={[styles.colUnit, styles.tableHeaderText]}>PRECIO U.</Text>
+                        <Text style={[styles.colTotal, styles.tableHeaderText]}>IMPORTE</Text>
+                    </View>
+
+                    <View style={styles.tableRow}>
+                        <Text style={styles.colQty}>{totalQuantity}</Text>
+                        <Text style={[styles.colDesc, { fontWeight: 'bold' }]}>{quote.project_name}</Text>
+                        <Text style={styles.colUnit}>{formatCurrency(unitPrice)}</Text>
+                        <Text style={styles.colTotal}>{formatCurrency(quote.subtotal)}</Text>
+                    </View>
+                </View>
+
+                {/* Totals Section */}
+                <View style={styles.totalsContainer}>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Subtotal</Text>
+                        <Text style={styles.totalValue}>{formatCurrency(quote.subtotal)}</Text>
+                    </View>
+
+                    {quote.iva_amount > 0 && (
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>IVA (16%)</Text>
+                            <Text style={styles.totalValue}>{formatCurrency(quote.iva_amount)}</Text>
+                        </View>
                     )}
-                </View>
-            </View>
 
-            {/* Table */}
-            <View style={styles.table}>
-                <View style={styles.tableHeaderNode}>
-                    <Text style={[styles.colQty, styles.tableHeaderText]}>CANT.</Text>
-                    <Text style={[styles.colDesc, styles.tableHeaderText]}>CONCEPTO / DESCRIPCIÓN</Text>
-                    <Text style={[styles.colUnit, styles.tableHeaderText]}>PRECIO U.</Text>
-                    <Text style={[styles.colTotal, styles.tableHeaderText]}>IMPORTE</Text>
-                </View>
+                    {quote.isr_amount > 0 && (
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>Retenciones (ISR)</Text>
+                            <Text style={styles.totalValue}>{formatCurrency(quote.isr_amount)}</Text>
+                        </View>
+                    )}
 
-                {/* Single Consolidated Row */}
-                <View style={[styles.tableRow, styles.tableRowAlt]}>
-                    <Text style={[styles.colQty, { fontWeight: 'bold' }]}>1</Text>
-                    <Text style={[styles.colDesc, { fontWeight: 'bold' }]}>{quote.project_name}</Text>
-                    <Text style={styles.colUnit}>{formatCurrency(quote.subtotal)}</Text>
-                    <Text style={styles.colTotal}>{formatCurrency(quote.subtotal)}</Text>
-                </View>
-            </View>
-
-            {/* Totals */}
-            <View style={styles.totalsContainer}>
-                <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Subtotal</Text>
-                    <Text style={styles.totalValue}>{formatCurrency(quote.subtotal)}</Text>
-                </View>
-
-                {quote.iva_amount > 0 && (
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>IVA (16%)</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(quote.iva_amount)}</Text>
+                    <View style={styles.totalFinalRow}>
+                        <Text style={styles.totalFinalLabel}>IMPORTE TOTAL</Text>
+                        <Text style={styles.totalFinalValue}>{formatCurrency(quote.total)}</Text>
                     </View>
-                )}
 
-                {quote.isr_amount > 0 && (
-                    <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Retenciones (ISR)</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(quote.isr_amount)}</Text>
-                    </View>
-                )}
-
-                <View style={styles.totalFinalRow}>
-                    <Text style={styles.totalFinalLabel}>IMPORTE TOTAL</Text>
-                    <Text style={styles.totalFinalValue}>{formatCurrency(quote.total)}</Text>
+                    <Text style={styles.legalLegend}>
+                        Vigencia de la cotización: 10 días naturales a partir de su fecha de envío.
+                    </Text>
                 </View>
-            </View>
 
-            {/* Footer */}
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Desarrollando ideas, creando sueños.</Text>
-            </View>
-        </Page>
-    </Document>
-);
+                {/* Footer Redesign */}
+                <View style={styles.footerContainer}>
+                    <Text style={styles.footerContactLine}>
+                        mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
+                    </Text>
+                    <View style={styles.footerDivider} />
+                    <Text style={styles.footerSlogan}>
+                        Desarrollando ideas, creando sueños.
+                    </Text>
+                </View>
+            </Page>
+        </Document>
+    );
+};
