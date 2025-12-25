@@ -28,16 +28,14 @@ const styles = StyleSheet.create({
         color: '#545555',
         // Removed explicit backgroundColor to avoid hiding watermarks in some viewer layers
     },
-    // Background Watermark (Imagotipo)
-    // Calculated from user's center coordinates:
-    // Left = 145.7mm - (212.429mm / 2) = 39.4855mm
-    // Top = 192.364mm - (182.225mm / 2) = 101.2515mm
+    // Background Watermark (Imagotipo) with Artistic Bleed
+    // Positioned bottom-right, covering ~2/3 and slightly cut off
     watermarkContainer: {
         position: 'absolute',
-        left: '39.4855mm',
-        top: '101.2515mm',
-        width: '212.429mm',
-        height: '182.225mm',
+        bottom: '-25mm', // Bleed off the bottom
+        right: '-25mm',  // Bleed off the right
+        width: '160mm',  // ~75% of width (slightly more than 2/3)
+        height: '160mm',
         zIndex: -1,
     },
     watermark: {
