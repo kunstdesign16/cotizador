@@ -1,19 +1,5 @@
 import { Page, Text, View, Document, StyleSheet, Image, Font, Svg, Path } from '@react-pdf/renderer';
 
-// Register Custom Fonts
-// Font.register({
-//     family: 'Bebas Neue',
-//     src: 'https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.ttf'
-// });
-
-// Font.register({
-//     family: 'Fira Sans',
-//     fonts: [
-//         { src: 'https://fonts.gstatic.com/s/firasans/v17/va9E4kDNxMZdWfMOD5Vvl4jL.ttf' }, // Regular
-//         { src: 'https://fonts.gstatic.com/s/firasans/v17/va9B4kDNxMZdWfMOD5VnRExD6XlD.ttf', fontWeight: 'bold' } // Bold
-//     ]
-// });
-
 // Disable Hyphenation for all fonts (Prevents breaking words with hyphens)
 Font.registerHyphenationCallback(word => [word]);
 
@@ -27,20 +13,21 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: '#545555',
     },
-    // Background Watermark (Imagotipo) with Artistic Bleed
-    // Anchored bottom-right, covering ~2/3 and slightly cut off as per example
+    // Background Watermark (Full Page Image KD Carta)
+    // Using a full-page container to match the exact position in the provided PNG
     watermarkContainer: {
         position: 'absolute',
-        bottom: '-25mm', // Bleed off the bottom
-        right: '-30mm',  // Bleed off the right
-        width: '185mm',  // Large scale to cover bottom-right 2/3
-        height: '185mm',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: -1,
+        opacity: 0.05, // Applying 5% opacity as requested
     },
     watermark: {
         width: '100%',
         height: '100%',
-        objectFit: 'contain'
+        objectFit: 'cover' // Cover full page to maintain coordinates
     },
     // Draft Status Watermark Text - PRELIMINAR
     draftWatermark: {
@@ -68,7 +55,7 @@ const styles = StyleSheet.create({
         paddingBottom: 15
     },
     logo: {
-        width: '48mm', // Increased by 20%
+        width: '58mm', // Increased by 20% (from 48mm)
         height: 'auto'
     },
     headerInfo: {
@@ -233,8 +220,8 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     footerSlogan: {
-        fontSize: 18,
-        fontWeight: 'bold', // Strong, Bold, Dominant Slogan
+        fontSize: 16,
+        fontWeight: 'normal',
         color: '#545555',
         textAlign: 'center',
         width: '100%',
@@ -247,18 +234,18 @@ const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export const QuoteDocument = ({ quote }: { quote: any }) => {
-    // Logic for dynamic quantities/prices - Max units for consolidation
+    // Logic for dynamic quantities/prices
     const items = quote.items || [];
     const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
 
     const logoSrc = "/logo_header.png";
-    const watermarkSrc = "/imagotipo.png";
+    const watermarkSrc = "/imagotipo_full.png";
 
     return (
         <Document title={`Cotización ${quote.project_name}`}>
             <Page size="LETTER" style={styles.page}>
-                {/* Background Watermark (Imagotipo) */}
+                {/* Background Watermark Layer */}
                 <View style={styles.watermarkContainer}>
                     <Image src={watermarkSrc} style={styles.watermark} />
                 </View>
