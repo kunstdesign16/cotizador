@@ -26,22 +26,23 @@ const styles = StyleSheet.create({
         paddingRight: '20mm',
         fontSize: 10,
         color: '#545555',
-        backgroundColor: '#FFFFFF'
+        // Removed explicit backgroundColor to avoid hiding watermarks in some viewer layers
     },
     // Background Watermark (Imagotipo)
+    // Calculated from user's center coordinates:
+    // Left = 145.7mm - (212.429mm / 2) = 39.4855mm
+    // Top = 192.364mm - (182.225mm / 2) = 101.2515mm
     watermarkContainer: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
+        left: '39.4855mm',
+        top: '101.2515mm',
+        width: '212.429mm',
+        height: '182.225mm',
         zIndex: -1,
-        // Removed opacity style since source PNG already has it
     },
     watermark: {
-        width: '85%', // Slightly larger watermark
+        width: '100%',
+        height: '100%',
         objectFit: 'contain'
     },
     // Draft Status Watermark Text - PRELIMINAR
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
         paddingBottom: 15
     },
     logo: {
-        width: '48mm', // Increased by 20% (from 40mm)
+        width: '48mm', // Increased by 20%
         height: 'auto'
     },
     headerInfo: {
@@ -213,10 +214,10 @@ const styles = StyleSheet.create({
         fontStyle: 'italic'
     },
 
-    // Footer Redesign
+    // Footer
     footerContainer: {
         position: 'absolute',
-        bottom: '20mm', // Fixed position relative to bottom margin
+        bottom: '20mm',
         left: '20mm',
         right: '20mm',
         alignItems: 'center'
@@ -235,8 +236,8 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     footerSlogan: {
-        fontSize: 18, // Large
-        fontWeight: 'bold', // Dominant bold weight as per latest request
+        fontSize: 18,
+        fontWeight: 'bold', // Dominant bold weight as per latest master reqs
         color: '#545555',
         textAlign: 'center',
         width: '100%',
@@ -249,19 +250,17 @@ const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export const QuoteDocument = ({ quote }: { quote: any }) => {
-    // Logic for dynamic quantities/prices - Max units for consolidation
     const items = quote.items || [];
     const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
 
-    // Local assets (copied PNGs)
     const logoSrc = "/logo_header.png";
     const watermarkSrc = "/imagotipo.png";
 
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
-                {/* Background Watermark (Imagotipo) - Permanent */}
+                {/* Background Watermark (Imagotipo) */}
                 <View style={styles.watermarkContainer}>
                     <Image src={watermarkSrc} style={styles.watermark} />
                 </View>
