@@ -19,12 +19,11 @@ Font.registerHyphenationCallback(word => [word]);
 
 const styles = StyleSheet.create({
     page: {
-        paddingGlobal: 40,
         fontFamily: 'Helvetica',
-        paddingTop: 40,
-        paddingBottom: 90,
-        paddingLeft: 40,
-        paddingRight: 40,
+        paddingTop: '25mm',
+        paddingBottom: '25mm',
+        paddingLeft: '20mm',
+        paddingRight: '20mm',
         fontSize: 10,
         color: '#545555',
         backgroundColor: '#FFFFFF'
@@ -39,14 +38,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1,
-        opacity: 0.08
+        opacity: 0.05 // 5% opacity (range 4-6%)
     },
     watermark: {
-        width: 550,
-        height: 550,
+        width: '80%', // 80% of width
         objectFit: 'contain'
     },
-    // Draft Status Watermark Text - PRELIMINAR (Restored)
+    // Draft Status Watermark Text - PRELIMINAR
     draftWatermark: {
         position: 'absolute',
         fontSize: 110,
@@ -72,7 +70,7 @@ const styles = StyleSheet.create({
         paddingBottom: 15
     },
     logo: {
-        width: 160,
+        width: '40mm', // Official width requirement 35-45mm
         height: 'auto'
     },
     headerInfo: {
@@ -218,9 +216,9 @@ const styles = StyleSheet.create({
     // Footer Redesign
     footerContainer: {
         position: 'absolute',
-        bottom: 30,
-        left: 40,
-        right: 40,
+        bottom: '20mm', // Fixed position relative to bottom margin
+        left: '20mm',
+        right: '20mm',
         alignItems: 'center'
     },
     footerContactLine: {
@@ -237,8 +235,8 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     footerSlogan: {
-        fontSize: 16,
-        fontWeight: 'normal', // Changed from bold to regular
+        fontSize: 18, // Large
+        fontWeight: 'bold', // Dominant bold weight as per latest request
         color: '#545555',
         textAlign: 'center',
         width: '100%',
@@ -251,25 +249,24 @@ const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export const QuoteDocument = ({ quote }: { quote: any }) => {
-    // Logic for dynamic quantities/prices
+    // Logic for dynamic quantities/prices - Max units for consolidation
     const items = quote.items || [];
     const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
 
-    // Fix for local image accessibility in some environments
-    // Using simple paths should work in public/
-    const logoSrc = "/logo_header.svg";
-    const watermarkSrc = "/imagotipo.svg";
+    // Local assets (copied PNGs)
+    const logoSrc = "/logo_header.png";
+    const watermarkSrc = "/imagotipo.png";
 
     return (
         <Document>
-            <Page size="A4" style={styles.page}>
-                {/* Background Watermark (Imagotipo) */}
+            <Page size="LETTER" style={styles.page}>
+                {/* Background Watermark (Imagotipo) - Permanent */}
                 <View style={styles.watermarkContainer}>
                     <Image src={watermarkSrc} style={styles.watermark} />
                 </View>
 
-                {/* Conditional Watermark Text (PRELIMINAR) - Restored */}
+                {/* Conditional Watermark Text (PRELIMINAR) */}
                 {quote.status !== 'APPROVED' && (
                     <Text style={styles.draftWatermark}>PRELIMINAR</Text>
                 )}
@@ -348,7 +345,7 @@ export const QuoteDocument = ({ quote }: { quote: any }) => {
                     </Text>
                 </View>
 
-                {/* Footer Redesign */}
+                {/* Footer */}
                 <View style={styles.footerContainer}>
                     <Text style={styles.footerContactLine}>
                         mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
