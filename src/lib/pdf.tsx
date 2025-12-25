@@ -26,16 +26,15 @@ const styles = StyleSheet.create({
         paddingRight: '20mm',
         fontSize: 10,
         color: '#545555',
-        // Removed explicit backgroundColor to avoid hiding watermarks in some viewer layers
     },
     // Background Watermark (Imagotipo) with Artistic Bleed
-    // Positioned bottom-right, covering ~2/3 and slightly cut off
+    // Anchored bottom-right, covering ~2/3 and slightly cut off as per example
     watermarkContainer: {
         position: 'absolute',
         bottom: '-25mm', // Bleed off the bottom
-        right: '-25mm',  // Bleed off the right
-        width: '160mm',  // ~75% of width (slightly more than 2/3)
-        height: '160mm',
+        right: '-30mm',  // Bleed off the right
+        width: '185mm',  // Large scale to cover bottom-right 2/3
+        height: '185mm',
         zIndex: -1,
     },
     watermark: {
@@ -235,7 +234,7 @@ const styles = StyleSheet.create({
     },
     footerSlogan: {
         fontSize: 18,
-        fontWeight: 'bold', // Dominant bold weight as per latest master reqs
+        fontWeight: 'bold', // Strong, Bold, Dominant Slogan
         color: '#545555',
         textAlign: 'center',
         width: '100%',
@@ -248,6 +247,7 @@ const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export const QuoteDocument = ({ quote }: { quote: any }) => {
+    // Logic for dynamic quantities/prices - Max units for consolidation
     const items = quote.items || [];
     const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
@@ -256,7 +256,7 @@ export const QuoteDocument = ({ quote }: { quote: any }) => {
     const watermarkSrc = "/imagotipo.png";
 
     return (
-        <Document>
+        <Document title={`Cotización ${quote.project_name}`}>
             <Page size="LETTER" style={styles.page}>
                 {/* Background Watermark (Imagotipo) */}
                 <View style={styles.watermarkContainer}>
