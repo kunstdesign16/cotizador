@@ -22,9 +22,18 @@ export async function GET(
             );
         }
 
+        // Normalize client data (Prisma null -> Component undefined)
+        const normalizedReport = {
+            ...result.report,
+            client: {
+                ...result.report.client,
+                company: result.report.client.company ?? undefined,
+            },
+        };
+
         // Render PDF directly to stream
         const stream = await renderToStream(
-            <ClientResumeDocument data={ result.report } />
+            <ClientResumeDocument data={normalizedReport as any} />
         );
 
         // Return PDF response
