@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Calculator, TrendingUp, TrendingDown, Wallet, Download, DollarSign } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 interface AccountingClientProps {
     quotes: any[]

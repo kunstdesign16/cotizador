@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createIncome, createVariableExpense } from "@/actions/accounting"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 
 export function IncomeForm({ projects = [], onSuccess }: { projects?: any[], onSuccess: () => void }) {
     const [loading, setLoading] = useState(false)
@@ -81,7 +80,7 @@ export function IncomeForm({ projects = [], onSuccess }: { projects?: any[], onS
             })
             toast.success("Ingreso registrado")
             onSuccess()
-        } catch (error) {
+        } catch {
             toast.error("Error al registrar ingreso")
         } finally {
             setLoading(false)
@@ -294,7 +293,7 @@ export function VariableExpenseForm({ projects = [], suppliers = [], onSuccess }
             })
             toast.success("Egreso registrado")
             onSuccess()
-        } catch (error) {
+        } catch {
             toast.error("Error al registrar egreso")
         } finally {
             setLoading(false)

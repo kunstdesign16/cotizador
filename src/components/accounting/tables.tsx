@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
     Table,
     TableBody,
@@ -10,12 +9,10 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Plus, Trash2, Pencil, MoreHorizontal } from "lucide-react"
+import { Trash2, MoreHorizontal } from "lucide-react"
 import { deleteIncome, deleteVariableExpense } from "@/actions/accounting"
-import { toast } from "sonner"
 import {
     DropdownMenu,
     DropdownMenuContent,
