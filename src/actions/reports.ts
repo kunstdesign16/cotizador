@@ -2,7 +2,6 @@
 
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 // Verify admin access for all report actions
 async function verifyAdminAccess() {
@@ -45,7 +44,7 @@ export async function getProjectsList() {
                 quotesCount: p.quotes.length
             }))
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error fetching projects list:', error)
         return { success: false, error: error.message }
     }
@@ -172,7 +171,7 @@ export async function getProjectReport(projectId: string) {
                 expenses: project.expenses
             }
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error generating project report:', error)
         return { success: false, error: error.message }
     }
@@ -311,7 +310,7 @@ export async function getFinancialKardex(
                 totals
             }
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error generating financial kardex:', error)
         return { success: false, error: error.message }
     }
@@ -406,7 +405,7 @@ export async function getClientReport(clientId: string) {
                 incomes: client.incomes
             }
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error generating client report:', error)
         return { success: false, error: error.message }
     }
@@ -510,7 +509,7 @@ export async function getSupplierReport(supplierId: string) {
                 expenses: supplier.expenses
             }
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error generating supplier report:', error)
         return { success: false, error: error.message }
     }
@@ -534,7 +533,7 @@ export async function getClientsList() {
                 email: c.email
             }))
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error fetching clients list:', error)
         return { success: false, error: error.message }
     }
@@ -557,7 +556,7 @@ export async function getSuppliersList() {
                 type: s.type
             }))
         }
-    } catch (error: any) {
+    } catch (_error: any) {
         console.error('Error fetching suppliers list:', error)
         return { success: false, error: error.message }
     }
