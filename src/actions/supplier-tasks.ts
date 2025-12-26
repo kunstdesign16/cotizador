@@ -41,7 +41,7 @@ export async function updateTaskStatus(id: string, status: string) {
         revalidatePath('/tasks')
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error actualizando estatus' }
     }
 }
@@ -57,7 +57,7 @@ export async function updateTaskPriority(id: string, priority: string) {
         revalidatePath('/tasks')
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error actualizando prioridad' }
     }
 }
@@ -79,7 +79,7 @@ export async function updateSupplierTask(
         revalidatePath('/suppliers')
         revalidatePath('/tasks')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error actualizando tarea' }
     }
 }
@@ -91,7 +91,7 @@ export async function deleteTask(id: string) {
         revalidatePath('/suppliers')
         revalidatePath('/tasks')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error al eliminar tarea' }
     }
 }

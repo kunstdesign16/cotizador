@@ -116,7 +116,7 @@ export async function updateOrderStatus(id: string, status: string) {
         revalidatePath('/dashboard')
         revalidatePath(`/suppliers/${id}`) // If checking specifically
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error actualizando estatus' }
     }
 }
@@ -129,7 +129,7 @@ export async function deleteOrder(id: string) {
         revalidatePath('/supplier-orders')
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error al eliminar' }
     }
 }
@@ -269,7 +269,7 @@ export async function updatePaymentStatus(id: string, paymentStatus: string) {
         revalidatePath('/accounting')
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (error) {
+    } catch {
         return { success: false, error: 'Error actualizando estatus de pago' }
     }
 }
