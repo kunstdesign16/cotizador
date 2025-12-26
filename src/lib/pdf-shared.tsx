@@ -11,7 +11,7 @@ const WATERMARK_PATH = path.join(process.cwd(), 'public/brand/watermark.png');
 export const sharedStyles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
-        paddingTop: '45mm', // Increased for header clearance
+        paddingTop: '55mm', // Increased for header clearance (Extra 1cm as requested)
         paddingBottom: '35mm', // Space for the larger footer
         paddingLeft: '20mm',
         paddingRight: '20mm',
@@ -88,7 +88,7 @@ export const sharedStyles = StyleSheet.create({
         alignItems: 'center',
     },
     contactLine: {
-        fontSize: 12, // Larger as requested
+        fontSize: 10, // Reduced 2pt (was 12)
         fontWeight: 'bold',
         color: '#284960',
         marginBottom: 8,
@@ -102,8 +102,8 @@ export const sharedStyles = StyleSheet.create({
         marginBottom: 10
     },
     slogan: {
-        fontSize: 20, // Larger and Bold
-        fontWeight: 'bold',
+        fontSize: 18, // Reduced 2pt (was 20)
+        fontWeight: 'normal', // Regular as requested
         color: '#545555',
         textAlign: 'center',
         width: '100%',
@@ -113,17 +113,17 @@ export const sharedStyles = StyleSheet.create({
 
 export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) => (
     <>
-        <View style={sharedStyles.watermarkContainer}>
+        <View style={sharedStyles.watermarkContainer} fixed>
             <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
         </View>
         {!isApproved && (
-            <Text style={sharedStyles.draftWatermark}>PRELIMINAR</Text>
+            <Text style={sharedStyles.draftWatermark} fixed>PRELIMINAR</Text>
         )}
     </>
 );
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
-    <View style={sharedStyles.headerContainer}>
+    <View style={sharedStyles.headerContainer} fixed>
         <Image src={LOGO_PATH} style={sharedStyles.logo} />
         <View style={sharedStyles.headerInfo}>
             <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
@@ -139,7 +139,7 @@ export const PDFHeader = ({ date }: { date: string | Date }) => (
 );
 
 export const PDFFooter = () => (
-    <View style={sharedStyles.footerContainer}>
+    <View style={sharedStyles.footerContainer} fixed>
         <Text style={sharedStyles.contactLine}>
             mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
         </Text>
