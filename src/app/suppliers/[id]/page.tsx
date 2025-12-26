@@ -4,7 +4,7 @@ import { ProductFormDialog } from "@/components/product-form-dialog"
 import { ProductImportForm } from "@/components/product-import-form"
 import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
-import { Trash2, Phone, Mail, FileText, ArrowLeft, Plus, ExternalLink, Calendar, MapPin, Pencil, Download } from "lucide-react"
+import { Trash2, ArrowLeft, Plus, Pencil, Download } from "lucide-react"
 import Link from "next/link"
 import { notFound } from 'next/navigation'
 import { SupplierOrderForm } from "@/components/supplier-order-form"

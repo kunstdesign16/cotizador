@@ -1,7 +1,6 @@
 'use client'
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,16 +10,10 @@ import { Input } from "@/components/ui/input"
 import {
     Calculator,
     TrendingUp,
-    TrendingDown,
     Wallet,
     Download,
-    DollarSign,
-    FileText,
-    Search,
     ArrowUpRight,
     ArrowDownRight,
-    PieChart,
-    ShoppingCart
 } from 'lucide-react'
 import {
     Dialog,
