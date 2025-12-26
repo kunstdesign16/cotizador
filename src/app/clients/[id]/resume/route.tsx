@@ -36,11 +36,15 @@ export async function GET(
             <ClientResumeDocument data={normalizedReport as any} />
         );
 
+        // Sanitize filename
+        const clientName = result.report.client.name.replace(/[^a-z0-9]/gi, '_');
+        const fileName = `Hoja_de_Vida_${clientName}.pdf`;
+
         // Return PDF response
         return new NextResponse(stream as any, {
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="Hoja_de_Vida_${id}.pdf"`,
+                'Content-Disposition': `attachment; filename="${fileName}"`,
             },
         });
     } catch (error: any) {

@@ -3,6 +3,9 @@ import { Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 // Disable Hyphenation globally for institutional documents
 Font.registerHyphenationCallback(word => [word]);
 
+const LOGO_PATH = '/Users/kunstdesign/Documents/cotizador_kunst/kunst_design.png';
+const WATERMARK_PATH = '/Users/kunstdesign/Documents/cotizador_kunst/Imagotipo KD carta.png';
+
 export const sharedStyles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
@@ -21,13 +24,14 @@ export const sharedStyles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
         zIndex: -1,
         opacity: 0.05, // 5% opacity
     },
     watermark: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover', // Cover full page to maintain coordinates
+        width: '80%', // size 70-80%
+        height: 'auto',
     },
     draftWatermark: {
         position: 'absolute',
@@ -109,7 +113,7 @@ export const sharedStyles = StyleSheet.create({
 export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) => (
     <>
         <View style={sharedStyles.watermarkContainer}>
-            <Image src="/watermark_final.png" style={sharedStyles.watermark} />
+            <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
         </View>
         {!isApproved && (
             <Text style={sharedStyles.draftWatermark}>PRELIMINAR</Text>
@@ -119,7 +123,7 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer}>
-        <Image src="/logo_final.png" style={sharedStyles.logo} />
+        <Image src={LOGO_PATH} style={sharedStyles.logo} />
         <View style={sharedStyles.headerInfo}>
             <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
             <Text style={sharedStyles.dateText}>
