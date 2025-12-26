@@ -123,7 +123,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 toast.error(result.error || 'Error al eliminar proyecto')
             }
         } catch {
-            console.error('Error:', error)
+            console.error('Error al eliminar proyecto')
             toast.error('Error al eliminar proyecto')
         } finally {
             setIsDeleting(false)
@@ -157,7 +157,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 toast.error(result.error || 'Error al registrar ingreso')
             }
         } catch {
-            console.error('Error:', error)
+            console.error('Error al registrar ingreso')
             toast.error('Error al registrar ingreso')
         } finally {
             setLoadingIncome(false)
