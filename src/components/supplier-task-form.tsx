@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, X, ClipboardList } from 'lucide-react'
+import { X, ClipboardList } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createSupplierTask } from '@/actions/supplier-tasks'
@@ -23,7 +23,6 @@ interface QuoteSummary {
 
 export function SupplierTaskForm({ supplierId, supplierType, projects = [], children }: SupplierTaskFormProps) {
     const [open, setOpen] = useState(false)
-    const [quotes, setQuotes] = useState<QuoteSummary[]>([])
     const [selectedQuote, setSelectedQuote] = useState('')
     const [description, setDescription] = useState('')
     const [expectedDate, setExpectedDate] = useState('')
@@ -56,7 +55,7 @@ export function SupplierTaskForm({ supplierId, supplierType, projects = [], chil
             } else {
                 alert(result.error)
             }
-        } catch (error) {
+        } catch {
             alert('Error al crear tarea')
         } finally {
             setLoading(false)

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckSquare, Pencil, Trash2, ShoppingCart } from 'lucide-react'
+import { Pencil, Trash2, ShoppingCart } from 'lucide-react'
 import { NewTaskDialog } from './new-task-dialog'
 import { EditTaskDialog } from './edit-task-dialog'
 import { updateTaskStatus, deleteTask } from '@/actions/supplier-tasks'
@@ -33,7 +33,7 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
             const products = await getProductsBySupplier(task.supplierId)
             setSupplierProducts(products)
             setConvertingTask(task)
-        } catch (error) {
+        } catch {
             toast.error('Error al cargar productos del proveedor')
         } finally {
             setLoadingProducts(false)

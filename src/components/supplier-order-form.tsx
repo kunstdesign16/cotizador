@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, X, ShoppingCart, Pencil, Receipt, Trash2 } from 'lucide-react'
 import { createSupplierOrder, updateSupplierOrder } from '@/actions/supplier-orders'
+import { Popover } from "@/components/ui/popover"
 import { useRouter } from 'next/navigation'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 interface Product {
     id: string
@@ -136,7 +134,7 @@ export function SupplierOrderForm({ supplierId, products, projects = [], tasks =
             } else {
                 alert(result.error)
             }
-        } catch (error) {
+        } catch {
             alert('Error al guardar orden')
         } finally {
             setLoading(false)
@@ -274,7 +272,7 @@ export function SupplierOrderForm({ supplierId, products, projects = [], tasks =
                                                 </td>
                                             </tr>
                                         ) : (
-                                            items.map((item, index) => (
+                                            items.map((item) => (
                                                 <tr key={item.code} className="hover:bg-muted/50">
                                                     <td className="p-4 font-mono text-xs">{item.code}</td>
                                                     <td className="p-4">{item.name}</td>
