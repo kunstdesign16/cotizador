@@ -86,7 +86,7 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
                     alert(result.error)
                 }
             }
-        } catch (error) {
+        } catch (_error) {
             alert('Error al guardar')
         } finally {
             setLoading(false)

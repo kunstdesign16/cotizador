@@ -97,8 +97,15 @@ const styles = StyleSheet.create({
 const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const ClientResumeDocument = ({ data }: { data: any }) => {
-    const { client, metrics, quotesByStatus, projectsByStatus, projects, quotes } = data;
+export const ClientResumeDocument = ({ data }: {
+    data: {
+        client: { name: string; company?: string; email: string; phone: string; createdAt: string };
+        metrics: { totalProyectos: number; totalCotizaciones: number; totalIngresos: number };
+        projectsByStatus: { cotizando: number; aprobado: number; produccion: number; entregado: number; cerrado: number };
+        projects?: Array<{ id: string; name: string; createdAt: string; status: string; quotes?: Array<{ total: number }> }>;
+    }
+}) => {
+    const { client, metrics, projectsByStatus, projects } = data;
 
     return (
         <Document title={`Hoja de Vida - ${client.name}`}>
