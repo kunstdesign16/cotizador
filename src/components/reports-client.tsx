@@ -340,10 +340,10 @@ export function ReportsClient() {
                                 <div className="p-6 bg-white border-t border-secondary flex justify-end gap-3">
                                     <Button
                                         disabled={!projectReport}
-                                        onClick={() => projectReport && generateProjectPDF(projectReport)}
+                                        onClick={() => projectReport && window.open(`/projects/${projectReport.project.id}/report`, '_blank')}
                                         className={`rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 px-8 transition-all ${!projectReport
-                                                ? 'bg-secondary/30 text-primary/30 cursor-not-allowed shadow-none hover:bg-secondary/30'
-                                                : 'bg-primary text-white shadow-xl hover:shadow-2xl hover:bg-primary/90'
+                                            ? 'bg-secondary/30 text-primary/30 cursor-not-allowed shadow-none hover:bg-secondary/30'
+                                            : 'bg-primary text-white shadow-xl hover:shadow-2xl hover:bg-primary/90'
                                             }`}
                                     >
                                         <Download className="h-4 w-4 mr-2" /> Descargar PDF Oficial
@@ -547,7 +547,7 @@ export function ReportsClient() {
                                 <Button
                                     variant="outline"
                                     disabled={!clientReport}
-                                    onClick={() => clientReport && generateClientPDF(clientReport)}
+                                    onClick={() => clientReport && window.open(`/clients/${clientReport.client.id}/resume`, '_blank')}
                                     className="w-full rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 border-secondary text-primary"
                                 >
                                     <Download className="h-4 w-4 mr-2" /> Hoja de Vida Comercial (PDF)

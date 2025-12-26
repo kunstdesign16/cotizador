@@ -1,78 +1,8 @@
-import { Page, Text, View, Document, StyleSheet, Image, Font, Svg, Path } from '@react-pdf/renderer';
-
-// Disable Hyphenation for all fonts (Prevents breaking words with hyphens)
-Font.registerHyphenationCallback(word => [word]);
+import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { sharedStyles, PDFHeader, PDFFooter, PDFWatermark } from './pdf-shared';
 
 const styles = StyleSheet.create({
-    page: {
-        fontFamily: 'Helvetica',
-        paddingTop: '25mm',
-        paddingBottom: '25mm',
-        paddingLeft: '20mm',
-        paddingRight: '20mm',
-        fontSize: 10,
-        color: '#545555',
-    },
-    // Background Watermark (Full Page Image KD Carta)
-    // Using a full-page container to match the exact position in the provided PNG
-    watermarkContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: -1,
-        opacity: 0.05, // Applying 5% opacity as requested
-    },
-    watermark: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover' // Cover full page to maintain coordinates
-    },
-    // Draft Status Watermark Text - PRELIMINAR
-    draftWatermark: {
-        position: 'absolute',
-        fontSize: 110,
-        color: '#94A3B8',
-        opacity: 0.12,
-        transform: 'rotate(-45deg)',
-        fontWeight: 'bold',
-        width: 800,
-        textAlign: 'center',
-        top: '40%',
-        left: '50%',
-        marginLeft: -400,
-        zIndex: 50
-    },
-    // Header
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 30,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-        paddingBottom: 15
-    },
-    logo: {
-        width: '58mm', // Increased by 20% (from 48mm)
-        height: 'auto'
-    },
-    headerInfo: {
-        alignItems: 'flex-end',
-        textAlign: 'right'
-    },
-    headerCityDate: {
-        fontSize: 10,
-        color: '#545555',
-        marginBottom: 2
-    },
-    headerDate: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#284960',
-        marginBottom: 2
-    },
+    ...sharedStyles,
     // Project Info Block
     projectInfoContainer: {
         marginBottom: 25,
@@ -80,7 +10,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: '#F8FAFC',
         padding: 12,
-        borderRadius: 4
+        borderRadius: 4,
+        marginTop: 10,
     },
     projectInfoColumn: {
         flex: 1
@@ -196,36 +127,6 @@ const styles = StyleSheet.create({
         color: '#64748B',
         textAlign: 'right',
         fontStyle: 'italic'
-    },
-
-    // Footer
-    footerContainer: {
-        position: 'absolute',
-        bottom: '20mm',
-        left: '20mm',
-        right: '20mm',
-        alignItems: 'center'
-    },
-    footerContactLine: {
-        fontSize: 11,
-        fontWeight: 'bold',
-        color: '#284960',
-        marginBottom: 8,
-        textAlign: 'center'
-    },
-    footerDivider: {
-        width: '100%',
-        borderTopWidth: 1,
-        borderTopColor: '#E2E8F0',
-        marginBottom: 10
-    },
-    footerSlogan: {
-        fontSize: 16,
-        fontWeight: 'normal',
-        color: '#545555',
-        textAlign: 'center',
-        width: '100%',
-        letterSpacing: 1
     }
 });
 
@@ -239,30 +140,14 @@ export const QuoteDocument = ({ quote }: { quote: any }) => {
     const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
 
-    const logoSrc = "/logo_header.png";
-    const watermarkSrc = "/imagotipo_full.png";
+    const isApproved = quote.status === 'APPROVED';
 
     return (
         <Document title={`Cotización ${quote.project_name}`}>
             <Page size="LETTER" style={styles.page}>
-                {/* Background Watermark Layer */}
-                <View style={styles.watermarkContainer}>
-                    <Image src={watermarkSrc} style={styles.watermark} />
-                </View>
-
-                {/* Conditional Watermark Text (PRELIMINAR) */}
-                {quote.status !== 'APPROVED' && (
-                    <Text style={styles.draftWatermark}>PRELIMINAR</Text>
-                )}
-
-                {/* Header */}
-                <View style={styles.headerContainer}>
-                    <Image src={logoSrc} style={styles.logo} />
-                    <View style={styles.headerInfo}>
-                        <Text style={styles.headerCityDate}>Tlajomulco de Zúñiga, Jalisco</Text>
-                        <Text style={styles.headerDate}>{new Date(quote.date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
-                    </View>
-                </View>
+                {/* Unified Branding Header, Watermark and Footer */}
+                <PDFWatermark isApproved={isApproved} />
+                <PDFHeader date={quote.date} />
 
                 {/* Project Info */}
                 <View style={styles.projectInfoContainer}>
@@ -329,16 +214,7 @@ export const QuoteDocument = ({ quote }: { quote: any }) => {
                     </Text>
                 </View>
 
-                {/* Footer */}
-                <View style={styles.footerContainer}>
-                    <Text style={styles.footerContactLine}>
-                        mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
-                    </Text>
-                    <View style={styles.footerDivider} />
-                    <Text style={styles.footerSlogan}>
-                        Desarrollando ideas, creando sueños.
-                    </Text>
-                </View>
+                <PDFFooter />
             </Page>
         </Document>
     );
