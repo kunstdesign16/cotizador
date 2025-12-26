@@ -45,8 +45,8 @@ export async function getProjectsList() {
             }))
         }
     } catch (_error: any) {
-        console.error('Error fetching projects list:', error)
-        return { success: false, error: error.message }
+        console.error('Error fetching projects list:', _error)
+        return { success: false, error: _error.message }
     }
 }
 
@@ -172,8 +172,8 @@ export async function getProjectReport(projectId: string) {
             }
         }
     } catch (_error: any) {
-        console.error('Error generating project report:', error)
-        return { success: false, error: error.message }
+        console.error('Error generating project report:', _error)
+        return { success: false, error: _error.message }
     }
 }
 
@@ -311,8 +311,8 @@ export async function getFinancialKardex(
             }
         }
     } catch (_error: any) {
-        console.error('Error generating financial kardex:', error)
-        return { success: false, error: error.message }
+        console.error('Error generating financial kardex:', _error)
+        return { success: false, error: _error.message }
     }
 }
 
@@ -510,8 +510,8 @@ export async function getSupplierReport(supplierId: string) {
             }
         }
     } catch (_error: any) {
-        console.error('Error generating supplier report:', error)
-        return { success: false, error: error.message }
+        console.error('Error generating supplier report:', _error)
+        return { success: false, error: _error.message }
     }
 }
 
@@ -534,8 +534,8 @@ export async function getClientsList() {
             }))
         }
     } catch (_error: any) {
-        console.error('Error fetching clients list:', error)
-        return { success: false, error: error.message }
+        console.error('Error fetching clients list:', _error)
+        return { success: false, error: _error.message }
     }
 }
 
@@ -557,7 +557,7 @@ export async function getSuppliersList() {
             }))
         }
     } catch (_error: any) {
-        console.error('Error fetching suppliers list:', error)
-        return { success: false, error: error.message }
+        console.error('Error fetching suppliers list:', _error)
+        return { success: false, error: _error.message }
     }
 }

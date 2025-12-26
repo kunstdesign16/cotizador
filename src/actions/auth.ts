@@ -12,7 +12,7 @@ export async function login(prevState: any, formData: FormData) {
     let bcrypt;
     try {
         bcrypt = await import('bcryptjs');
-    } catch (e) {
+    } catch (_e) {
         console.error('Failed to load bcryptjs');
     }
 
@@ -41,7 +41,7 @@ export async function login(prevState: any, formData: FormData) {
         if (bcrypt) {
             try {
                 isCorrectPassword = await bcrypt.compare(password, user.password)
-            } catch (e) {
+            } catch (_e) {
                 // Not a bcrypt hash
             }
         }
@@ -80,12 +80,12 @@ export async function login(prevState: any, formData: FormData) {
         cookieStore.set('auth_refresh', Date.now().toString(), cookieOptions)
 
         redirect('/dashboard')
-    } catch (error: any) {
-        if (error.message === 'NEXT_REDIRECT') {
-            throw error
+    } catch (_error: any) {
+        if (_error.message === 'NEXT_REDIRECT') {
+            throw _error
         }
-        console.error('Login error:', error)
-        return { error: 'Ocurrió un error: ' + error.message }
+        console.error('Login error:', _error)
+        return { error: 'Ocurrió un error: ' + _error.message }
     }
 }
 
@@ -125,12 +125,12 @@ export async function register(prevState: any, formData: FormData) {
         })
 
         redirect('/login')
-    } catch (error: any) {
-        if (error.message === 'NEXT_REDIRECT') {
-            throw error
+    } catch (_error: any) {
+        if (_error.message === 'NEXT_REDIRECT') {
+            throw _error
         }
-        console.error('Register error:', error)
-        return { error: 'Error: ' + error.message }
+        console.error('Register error:', _error)
+        return { error: 'Error: ' + _error.message }
     }
 }
 

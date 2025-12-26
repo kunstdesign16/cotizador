@@ -7,7 +7,7 @@ export async function saveQuote(data: any) {
     // data is the JSON payload from the client state
     // In a real app we should validate this with Zod again
 
-    const { client, project, items, iva_rate, clientId, projectId } = data
+    const { client, project: _project, items, iva_rate: _iva_rate, clientId, projectId } = data
 
     // VALIDATION: If projectId is provided, verify the project exists
     if (projectId) {

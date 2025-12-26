@@ -53,8 +53,8 @@ export async function createClient(prevState: ClientState, formData: FormData) {
         revalidatePath('/clients')
         revalidatePath('/quotes/new') // Revalidate quotes page to refresh client list
         return { message: 'Cliente creado exitosamente', success: true, id: client.id }
-    } catch (e) {
-        console.error(e)
+    } catch (_error) {
+        console.error(_error)
         return { message: 'Error al crear el cliente' }
     }
 }
@@ -82,7 +82,7 @@ export async function updateClient(id: string, prevState: ClientState, formData:
         revalidatePath('/clients/' + id)
         revalidatePath('/quotes/new')
         return { message: 'Cliente actualizado', success: true }
-    } catch (e) {
+    } catch (_error) {
         return { message: 'Error al actualizar' }
     }
 }
@@ -95,7 +95,7 @@ export async function deleteClient(id: string) {
         })
         revalidatePath('/clients')
         return { success: true }
-    } catch (error) {
+    } catch (_error) {
         return { success: false, error: 'Error al eliminar' }
     }
 }

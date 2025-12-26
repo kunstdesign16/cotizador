@@ -46,9 +46,9 @@ export async function createProduct(supplierId: string, data: {
         })
         revalidatePath(`/suppliers/${supplierId}`)
         return { success: true, product }
-    } catch (error) {
-        console.error('Error creating product:', error)
-        return { success: false, error: 'Error al crear producto' }
+    } catch (_error) {
+        console.error('Error creating product:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -68,9 +68,9 @@ export async function updateProduct(id: string, data: {
         })
         revalidatePath(`/suppliers/${product.supplierId}`)
         return { success: true, product }
-    } catch (error) {
-        console.error('Error updating product:', error)
-        return { success: false, error: 'Error al actualizar producto' }
+    } catch (_error) {
+        console.error('Error updating product:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -81,9 +81,9 @@ export async function deleteProduct(id: string, supplierId: string) {
         })
         revalidatePath(`/suppliers/${supplierId}`)
         return { success: true }
-    } catch (error) {
-        console.error('Error deleting product:', error)
-        return { success: false, error: 'Error al eliminar producto' }
+    } catch (_error) {
+        console.error('Error deleting product:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 

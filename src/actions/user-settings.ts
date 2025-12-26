@@ -54,9 +54,9 @@ export async function updateUserProfile(data: { name: string; email: string }) {
 
         revalidatePath('/')
         return { success: true }
-    } catch (error) {
-        console.error('Update Profile Error:', error)
-        return { success: false, error: 'Error al actualizar perfil' }
+    } catch (_error) {
+        console.error('Update Profile Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -89,8 +89,8 @@ export async function changeUserPassword(data: { current: string; new: string })
         })
 
         return { success: true }
-    } catch (error) {
-        console.error('Password Change Error:', error)
-        return { success: false, error: 'Error al cambiar contraseña' }
+    } catch (_error) {
+        console.error('Password Change Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }

@@ -100,8 +100,8 @@ export async function getManagementDashboardData() {
             agedProjects: JSON.parse(JSON.stringify(agedProjects))
         }
 
-    } catch (error) {
-        console.error('Error fetching management data:', error)
-        throw error
+    } catch (_error) {
+        console.error('Error fetching management data:', _error)
+        throw _error
     }
 }
