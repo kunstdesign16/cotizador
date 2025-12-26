@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8FAFC',
         padding: 12,
         borderRadius: 4,
-        marginTop: 10,
+        marginTop: 20,
     },
     projectInfoColumn: {
         flex: 1
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     table: {
         width: '100%',
         marginBottom: 15,
-        marginTop: 5
+        marginTop: 20 // Changed from 5 to 20 based on the instruction's intent to increase marginTop
     },
     tableHeaderNode: {
         flexDirection: 'row',

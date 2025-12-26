@@ -4,7 +4,7 @@ import { sharedStyles, PDFHeader, PDFFooter, PDFWatermark } from './pdf-shared';
 const styles = StyleSheet.create({
     ...sharedStyles,
     titleContainer: {
-        marginTop: 10,
+        marginTop: 20,
         marginBottom: 20,
         alignItems: 'center',
     },

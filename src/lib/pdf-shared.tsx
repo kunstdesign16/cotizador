@@ -11,7 +11,7 @@ const WATERMARK_PATH = path.join(process.cwd(), 'public/brand/watermark.png');
 export const sharedStyles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
-        paddingTop: '30mm',
+        paddingTop: '45mm', // Increased for header clearance
         paddingBottom: '35mm', // Space for the larger footer
         paddingLeft: '20mm',
         paddingRight: '20mm',
