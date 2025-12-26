@@ -3,7 +3,7 @@
 import { ManagementCharts } from './charts'
 import { ControlLists } from './control-lists'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart3, TrendingUp, TrendingDown, Target, CheckCircle2, Clock } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, Target } from 'lucide-react'
 
 interface ManagementDashboardClientProps {
     data: {

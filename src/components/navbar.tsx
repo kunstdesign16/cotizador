@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { LayoutDashboard, Users, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -32,7 +33,7 @@ export function Navbar() {
                     {/* Right: Logo & User */}
                     <div className="flex items-center gap-6">
                         <Link href="/dashboard" className="flex items-center transition-opacity hover:opacity-80">
-                            <img src="/logo.svg" alt="Kunst & Design" className="h-32 w-auto object-contain" />
+                            <Image src="/logo.svg" alt="Kunst & Design" width={128} height={128} className="h-32 w-auto object-contain" />
                         </Link>
 
                         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium border border-border">

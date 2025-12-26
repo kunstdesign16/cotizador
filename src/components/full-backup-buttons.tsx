@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Download, Upload, AlertTriangle } from 'lucide-react'
+import { Download, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function FullBackupButtons() {

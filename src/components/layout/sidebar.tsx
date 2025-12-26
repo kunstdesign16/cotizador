@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -10,7 +11,6 @@ import {
     Users,
     Truck,
     CheckSquare,
-    Settings,
     Package,
     BarChart,
     Menu,
@@ -57,7 +57,7 @@ export function Sidebar({ initialUser }: SidebarProps) {
         <>
             <div className="flex h-24 items-center px-6 border-b">
                 <Link href="/dashboard" className="flex items-center justify-center w-full">
-                    <img src="/logo.svg" alt="Kunst Design" className="h-[80px] w-auto" />
+                    <Image src="/logo.svg" alt="Kunst Design" width={200} height={80} className="h-[80px] w-auto" />
                 </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
