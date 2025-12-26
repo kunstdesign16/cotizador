@@ -14,12 +14,7 @@ interface SupplierTaskFormProps {
     children?: React.ReactNode
 }
 
-// Simple Quote interface for the selector
-interface QuoteSummary {
-    id: string
-    project_name: string
-    client: { name: string }
-}
+// Unused QuoteSummary removed
 
 export function SupplierTaskForm({ supplierId, supplierType, projects = [], children }: SupplierTaskFormProps) {
     const [open, setOpen] = useState(false)

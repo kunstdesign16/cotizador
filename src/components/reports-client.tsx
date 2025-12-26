@@ -18,16 +18,14 @@ import {
     getSuppliersList
 } from '@/actions/reports'
 import {
-    generateProjectPDF,
     generateFinancialExcel,
     generateFinancialCSV,
-    generateClientPDF,
     generateSupplierExcel
 } from '@/lib/export-utils'
 import { toast } from 'sonner'
 
 export function ReportsClient() {
-    const [activeTab, setActiveTab] = useState('proyectos')
+    // Legacy activeTab state removed as it was unused
 
     // Projects state
     const [projects, setProjects] = useState<any[]>([])
@@ -167,7 +165,7 @@ export function ReportsClient() {
                 <p className="text-lg text-[#545555] font-brand-ui opacity-70">Documentación y análisis histórico corporativo</p>
             </header>
 
-            <Tabs defaultValue="proyectos" onValueChange={setActiveTab} className="space-y-8">
+            <Tabs defaultValue="proyectos" className="space-y-8">
                 <div className="bg-white/50 backdrop-blur-sm border-b border-secondary sticky top-0 z-10 py-4 -mx-8 px-8">
                     <TabsList className="bg-secondary/20 h-14 p-1 rounded-2xl gap-2">
                         <TabsTrigger value="proyectos" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded-xl px-8 font-brand-header uppercase tracking-widest text-xs h-full">

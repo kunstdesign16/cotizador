@@ -69,7 +69,7 @@ export function RegisterOrderPaymentDialog({ order }: RegisterOrderPaymentDialog
             } else {
                 toast.error(res.error || 'Error al registrar pago')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error de red al registrar pago')
         } finally {
             setIsSubmitting(false)

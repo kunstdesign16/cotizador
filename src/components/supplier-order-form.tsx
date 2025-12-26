@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, X, ShoppingCart, Pencil, Receipt, Trash2 } from 'lucide-react'
+import { Plus, X, ShoppingCart, Pencil, Trash2 } from 'lucide-react'
 import { createSupplierOrder, updateSupplierOrder } from '@/actions/supplier-orders'
-import { Popover } from "@/components/ui/popover"
 import { useRouter } from 'next/navigation'
 
 interface Product {

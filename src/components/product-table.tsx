@@ -51,7 +51,7 @@ export function ProductTable({ products, supplierId }: ProductTableProps) {
             {filteredProducts.length === 0 ? (
                 <div className="p-12 text-center text-muted-foreground">
                     {searchQuery ? (
-                        <p>No se encontraron productos que coincidan con "{searchQuery}"</p>
+                        <p>No se encontraron productos que coincidan con &quot;{searchQuery}&quot;</p>
                     ) : (
                         <>
                             <p>No hay productos registrados para este proveedor.</p>
