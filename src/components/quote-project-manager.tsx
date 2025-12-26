@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import QuotePDFClient from '@/app/quotes/[id]/pdf-client'
-import { Pencil, FileText, CheckSquare, Truck, ExternalLink, Plus } from 'lucide-react'
+import { Pencil, FileText, ExternalLink, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { createOrderFromQuoteItem } from '@/actions/supplier-orders'
 import { toast } from 'sonner'
@@ -91,7 +91,7 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
             } else {
                 toast.error(res.error || 'Error al generar orden')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error de red al generar orden')
         } finally {
             setIsCreatingOrder(null)
@@ -251,7 +251,7 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                                                                     <DialogHeader>
                                                                         <DialogTitle>Generar Orden de Compra</DialogTitle>
                                                                         <DialogDescription>
-                                                                            Se creará una Orden de Compra para "{item.concept}" basada en el costo cotizado de <strong>${item.cost_article.toLocaleString('es-MX')}</strong>.
+                                                                            Se creará una Orden de Compra para &quot;{item.concept}&quot; basada en el costo cotizado de <strong>${item.cost_article.toLocaleString('es-MX')}</strong>.
                                                                         </DialogDescription>
                                                                     </DialogHeader>
                                                                     <div className="py-4 space-y-4">
@@ -415,7 +415,7 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
 
                             {quote.status !== 'APPROVED' && (
                                 <p className="text-xs text-amber-600/80 max-w-sm text-center">
-                                    Nota: Esta cotización aún no está aprobada. El PDF incluirá una marca de "PRELIMINAR".
+                                    Nota: Esta cotización aún no está aprobada. El PDF incluirá una marca de &quot;PRELIMINAR&quot;.
                                 </p>
                             )}
                         </CardContent>

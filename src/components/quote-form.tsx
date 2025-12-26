@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation'
 import QuoteItemCostDialog from './quote-item-cost-dialog'
 
 import { ClientCombobox } from './client-combobox'
-import { ItemProductAutocomplete } from "@/components/item-product-autocomplete"
 
 // Types
 export type QuoteItem = {
