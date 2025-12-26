@@ -1,4 +1,4 @@
-import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 import { sharedStyles, PDFHeader, PDFFooter, PDFWatermark } from './pdf-shared';
 
 const styles = StyleSheet.create({
@@ -134,10 +134,22 @@ const styles = StyleSheet.create({
 const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const QuoteDocument = ({ quote }: { quote: any }) => {
+export const QuoteDocument = ({ quote }: {
+    quote: {
+        project_name: string;
+        date: string | Date;
+        status: string;
+        subtotal: number;
+        iva_amount: number;
+        isr_amount: number;
+        total: number;
+        client?: { name: string; company?: string };
+        items?: Array<{ quantity?: number }>;
+    }
+}) => {
     // Logic for dynamic quantities/prices
     const items = quote.items || [];
-    const totalQuantity = items.length > 0 ? Math.max(...items.map((i: any) => i.quantity || 0)) : 1;
+    const totalQuantity = items.length > 0 ? Math.max(...items.map((i: { quantity?: number }) => i.quantity || 0)) : 1;
     const unitPrice = quote.subtotal / totalQuantity;
 
     const isApproved = quote.status === 'APPROVED';

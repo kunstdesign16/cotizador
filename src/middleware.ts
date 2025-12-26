@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     const userRoleCookie = request.cookies.get('user_role')
 
     const userEmail = userEmailCookie?.value
-    let userRole = userRoleCookie?.value
+    const userRole = userRoleCookie?.value
 
     // Redirect to login if not authenticated
     if (!userEmail) {

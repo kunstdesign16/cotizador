@@ -83,7 +83,17 @@ const styles = StyleSheet.create({
 const formatCurrency = (amount: number) =>
     `$${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const ProjectReportDocument = ({ data }: { data: any }) => {
+export const ProjectReportDocument = ({ data }: {
+    data: {
+        project: { name: string; status: string; id: string };
+        client: { name: string; company?: string };
+        financial: { totalIngresos: number; totalEgresos: number; utilidad: number; margenUtilidad: number };
+        quotes: { total: number; approved: number; totalCotizado: number };
+        tasks: { total: number; completed: number };
+        orders: { total: number; received: number };
+        quotesDetail?: Array<{ id: string; project_name: string; date: string; status: string; total: number }>;
+    }
+}) => {
     const { project, client, financial, quotes, tasks, orders } = data;
 
     return (
@@ -152,7 +162,7 @@ export const ProjectReportDocument = ({ data }: { data: any }) => {
                                 <Text style={[styles.col3, { color: '#FFF', fontWeight: 'bold', fontSize: 10 }]}>Estatus</Text>
                                 <Text style={[styles.col4, { color: '#FFF', fontWeight: 'bold', fontSize: 10 }]}>Total</Text>
                             </View>
-                            {data.quotesDetail.map((q: any) => (
+                            {data.quotesDetail.map((q: { id: string; project_name: string; date: string; status: string; total: number }) => (
                                 <View key={q.id} style={styles.tableRow}>
                                     <Text style={[styles.col1, styles.tableCell]}>{q.project_name}</Text>
                                     <Text style={[styles.col2, styles.tableCell]}>{new Date(q.date).toLocaleDateString()}</Text>
