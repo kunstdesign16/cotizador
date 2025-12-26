@@ -1,10 +1,12 @@
 import { Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import path from 'path';
 
 // Disable Hyphenation globally for institutional documents
 Font.registerHyphenationCallback(word => [word]);
 
-const LOGO_PATH = '/Users/kunstdesign/Documents/cotizador_kunst/kunst_design.png';
-const WATERMARK_PATH = '/Users/kunstdesign/Documents/cotizador_kunst/Imagotipo KD carta.png';
+// Portable paths for branding assets - loaded from public dir but using process.cwd() for the PDF renderer
+const LOGO_PATH = path.join(process.cwd(), 'public/brand/logo.png');
+const WATERMARK_PATH = path.join(process.cwd(), 'public/brand/watermark.png');
 
 export const sharedStyles = StyleSheet.create({
     page: {
@@ -24,14 +26,13 @@ export const sharedStyles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
         zIndex: -1,
         opacity: 0.05, // 5% opacity
     },
     watermark: {
-        width: '80%', // size 70-80%
-        height: 'auto',
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover', // Cover full page as requested
     },
     draftWatermark: {
         position: 'absolute',
