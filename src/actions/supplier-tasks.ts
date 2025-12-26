@@ -25,7 +25,7 @@ export async function createSupplierTask(
         revalidatePath(`/suppliers/${supplierId}`)
         return { success: true, id: task.id }
     } catch (_error) {
-        console.error('Error creating task:', error)
+        console.error('Error creating task:', _error)
         return { success: false, error: 'Error al crear tarea' }
     }
 }

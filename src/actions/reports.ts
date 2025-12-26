@@ -406,8 +406,8 @@ export async function getClientReport(clientId: string) {
             }
         }
     } catch (_error: any) {
-        console.error('Error generating client report:', error)
-        return { success: false, error: error.message }
+        console.error('Error generating client report:', _error)
+        return { success: false, error: _error.message }
     }
 }
 

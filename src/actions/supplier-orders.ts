@@ -50,7 +50,7 @@ export async function createSupplierOrder(
         revalidatePath(`/suppliers/${supplierId}`)
         return { success: true, id: order.id }
     } catch (_error) {
-        console.error('Error creating order:', error)
+        console.error('Error creating order:', _error)
         return { success: false, error: 'Error al crear orden' }
     }
 }
@@ -98,7 +98,7 @@ export async function updateSupplierOrder(
         // For now, revalidate general paths.
         return { success: true }
     } catch (_error) {
-        console.error('Error updating order:', error)
+        console.error('Error updating order:', _error)
         return { success: false, error: 'Error al actualizar orden' }
     }
 }
@@ -162,7 +162,7 @@ export async function duplicateSupplierOrder(id: string) {
         revalidatePath('/dashboard')
         return { success: true, id: duplicate.id }
     } catch (_error) {
-        console.error('Error duplicating order:', error)
+        console.error('Error duplicating order:', _error)
         return { success: false, error: 'Error al duplicar orden' }
     }
 }
@@ -245,7 +245,7 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
 
         return { success: true }
     } catch (_error) {
-        console.error('Error registering order payment:', error)
+        console.error('Error registering order payment:', _error)
         return { success: false, error: 'Error al registrar el pago' }
     }
 }
@@ -393,7 +393,7 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
 
         return { success: true, id: result.id, total: orderTotal }
     } catch (_error) {
-        console.error('Error creating order from item:', error)
+        console.error('Error creating order from item:', _error)
         return { success: false, error: 'Error al generar la orden de compra.' }
     }
 }
