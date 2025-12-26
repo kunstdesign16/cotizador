@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { updateUserRole, toggleUserStatus } from "@/actions/admin-users"
@@ -26,7 +25,7 @@ export function UserAdminControls({ userId, initialRole, initialStatus }: UserAd
             } else {
                 toast.error(res.error || "Error al actualizar rol")
             }
-        } catch (error) {
+        } catch {
             toast.error("Error inesperado")
         }
     }
@@ -40,7 +39,7 @@ export function UserAdminControls({ userId, initialRole, initialStatus }: UserAd
             } else {
                 toast.error(res.error || "Error al cambiar estatus")
             }
-        } catch (error) {
+        } catch {
             toast.error("Error inesperado")
         }
     }

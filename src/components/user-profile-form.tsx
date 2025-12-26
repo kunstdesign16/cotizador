@@ -42,7 +42,7 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
             } else {
                 toast.error(res.error || "Error al actualizar")
             }
-        } catch (_error) {
+        } catch {
             toast.error("Ocurrió un error inesperado")
         } finally {
             setLoading(false)
@@ -71,7 +71,7 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
             } else {
                 toast.error(res.error || "Error al cambiar contraseña")
             }
-        } catch (_error) {
+        } catch {
             toast.error("Ocurrió un error")
         } finally {
             setSecurityLoading(false)
