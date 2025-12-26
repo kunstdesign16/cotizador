@@ -36,9 +36,9 @@ export async function createIncome(data: {
         })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        console.error('Error creating income:', error)
-        return { success: false, error: 'Error al registrar ingreso' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -59,8 +59,8 @@ export async function updateIncome(id: string, data: Partial<{
         })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        return { success: false, error: 'Error al actualizar ingreso' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -70,8 +70,8 @@ export async function deleteIncome(id: string) {
         await prisma.income.delete({ where: { id } })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        return { success: false, error: 'Error al eliminar ingreso' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -107,9 +107,9 @@ export async function createVariableExpense(data: {
         })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        console.error('Error creating expense:', error)
-        return { success: false, error: 'Error al registrar egreso' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -130,8 +130,8 @@ export async function updateVariableExpense(id: string, data: Partial<{
         })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        return { success: false, error: 'Error al actualizar egreso' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -141,8 +141,8 @@ export async function deleteVariableExpense(id: string) {
         await prisma.variableExpense.delete({ where: { id } })
         revalidatePath('/accounting')
         return { success: true }
-    } catch (error) {
-        return { success: false, error: 'Error al eliminar egreso' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 

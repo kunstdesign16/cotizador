@@ -37,8 +37,8 @@ export async function getProjectClosureEligibility(projectId: string) {
             pendingCount: pendingOrders.length,
             status: project.status
         }
-    } catch (error) {
-        return { eligible: false, error: 'Error al verificar elegibilidad' }
+    } catch (_error) {
+        return { eligible: false, error: 'Error' }
     }
 }
 
@@ -64,9 +64,9 @@ export async function closeProject(projectId: string) {
         revalidatePath('/dashboard')
 
         return { success: true }
-    } catch (error) {
-        console.error('Error closing project:', error)
-        return { success: false, error: 'Error al cerrar el proyecto' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -141,11 +141,11 @@ export async function deleteProject(projectId: string) {
         revalidatePath('/dashboard')
 
         return { success: true }
-    } catch (error) {
-        console.error('Error deleting project:', error)
+    } catch (_error) {
+        console.error('Error:', _error)
         return {
             success: false,
-            error: 'Error al eliminar el proyecto. Por favor, contacta al administrador.'
+            error: 'Error'
         }
     }
 }

@@ -23,9 +23,9 @@ export async function registerPayment({
     const { prisma } = await import('@/lib/prisma')
 
     try {
-        let finalQuoteId = quoteId
-        let finalSupplierId = supplierId
-        let finalDescription = description
+        const finalQuoteId = quoteId
+        const finalSupplierId = supplierId
+        const finalDescription = description
 
         if (orderId) {
             // Redirect to the specialized order payment logic
@@ -75,8 +75,8 @@ export async function registerPayment({
         revalidatePath('/dashboard')
         return { success: true }
 
-    } catch (error) {
-        console.error('Error registering payment:', error)
-        return { success: false, error: 'Error al registrar pago' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }

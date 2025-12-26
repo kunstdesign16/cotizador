@@ -41,9 +41,9 @@ export async function createUser(data: {
         })
         revalidatePath('/users')
         return { success: true, id: user.id }
-    } catch (error) {
-        console.error('Error creating user:', error)
-        return { success: false, error: 'Error al crear usuario' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -67,9 +67,9 @@ export async function updateUser(id: string, data: {
         })
         revalidatePath('/users')
         return { success: true }
-    } catch (error) {
-        console.error('Error updating user:', error)
-        return { success: false, error: 'Error al actualizar usuario' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -87,9 +87,9 @@ export async function deleteUser(id: string) {
         })
         revalidatePath('/users')
         return { success: true }
-    } catch (error) {
-        console.error('Error deleting user:', error)
-        return { success: false, error: 'Error al eliminar usuario' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -117,9 +117,9 @@ export async function getCurrentUser() {
         }
 
         return user
-    } catch (error) {
-        console.error('Error in getCurrentUser:', error)
-        return null // Fail silently to allow landing pages/login to load
+    } catch (_error) {
+        console.error('Error:', _error)
+        throw _error
     }
 }
 

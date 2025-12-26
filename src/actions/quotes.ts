@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 export async function saveQuote(data: any) {
     const { prisma } = await import('@/lib/prisma')
@@ -219,8 +218,8 @@ export async function getActiveProjects() {
             orderBy: { createdAt: 'desc' }
         })
         return projects
-    } catch (error) {
-        console.error('Error fetching active projects:', error)
+    } catch (_error) {
+        console.error('Error:', _error)
         return []
     }
 }
@@ -243,8 +242,8 @@ export async function updateQuoteStatus(id: string, status: string) {
         revalidatePath('/accounting')
         revalidatePath(`/quotes/${id}`)
         return { success: true }
-    } catch (e) {
-        return { success: false, error: 'Error modifying status' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -286,9 +285,9 @@ export async function approveQuote(quoteId: string) {
         revalidatePath(`/projects/${quote.projectId}`)
         revalidatePath(`/quotes/${quoteId}`)
         return { success: true }
-    } catch (e) {
-        console.error('Error approving quote:', e)
-        return { success: false, error: 'Error al aprobar la cotización' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -340,8 +339,8 @@ export async function deleteQuote(id: string) {
         })
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (e) {
-        return { success: false, error: 'Error deleting quote' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -415,9 +414,9 @@ export async function duplicateQuote(id: string) {
         if (original.projectId) revalidatePath(`/projects/${original.projectId}`)
 
         return { success: true, id: newQuote.id }
-    } catch (error) {
-        console.error('Error duplicating quote:', error)
-        return { success: false, error: 'Error al duplicar la cotización' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -431,7 +430,7 @@ export async function updateProjectDate(id: string, date: Date | null) {
         })
         revalidatePath('/dashboard')
         return { success: true }
-    } catch (e) {
-        return { success: false, error: 'Error modifying date' }
+    } catch (_error) {
+        return { success: false, error: 'Error' }
     }
 }

@@ -25,9 +25,9 @@ export async function createSupplier(name: string, type: string) {
         })
         revalidatePath('/suppliers')
         return { success: true, supplier }
-    } catch (error) {
-        console.error('Error creating supplier:', error)
-        return { success: false, error: 'Error al crear proveedor' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -43,9 +43,9 @@ export async function updateSupplier(id: string, name: string, type: string) {
         revalidatePath('/suppliers')
         revalidatePath(`/suppliers/${id}`)
         return { success: true, supplier }
-    } catch (error) {
-        console.error('Error updating supplier:', error)
-        return { success: false, error: 'Error al actualizar proveedor' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
@@ -56,9 +56,9 @@ export async function deleteSupplier(id: string) {
         })
         revalidatePath('/suppliers')
         return { success: true }
-    } catch (error) {
-        console.error('Error deleting supplier:', error)
-        return { success: false, error: 'Error al eliminar proveedor' }
+    } catch (_error) {
+        console.error('Error:', _error)
+        return { success: false, error: 'Error' }
     }
 }
 
