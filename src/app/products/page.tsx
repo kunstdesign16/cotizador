@@ -1,8 +1,7 @@
 
 import { ProductImportForm } from "@/components/product-import-form"
 import { prisma } from "@/lib/prisma"
-import { Search } from 'lucide-react'
-import { Input } from "@/components/ui/input"
+import { prisma } from "@/lib/prisma"
 import { ProductExportButton } from "@/components/product-export-button"
 
 export const dynamic = 'force-dynamic'

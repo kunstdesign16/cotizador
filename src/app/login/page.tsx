@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 
 import { login } from "@/actions/auth"
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,7 @@ export default function LoginPage() {
                 className="w-full max-w-md space-y-8 rounded-3xl border border-secondary bg-white p-10 shadow-2xl"
             >
                 <div className="text-center flex flex-col items-center">
-                    <img src="/logo.svg" alt="Kunst Design" className="h-36 w-auto mb-4" />
+                    <Image src="/logo.svg" alt="Kunst Design" width={150} height={150} className="h-36 w-auto mb-4" />
                     <p className="text-[10px] font-brand-ui text-foreground/40 uppercase tracking-[0.2em] mb-8">
                         Desarrollando ideas, creando sueños.
                     </p>

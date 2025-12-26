@@ -22,7 +22,7 @@ export default function QuotePDFClient({ quote }: { quote: any }) {
             document={<QuoteDocument quote={quote} />}
             fileName={`cotizacion-${quote.project_name}.pdf`}
         >
-            {({ blob, url, loading, error }) => {
+            {({ url, loading, error }) => {
                 if (error) {
                     console.error('PDF Generation Error:', error)
                     return (
