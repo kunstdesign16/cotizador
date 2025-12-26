@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
-import { Plus, FileText, Users } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
 import { DashboardTaskList } from "@/components/dashboard-task-list"
 import { DashboardOrderList } from "@/components/dashboard-order-list"
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
 
         const serializedQuotes = JSON.parse(JSON.stringify(quotes))
         const serializedClients = JSON.parse(JSON.stringify(clients))
-        const serializedTasks = JSON.parse(JSON.stringify(pendingTasks))
+
 
         // Calculate Metrics
         const activeQuotes = quotes.filter((q: any) => q.status === 'DRAFT' || q.status === 'SAVED').length

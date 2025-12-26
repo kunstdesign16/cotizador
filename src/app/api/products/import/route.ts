@@ -152,8 +152,7 @@ export async function POST(req: NextRequest) {
         // Or createMany if we don't care about duplicates? No, we want to update prices.
         // We defined @@unique([supplierId, code]), so we can use upsert.
 
-        let created = 0
-        let updated = 0
+
 
         // Processing in chunks to avoid blocking too long
         const CHUNK_SIZE = 50
@@ -176,7 +175,7 @@ export async function POST(req: NextRequest) {
                     create: p
                 })
             ))
-            created += chunk.length // Approximate (upsert result not checked individually for speed)
+
         }
 
         return NextResponse.json({
