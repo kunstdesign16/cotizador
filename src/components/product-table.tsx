@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { Input } from "@/components/ui/input"
-import { Search } from 'lucide-react'
+import { Search, Pencil, Trash2 } from 'lucide-react'
+import { ProductFormDialog } from '@/components/product-form-dialog'
+import { deleteProduct } from '@/actions/products'
+import { Button } from '@/components/ui/button'
 
 interface ProductTableProps {
     products: Array<{
@@ -113,10 +116,6 @@ function ProductRow({ product, supplierId }: { product: any, supplierId: string 
 
 // Client component for actions
 function ProductActions({ product, supplierId }: { product: any, supplierId: string }) {
-    const { ProductFormDialog } = require('@/components/product-form-dialog')
-    const { deleteProduct } = require('@/actions/products')
-    const { Button } = require('@/components/ui/button')
-    const { Pencil, Trash2 } = require('lucide-react')
 
     const handleDelete = async () => {
         if (confirm('¿Estás seguro de eliminar este producto?')) {

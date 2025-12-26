@@ -39,7 +39,6 @@ interface ProjectHubClientProps {
 
 export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const router = useRouter()
-    const [activeTab, setActiveTab] = useState('resumen')
     const [isApproving, setIsApproving] = useState<string | null>(null)
     const [isClosing, setIsClosing] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -72,7 +71,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             } else {
                 toast.error(res.error || 'Error al aprobar')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error de red al aprobar')
         } finally {
             setIsApproving(null)
@@ -97,7 +96,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             } else {
                 toast.error(res.error || 'Error al cerrar proyecto')
             }
-        } catch (error) {
+        } catch {
             toast.error('Error de red al cerrar')
         } finally {
             setIsClosing(false)
@@ -123,7 +122,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             } else {
                 toast.error(result.error || 'Error al eliminar proyecto')
             }
-        } catch (error) {
+        } catch {
             console.error('Error:', error)
             toast.error('Error al eliminar proyecto')
         } finally {
@@ -157,7 +156,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             } else {
                 toast.error(result.error || 'Error al registrar ingreso')
             }
-        } catch (error) {
+        } catch {
             console.error('Error:', error)
             toast.error('Error al registrar ingreso')
         } finally {
@@ -279,7 +278,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 </div>
 
                 {/* Tabs Section */}
-                <Tabs defaultValue="resumen" onValueChange={setActiveTab} className="space-y-6">
+                <Tabs defaultValue="resumen" className="space-y-6">
                     <div className="bg-card border rounded-xl p-1 shadow-sm sticky top-4 z-10 overflow-x-auto">
                         <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-1">
                             <TabsTrigger value="resumen" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2.5 px-4 rounded-lg flex gap-2">
