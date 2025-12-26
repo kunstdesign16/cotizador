@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, FileText, Calendar, Search, ChevronDown, ChevronRight, Pencil } from "lucide-react"
+import { FileText, Calendar, Search, ChevronDown, ChevronRight, Pencil } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -32,14 +32,7 @@ const STATUS_LABELS: Record<string, string> = {
     'COBRADO': 'Cobrado'
 }
 
-const STATUS_COLORS: Record<string, string> = {
-    'DRAFT': 'bg-gray-100 text-gray-600 ring-gray-500/10',
-    'COTIZADO': 'bg-blue-50 text-blue-700 ring-blue-600/20',
-    'PRODUCCION': 'bg-amber-50 text-amber-700 ring-amber-600/20',
-    'ENTREGADO': 'bg-purple-50 text-purple-700 ring-purple-600/20',
-    'FACTURADO': 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
-    'COBRADO': 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-}
+
 
 export function DashboardClient({ quotes, clients, suppliers }: {
     quotes: QuoteWithClient[],

@@ -53,7 +53,7 @@ export function CreateProjectDialog({ clients }: CreateProjectDialogProps) {
             })
             setOpen(false)
             router.push(`/projects/${project.id}`)
-        } catch (error) {
+        } catch {
             toast({
                 title: "Error",
                 description: "No se pudo crear el proyecto. Intenta de nuevo.",

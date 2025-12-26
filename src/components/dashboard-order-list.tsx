@@ -49,7 +49,7 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
             await updateSupplierOrderStatus(orderId, newStatus as any)
             toast.success("Estatus actualizado")
             router.refresh()
-        } catch (error) {
+        } catch {
             toast.error("Error al actualizar estatus")
         }
     }
@@ -60,7 +60,7 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
             toast.success("Estatus de pago actualizado")
             // Manually refresh to update totals if needed, or let router handle it
             router.refresh()
-        } catch (error) {
+        } catch {
             toast.error("Error al actualizar pago")
         }
     }

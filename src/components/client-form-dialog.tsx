@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient, updateClient } from '@/actions/clients'
 import { Plus, X, Pencil } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 type ClientData = {
     id?: string

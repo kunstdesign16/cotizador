@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { ChevronsUpDown } from "lucide-react"
 
 type Client = {
     id: string
