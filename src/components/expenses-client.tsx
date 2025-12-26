@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Trash2, Pencil, X, Wallet, Calendar, RefreshCw } from 'lucide-react'
+import { Plus, Trash2, Pencil, X, Wallet, RefreshCw } from 'lucide-react'
 import { createExpense, updateExpense, deleteExpense } from '@/actions/expenses'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
@@ -87,7 +87,7 @@ export function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
                     alert(result.error)
                 }
             }
-        } catch (error) {
+        } catch {
             alert('Error al guardar')
         } finally {
             setLoading(false)

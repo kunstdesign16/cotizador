@@ -35,18 +35,7 @@ interface DashboardTaskListProps {
     tasks: Task[]
 }
 
-const statusMap: Record<string, string> = {
-    'PENDING': 'Pendiente',
-    'IN_PROGRESS': 'En Progreso',
-    'COMPLETED': 'Completado'
-}
 
-const priorityMap: Record<string, string> = {
-    'LOW': 'Baja',
-    'MEDIUM': 'Media',
-    'HIGH': 'Alta',
-    'URGENT': 'Urgente'
-}
 
 export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
     const router = useRouter()
@@ -57,7 +46,7 @@ export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
             await updateTaskStatus(taskId, newStatus as any)
             toast.success("Estatus actualizado")
             router.refresh()
-        } catch (error) {
+        } catch {
             toast.error("Error al actualizar estatus")
         }
     }
@@ -67,7 +56,7 @@ export function DashboardTaskList({ tasks }: DashboardTaskListProps) {
             await updateTaskPriority(taskId, newPriority as any)
             toast.success("Prioridad actualizada")
             router.refresh()
-        } catch (error) {
+        } catch {
             toast.error("Error al actualizar prioridad")
         }
     }
