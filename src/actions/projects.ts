@@ -44,18 +44,26 @@ export async function getProjectClosureEligibility(projectId: string) {
 
 export async function closeProject(projectId: string) {
     try {
-        const eligibility = await getProjectClosureEligibility(projectId)
+        const { prisma } = await import('@/lib/prisma') // Ensure prisma import in scope if needed, though likely available globally in file context
 
-        if (!eligibility.eligible) {
-            return {
-                success: false,
-                error: eligibility.error || `No se puede cerrar el proyecto. Tiene ${eligibility.pendingCount} órdenes sin liquidar.`
-            }
-        }
+        await prisma.$transaction(async (tx) => {
+            // 1. Mark all pending supplier orders as PAID (Liquidated)
+            await tx.supplierOrder.updateMany({
+                where: {
+                    projectId: projectId,
+                    paymentStatus: { not: 'PAID' }
+                },
+                data: { paymentStatus: 'PAID' }
+            })
 
-        await (prisma as any).project.update({
-            where: { id: projectId },
-            data: { financialStatus: 'CERRADO' }
+            // 2. Close Project + Set as Delivered
+            await tx.project.update({
+                where: { id: projectId },
+                data: {
+                    financialStatus: 'CERRADO',
+                    status: 'ENTREGADO'
+                }
+            })
         })
 
         revalidatePath('/projects')
@@ -65,7 +73,7 @@ export async function closeProject(projectId: string) {
         return { success: true }
     } catch (_error) {
         console.error('Error:', _error)
-        return { success: false, error: 'Error' }
+        return { success: false, error: 'Error al cerrar el proyecto' }
     }
 }
 
