@@ -4,6 +4,8 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { Plus, Trash2, Save, ArrowLeft, Settings2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -73,6 +75,10 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [client, setClient] = useState(initialData?.client || { name: '', company: '', email: '', phone: '' })
     const [project, setProject] = useState(initialData?.project || { name: '', date: new Date().toISOString().split('T')[0], deliveryDate: '' })
 
+    // Global Margin State
+    const [useGlobalMargin, setUseGlobalMargin] = useState(false)
+    const [globalMargin, setGlobalMargin] = useState(30)
+
     // Ensure items have internal_unit_cost and profit_margin if loading from legacy data or partial data
     const safeItems = (initialData?.items || [{
         id: '1',
@@ -105,6 +111,9 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     // Computed
     const totalInternalCost = items.reduce((acc, item) => acc + (item.internal_unit_cost * item.quantity), 0)
     const subtotal = items.reduce((acc, item) => acc + item.subtotal, 0)
+    // Calculate total unit price (sum of unit prices) as requested
+    const totalUnitPrices = items.reduce((acc, item) => acc + item.unit_cost, 0)
+
     const iva = subtotal * 0.16
     const isrRetention = subtotal * (isrRate / 100)
     const total = subtotal + iva - isrRetention
@@ -195,6 +204,25 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
             }
             return item
         }))
+    }
+
+    const handleGlobalMarginChange = (enabled: boolean, newMargin: number) => {
+        setUseGlobalMargin(enabled)
+        setGlobalMargin(newMargin)
+
+        if (enabled) {
+            setItems(items.map(item => {
+                const markup = 1 + (newMargin / 100)
+                const newUnitCost = item.internal_unit_cost * markup
+                const newSubtotal = item.quantity * newUnitCost
+                return {
+                    ...item,
+                    profit_margin: newMargin,
+                    unit_cost: newUnitCost,
+                    subtotal: newSubtotal
+                }
+            }))
+        }
     }
 
     const addItem = () => {
@@ -330,8 +358,34 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
 
                 {/* Items Table with Cost Analysis */}
                 <section className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                         <h2 className="font-semibold text-lg">Conceptos y Costos</h2>
+
+                        <div className="flex items-center gap-6 bg-muted/30 p-2 rounded-lg border border-muted/50">
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    id="global-margin"
+                                    checked={useGlobalMargin}
+                                    onCheckedChange={(checked) => handleGlobalMarginChange(checked, globalMargin)}
+                                />
+                                <Label htmlFor="global-margin" className="text-sm font-medium cursor-pointer">Margen Global</Label>
+                            </div>
+
+                            {useGlobalMargin && (
+                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
+                                    <div className="relative w-24">
+                                        <Input
+                                            type="number"
+                                            value={globalMargin}
+                                            onChange={(e) => handleGlobalMarginChange(true, Number(e.target.value))}
+                                            className="h-8 pr-6 text-right font-medium text-blue-700 border-blue-200 focus-visible:ring-blue-500"
+                                        />
+                                        <span className="absolute right-2 top-2 text-xs text-muted-foreground">%</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <Button variant="outline" size="sm" onClick={addItem} className="gap-2">
                             <Plus className="h-4 w-4" /> Agregar Item
                         </Button>
@@ -374,13 +428,14 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-semibold text-blue-700 uppercase">% Margen</label>
+                                        <label className={`text-xs font-semibold uppercase ${useGlobalMargin ? 'text-muted-foreground' : 'text-blue-700'}`}>% Margen</label>
                                         <div className="relative mt-1">
                                             <Input
                                                 type="number"
                                                 value={item.profit_margin}
-                                                onChange={e => handleItemChange(item.id, 'profit_margin', e.target.value)}
-                                                className="pr-6 text-right text-blue-700 font-medium"
+                                                onChange={e => !useGlobalMargin && handleItemChange(item.id, 'profit_margin', e.target.value)}
+                                                disabled={useGlobalMargin}
+                                                className={`pr-6 text-right font-medium ${useGlobalMargin ? 'bg-muted text-muted-foreground' : 'text-blue-700'}`}
                                             />
                                             <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
                                         </div>
@@ -481,8 +536,9 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                                 <Input
                                                     type="number"
                                                     value={item.profit_margin}
-                                                    onChange={e => handleItemChange(item.id, 'profit_margin', e.target.value)}
-                                                    className="border-transparent shadow-none focus-visible:ring-0 bg-transparent text-right w-16 p-0 text-blue-700"
+                                                    onChange={e => !useGlobalMargin && handleItemChange(item.id, 'profit_margin', e.target.value)}
+                                                    disabled={useGlobalMargin}
+                                                    className={`border-transparent shadow-none focus-visible:ring-0 bg-transparent text-right w-16 p-0 ${useGlobalMargin ? 'text-muted-foreground cursor-not-allowed' : 'text-blue-700'}`}
                                                 />
                                                 <span className="text-muted-foreground ml-1">%</span>
                                             </div>
@@ -500,6 +556,22 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                     </tr>
                                 ))}
                             </tbody>
+                            <tfoot className="bg-muted/50 border-t font-semibold text-sm">
+                                <tr>
+                                    <td colSpan={2} className="px-4 py-3 text-right text-muted-foreground uppercase text-xs">Totales</td>
+                                    <td className="px-4 py-3 text-right text-blue-900 bg-blue-50/50 border-l border-blue-100">
+                                        ${totalInternalCost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </td>
+                                    <td className="px-4 py-3 bg-blue-50/50"></td>
+                                    <td className="px-4 py-3 text-right">
+                                        ${totalUnitPrices.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </td>
+                                    <td className="px-4 py-3 text-right text-lg">
+                                        ${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 
