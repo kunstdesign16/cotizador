@@ -31,7 +31,14 @@ import { approveQuote } from '@/actions/quotes'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { RegisterOrderPaymentDialog } from './register-order-payment-dialog'
-import { closeProject, getProjectClosureEligibility, deleteProject } from '@/actions/projects'
+import { closeProject, getProjectClosureEligibility, deleteProject, updateProjectStatus } from '@/actions/projects'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface ProjectHubClientProps {
     project: any
@@ -42,6 +49,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const [isApproving, setIsApproving] = useState<string | null>(null)
     const [isClosing, setIsClosing] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
     // Income dialog states
     const [showIncomeDialog, setShowIncomeDialog] = useState(false)
@@ -59,7 +67,11 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const utilidad = totalIngresado - totalEgresado
     const totalCobrado = totalIngresado // Alias for clarity in financials tab
 
+    const isFinancialmenteCerrado = project.financialStatus === 'CERRADO'
+    const isCancelled = project.status === 'CANCELADO'
+
     const handleApprove = async (quoteId: string) => {
+        if (isFinancialmenteCerrado) return
         if (!confirm('¿Está seguro de aprobar esta cotización? Esto marcará el proyecto como APROBADO y bloqueará ediciones en esta versión.')) return
 
         setIsApproving(quoteId)
@@ -130,6 +142,23 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
         }
     }
 
+    const handleStatusChange = async (newStatus: string) => {
+        setIsUpdatingStatus(true)
+        try {
+            const res = await updateProjectStatus(project.id, newStatus as any)
+            if (res.success) {
+                toast.success(`Estado operativo actualizado a ${newStatus}`)
+                router.refresh()
+            } else {
+                toast.error(res.error || 'Error al actualizar estado')
+            }
+        } catch {
+            toast.error('Error de red al actualizar estado')
+        } finally {
+            setIsUpdatingStatus(false)
+        }
+    }
+
     const handleIncomeSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoadingIncome(true)
@@ -175,7 +204,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         Proyectos
                     </Link>
                     <div className="flex gap-2">
-                        {project.status === 'COTIZANDO' && (
+                        {!isFinancialmenteCerrado && project.status === 'COTIZANDO' && (
                             <>
                                 {project.quotes?.length === 0 ? (
                                     <Link href={`/quotes/new?projectId=${project.id}`}>
@@ -205,18 +234,23 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 </Button>
                             </>
                         )}
-                        {project.status !== 'CERRADO' && project.status !== 'COTIZANDO' && (
+                        {!isFinancialmenteCerrado && project.status !== 'COTIZANDO' && (
                             <>
                                 <Button variant="outline" size="sm" onClick={handleCloseProject} disabled={isClosing} className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
                                     {isClosing ? 'Cerrando...' : 'Cerrar Obra'}
                                 </Button>
-                                <Button size="sm" className="rounded-xl font-brand-header uppercase tracking-wider text-xs shadow-lg shadow-primary/20">Editar Proyecto</Button>
+                                {/* Edición bloqueada si no es borrador */}
                             </>
                         )}
-                        {project.status === 'CERRADO' && (
-                            <Badge className="bg-primary text-white gap-1.5 px-4 py-1.5 font-brand-header tracking-widest uppercase">
-                                <Lock className="h-3 w-3" /> CERRADO
-                            </Badge>
+                        {isFinancialmenteCerrado && (
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-slate-900 text-white gap-1.5 px-4 py-1.5 font-brand-header tracking-widest uppercase">
+                                    <Lock className="h-3 w-3" /> PROYECTO CERRADO
+                                </Badge>
+                                <span className="text-[10px] text-muted-foreground font-brand-header uppercase tracking-widest max-w-[150px] leading-tight">
+                                    Solo lectura por cierre financiero
+                                </span>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -224,18 +258,45 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 {/* Header Card */}
                 <div className="bg-white border border-secondary rounded-3xl p-8 shadow-xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                        <div className="space-y-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        <div className="lg:col-span-5 space-y-3">
                             <div className="flex flex-wrap items-center gap-4">
-                                <h1 className="text-5xl font-brand-header text-primary tracking-tight leading-none">{project.name}</h1>
-                                <Badge className={`uppercase text-[11px] px-3 py-1 font-brand-header tracking-widest border-0 flex items-center gap-1.5 ${project.status === 'COTIZANDO' ? 'bg-secondary text-primary' :
-                                    project.status === 'APROBADO' ? 'bg-primary text-white' :
-                                        project.status === 'CERRADO' ? 'bg-primary/20 text-primary' :
-                                            'bg-secondary text-primary'
-                                    }`}>
-                                    {project.status !== 'COTIZANDO' && <Lock className="h-3 w-3" />}
-                                    {project.status}
-                                </Badge>
+                                <h1 className="text-3xl font-brand-header text-primary tracking-tight leading-none break-words">{project.name}</h1>
+                                <div className="flex items-center gap-2">
+                                    <Select
+                                        value={project.status}
+                                        onValueChange={handleStatusChange}
+                                        disabled={isUpdatingStatus || isFinancialmenteCerrado}
+                                    >
+                                        <SelectTrigger className={`w-[180px] h-8 uppercase text-[11px] font-brand-header tracking-widest border-0 flex items-center gap-1.5 shadow-sm rounded-lg ${project.status === 'COTIZANDO' ? 'bg-secondary text-primary' :
+                                            project.status === 'EN_PRODUCCION' ? 'bg-blue-500 text-white' :
+                                                project.status === 'ENTREGADO' ? 'bg-primary text-white' :
+                                                    project.status === 'CANCELADO' ? 'bg-red-500 text-white' :
+                                                        'bg-secondary text-primary'
+                                            }`}>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="COTIZANDO">COTIZANDO</SelectItem>
+                                            <SelectItem value="EN_PRODUCCION">EN PRODUCCIÓN</SelectItem>
+                                            <SelectItem value="ENTREGADO">ENTREGADO</SelectItem>
+                                            <SelectItem value="CANCELADO">CANCELADO</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    <Badge className={`uppercase text-[11px] px-3 py-1.5 font-brand-header tracking-widest border-0 flex items-center gap-1.5 rounded-lg shadow-sm ${project.financialStatus === 'ABIERTO' ? 'bg-blue-50 text-blue-700' : 'bg-slate-900 text-white'}`}>
+                                        {project.financialStatus === 'CERRADO' ? <Lock className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
+                                        FINANZAS: {project.financialStatus}
+                                    </Badge>
+                                </div>
+                                <div className="flex gap-2 mt-2">
+                                    <Badge variant="outline" className={`uppercase text-[10px] tracking-widest ${approvedQuote ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                                        Cotización: {approvedQuote ? 'APROBADA' : 'BORRADOR'}
+                                    </Badge>
+                                    <Badge variant="outline" className="uppercase text-[10px] tracking-widest bg-slate-50 text-slate-700 border-slate-200">
+                                        Proyecto: {project.status.replace('_', ' ')}
+                                    </Badge>
+                                </div>
                             </div>
                             <p className="text-foreground/70 max-w-2xl font-brand-ui text-sm leading-relaxed">{project.description || 'Sin descripción adicional disponible para este proyecto.'}</p>
                             {project.status === 'COTIZANDO' && (
@@ -260,18 +321,24 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         </div>
 
                         {/* Quick Stats Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 md:border-l md:border-secondary md:pl-10">
+                        <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 md:border-l md:border-secondary md:pl-6 pt-4 md:pt-0 border-t md:border-t-0 border-secondary/50 h-full items-center">
                             <div className="space-y-1">
-                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Total Cotizado</span>
-                                <div className="text-3xl font-brand-header text-primary">${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest pl-1">Total Cotizado</span>
+                                <div className="text-xl md:text-lg lg:text-xl xl:text-2xl font-brand-header text-primary whitespace-nowrap">
+                                    ${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Cobrado (Ing)</span>
-                                <div className="text-3xl font-brand-header text-primary">${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest pl-1">Cobrado (Ing)</span>
+                                <div className="text-xl md:text-lg lg:text-xl xl:text-2xl font-brand-header text-primary whitespace-nowrap">
+                                    ${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest">Pagado (Egr)</span>
-                                <div className="text-3xl font-brand-header text-primary">${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</div>
+                                <span className="text-[10px] text-primary/50 uppercase font-brand-header tracking-widest pl-1">Pagado (Egr)</span>
+                                <div className="text-xl md:text-lg lg:text-xl xl:text-2xl font-brand-header text-primary whitespace-nowrap">
+                                    ${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -324,7 +391,9 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     <div className="space-y-4">
                                         <div className="space-y-1">
                                             <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Ingresos Totales</span>
-                                            <div className="text-4xl font-brand-header text-primary">${totalIngresado.toLocaleString('es-MX')}</div>
+                                            <div className="text-2xl sm:text-3xl font-brand-header text-primary whitespace-nowrap">
+                                                ${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
                                         </div>
                                         <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
@@ -340,7 +409,9 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     <div className="space-y-4">
                                         <div className="space-y-1">
                                             <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Egresos Ejecutados</span>
-                                            <div className="text-4xl font-brand-header text-primary">${totalEgresado.toLocaleString('es-MX')}</div>
+                                            <div className="text-2xl sm:text-3xl font-brand-header text-primary whitespace-nowrap">
+                                                ${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
                                         </div>
                                         <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
@@ -356,7 +427,9 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     <div className="space-y-4 bg-primary text-white p-6 rounded-2xl shadow-xl shadow-primary/10">
                                         <div className="space-y-1">
                                             <span className="text-[11px] text-white/70 uppercase font-brand-header tracking-widest">Utilidad Obra</span>
-                                            <div className="text-4xl font-brand-header tracking-wider">${utilidad.toLocaleString('es-MX')}</div>
+                                            <div className="text-2xl sm:text-3xl font-brand-header tracking-wider whitespace-nowrap">
+                                                ${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
                                         </div>
                                         <div className="text-[11px] font-brand-header tracking-widest uppercase border-t border-white/20 pt-2">
                                             MARGEN: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%
@@ -369,11 +442,11 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="p-3 bg-muted/40 rounded-lg flex justify-between items-center">
                                             <span className="text-xs">Pendiente por Cobrar:</span>
-                                            <span className="font-bold text-sm">${(totalCotizado - totalIngresado).toLocaleString('es-MX')}</span>
+                                            <span className="font-bold text-sm text-right truncate pl-2">${(totalCotizado - totalIngresado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                         <div className="p-3 bg-muted/40 rounded-lg flex justify-between items-center">
                                             <span className="text-xs">Pendiente por Pagar:</span>
-                                            <span className="font-bold text-sm text-muted-foreground">Calculando...</span>
+                                            <span className="font-bold text-sm text-muted-foreground text-right truncate pl-2">Calculando...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -436,9 +509,13 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         <div className="bg-card border rounded-2xl p-6 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-bold">Listado de Cotizaciones</h3>
-                                <Button size="sm" className="gap-2">
-                                    <FileText className="h-4 w-4" /> Nueva Versión
-                                </Button>
+                                {!isFinancialmenteCerrado && approvedQuote && (
+                                    <Link href={`/quotes/${approvedQuote.id}/duplicate`}>
+                                        <Button size="sm" className="gap-2">
+                                            <Plus className="h-4 w-4" /> Nueva Versión
+                                        </Button>
+                                    </Link>
+                                )}
                             </div>
                             <div className="space-y-4">
                                 {project.quotes?.map((quote: any) => (
@@ -459,12 +536,12 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="text-right mr-2">
-                                                <div className="text-sm font-bold">${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                                                <div className="text-sm font-bold">${quote.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                                 <Badge variant="outline" className="text-[10px] uppercase">{quote.status}</Badge>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                {!quote.isApproved && project.status === 'COTIZANDO' && (
+                                                {!quote.isApproved && !isFinancialmenteCerrado && (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
@@ -476,9 +553,9 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                     </Button>
                                                 )}
 
-                                                <Link href={`/quotes/${quote.id}${project.status !== 'COTIZANDO' ? '' : '/edit'}`}>
+                                                <Link href={`/quotes/${quote.id}${quote.isApproved || isFinancialmenteCerrado ? '' : '/edit'}`}>
                                                     <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs border">
-                                                        {project.status !== 'COTIZANDO' ? 'Ver' : 'Editar'}
+                                                        {quote.isApproved || isFinancialmenteCerrado ? 'Ver' : 'Editar'}
                                                         <ChevronLeft className="h-3.5 w-3.5 rotate-180" />
                                                     </Button>
                                                 </Link>
@@ -497,7 +574,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     <Truck className="h-12 w-12 mx-auto mb-4 opacity-20 text-muted-foreground" />
                                     <div className="space-y-2">
                                         <p className="text-muted-foreground">No hay órdenes de compra generadas para este proyecto.</p>
-                                        {project.status === 'COTIZANDO' ? (
+                                        {!approvedQuote ? (
                                             <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl max-w-md mx-auto">
                                                 <p className="text-sm text-amber-800 font-medium">
                                                     ⚠️ No puedes crear órdenes sin una cotización aprobada.
@@ -558,26 +635,27 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                             </Badge>
                                                         </td>
                                                         <td className="p-4 text-right font-medium">
-                                                            ${totalOrdered.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                            ${totalOrdered.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </td>
                                                         <td className="p-4 text-right font-medium text-emerald-600">
-                                                            ${totalPaid.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                            ${totalPaid.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </td>
                                                         <td className="p-4 text-right">
                                                             <span className={`font-bold ${pending > 0.01 ? 'text-orange-600' : 'text-muted-foreground'}`}>
-                                                                ${pending.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                                ${pending.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </span>
                                                         </td>
                                                         <td className="p-4 text-center">
                                                             <div className="flex items-center justify-center gap-2">
-                                                                {pending > 0.01 && (
+                                                                {pending > 0.01 && !isFinancialmenteCerrado && (
                                                                     <RegisterOrderPaymentDialog order={order} />
                                                                 )}
-                                                                <Link href={`/supplier-orders/${order.id}`}>
+                                                                {/* Enlace comentado temporalmente porque la página individual no existe */}
+                                                                {/* <Link href={`/supplier-orders/${order.id}`}>
                                                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary">
                                                                         <ExternalLink className="h-4 w-4" />
                                                                     </Button>
-                                                                </Link>
+                                                                </Link> */}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -615,13 +693,15 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                             <span>Diferente a pagos a proveedores (ver pestaña Órdenes)</span>
                                         </div>
                                     </div>
-                                    <Button
-                                        onClick={() => setShowIncomeDialog(true)}
-                                        className="rounded-xl font-brand-header uppercase tracking-wider text-xs bg-green-600 hover:bg-green-700 shadow-lg whitespace-nowrap"
-                                    >
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        Registrar Ingreso
-                                    </Button>
+                                    {!isFinancialmenteCerrado && (
+                                        <Button
+                                            onClick={() => setShowIncomeDialog(true)}
+                                            className="rounded-xl font-brand-header uppercase tracking-wider text-xs bg-green-600 hover:bg-green-700 shadow-lg whitespace-nowrap"
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Registrar Ingreso
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
 
@@ -656,7 +736,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                     </div>
                                                     <div className="text-right w-full sm:w-auto">
                                                         <p className="text-lg font-bold text-green-600">
-                                                            ${income.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                            ${income.amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -676,14 +756,14 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                                     <p className="text-xs text-green-700 uppercase tracking-wide mb-1">Total Cobrado</p>
-                                    <p className="text-2xl font-bold text-green-900">
-                                        ${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    <p className="text-2xl font-bold text-green-900 truncate" title={`$${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>
+                                        ${totalCobrado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <p className="text-xs text-blue-700 uppercase tracking-wide mb-1">Total Cotizado</p>
-                                    <p className="text-2xl font-bold text-blue-900">
-                                        ${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    <p className="text-2xl font-bold text-blue-900 truncate" title={`$${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>
+                                        ${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
                                 <div className={`border rounded-xl p-4 ${totalCobrado >= totalCotizado
@@ -694,9 +774,9 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         }`}>
                                         Saldo Pendiente
                                     </p>
-                                    <p className={`text-2xl font-bold ${totalCobrado >= totalCotizado ? 'text-green-900' : 'text-orange-900'
-                                        }`}>
-                                        ${(totalCotizado - totalCobrado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                    <p className={`text-2xl font-bold truncate ${totalCobrado >= totalCotizado ? 'text-green-900' : 'text-orange-900'
+                                        }`} title={`$${(totalCotizado - totalCobrado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>
+                                        ${(totalCotizado - totalCobrado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
                             </div>
@@ -726,22 +806,22 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <div className="bg-muted/40 p-6 rounded-2xl border space-y-2">
                                     <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Total Cotizado</span>
-                                    <div className="text-3xl font-black">${totalCotizado.toLocaleString('es-MX')}</div>
+                                    <div className="text-3xl font-black truncate" title={`$${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>${totalCotizado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                     <p className="text-[10px] text-muted-foreground">Importe aprobado por el cliente</p>
                                 </div>
                                 <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 space-y-2">
                                     <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-widest">Total Ingresado</span>
-                                    <div className="text-3xl font-black text-emerald-600">${totalIngresado.toLocaleString('es-MX')}</div>
+                                    <div className="text-3xl font-black text-emerald-600 truncate" title={`$${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                     <p className="text-[10px] text-emerald-600/70">Pagos reales recibidos</p>
                                 </div>
                                 <div className="bg-rose-50 p-6 rounded-2xl border border-rose-100 space-y-2">
                                     <span className="text-[10px] uppercase font-bold text-rose-700 tracking-widest">Total Gastado</span>
-                                    <div className="text-3xl font-black text-rose-600">${totalEgresado.toLocaleString('es-MX')}</div>
+                                    <div className="text-3xl font-black text-rose-600 truncate" title={`$${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                     <p className="text-[10px] text-rose-600/70">Pagos a proveedores y gastos</p>
                                 </div>
                                 <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2 text-white">
                                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Utilidad Final</span>
-                                    <div className="text-3xl font-black text-white">${utilidad.toLocaleString('es-MX')}</div>
+                                    <div className="text-3xl font-black text-white truncate" title={`$${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                     <p className="text-[10px] text-slate-400">Margen neto: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%</p>
                                 </div>
                             </div>
@@ -769,8 +849,8 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                     return (
                                                         <tr key={o.id}>
                                                             <td className="p-2 font-medium">{o.supplier?.name}</td>
-                                                            <td className="p-2 text-right">${total.toLocaleString()}</td>
-                                                            <td className="p-2 text-right font-bold text-emerald-600">${paid.toLocaleString()}</td>
+                                                            <td className="p-2 text-right">${total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                            <td className="p-2 text-right font-bold text-emerald-600">${paid.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                             <td className="p-2 text-center capitalize">{o.paymentStatus}</td>
                                                         </tr>
                                                     )
@@ -787,13 +867,13 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         <div className="flex justify-between p-3 bg-muted/40 rounded-lg border">
                                             <span className="text-xs">Diferencia Cotizado vs Cobrado:</span>
                                             <span className={`text-xs font-bold ${totalCotizado - totalIngresado > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                                                ${(totalCotizado - totalIngresado).toLocaleString()}
+                                                ${(totalCotizado - totalIngresado).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
                                         </div>
                                         <div className="flex justify-between p-3 bg-muted/40 rounded-lg border">
                                             <span className="text-xs">Gastos Variables Extra:</span>
                                             <span className="text-xs font-bold text-slate-700">
-                                                ${(project.expenses?.filter((e: any) => !e.supplierOrderId).reduce((s: number, e: any) => s + e.amount, 0) || 0).toLocaleString()}
+                                                ${(project.expenses?.filter((e: any) => !e.supplierOrderId).reduce((s: number, e: any) => s + e.amount, 0) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
                                         </div>
                                         <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
@@ -813,97 +893,99 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             </div>
 
             {/* Diálogo de Registro de Ingreso */}
-            {showIncomeDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 text-white">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-brand-header font-semibold">
-                                    Registrar Cobro al Cliente
-                                </h2>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setShowIncomeDialog(false)}
-                                    className="text-white hover:bg-white/20 h-8 w-8"
-                                >
-                                    <X className="h-5 w-5" />
-                                </Button>
+            {
+                showIncomeDialog && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                            <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 text-white">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-lg font-brand-header font-semibold">
+                                        Registrar Cobro al Cliente
+                                    </h2>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setShowIncomeDialog(false)}
+                                        className="text-white hover:bg-white/20 h-8 w-8"
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-green-100 mt-1">
+                                    Ingreso que recibes del cliente por este proyecto
+                                </p>
                             </div>
-                            <p className="text-xs text-green-100 mt-1">
-                                Ingreso que recibes del cliente por este proyecto
-                            </p>
+
+                            <form onSubmit={handleIncomeSubmit} className="p-6 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Monto Recibido *</label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        required
+                                        placeholder="0.00"
+                                        value={incomeAmount}
+                                        onChange={(e) => setIncomeAmount(e.target.value)}
+                                        className="text-lg"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Descripción</label>
+                                    <Input
+                                        type="text"
+                                        placeholder="Ej: Anticipo 50%, Pago final, etc."
+                                        value={incomeDescription}
+                                        onChange={(e) => setIncomeDescription(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Método de Pago</label>
+                                    <select
+                                        value={incomePaymentMethod}
+                                        onChange={(e) => setIncomePaymentMethod(e.target.value)}
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        <option value="TRANSFERENCIA">Transferencia</option>
+                                        <option value="EFECTIVO">Efectivo</option>
+                                        <option value="CHEQUE">Cheque</option>
+                                        <option value="TARJETA">Tarjeta</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Fecha</label>
+                                    <Input
+                                        type="date"
+                                        value={incomeDate}
+                                        onChange={(e) => setIncomeDate(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setShowIncomeDialog(false)}
+                                        className="flex-1"
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={loadingIncome}
+                                        className="flex-1 bg-green-600 hover:bg-green-700"
+                                    >
+                                        {loadingIncome ? 'Guardando...' : 'Registrar Ingreso'}
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
-
-                        <form onSubmit={handleIncomeSubmit} className="p-6 space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Monto Recibido *</label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    required
-                                    placeholder="0.00"
-                                    value={incomeAmount}
-                                    onChange={(e) => setIncomeAmount(e.target.value)}
-                                    className="text-lg"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Descripción</label>
-                                <Input
-                                    type="text"
-                                    placeholder="Ej: Anticipo 50%, Pago final, etc."
-                                    value={incomeDescription}
-                                    onChange={(e) => setIncomeDescription(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Método de Pago</label>
-                                <select
-                                    value={incomePaymentMethod}
-                                    onChange={(e) => setIncomePaymentMethod(e.target.value)}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                >
-                                    <option value="">Seleccionar...</option>
-                                    <option value="TRANSFERENCIA">Transferencia</option>
-                                    <option value="EFECTIVO">Efectivo</option>
-                                    <option value="CHEQUE">Cheque</option>
-                                    <option value="TARJETA">Tarjeta</option>
-                                </select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Fecha</label>
-                                <Input
-                                    type="date"
-                                    value={incomeDate}
-                                    onChange={(e) => setIncomeDate(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setShowIncomeDialog(false)}
-                                    className="flex-1"
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={loadingIncome}
-                                    className="flex-1 bg-green-600 hover:bg-green-700"
-                                >
-                                    {loadingIncome ? 'Guardando...' : 'Registrar Ingreso'}
-                                </Button>
-                            </div>
-                        </form>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     )
 }

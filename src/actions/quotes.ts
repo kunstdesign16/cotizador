@@ -115,10 +115,10 @@ export async function updateQuote(id: string, data: any) {
     if (!existingQuote) return { success: false, error: 'Quote not found' }
 
     // Project Status Guards
-    if (existingQuote.project && existingQuote.project.status === 'CERRADO') {
+    if (existingQuote.project && existingQuote.project.financialStatus === 'CERRADO') {
         return {
             success: false,
-            error: 'El proyecto está CERRADO. No se permiten ediciones.'
+            error: 'El proyecto está CERRADO FINANCIERAMENTE. No se permiten ediciones.'
         }
     }
 
@@ -207,7 +207,10 @@ export async function getActiveProjects() {
     try {
         const projects = await prisma.quote.findMany({
             where: {
-                status: { in: ['SENT', 'APPROVED', 'COBRADO'] }
+                status: { in: ['SENT', 'APPROVED', 'COBRADO'] },
+                project: {
+                    status: { not: 'CANCELADO' }
+                }
             },
             select: {
                 id: true,
@@ -257,8 +260,8 @@ export async function approveQuote(quoteId: string) {
 
         if (!quote || !quote.projectId) return { success: false, error: 'Cotización o Proyecto no encontrado' }
 
-        if (quote.project && quote.project.status === 'CERRADO') {
-            return { success: false, error: 'El proyecto está CERRADO. No se pueden aprobar cotizaciones.' }
+        if (quote.project && quote.project.financialStatus === 'CERRADO') {
+            return { success: false, error: 'El proyecto está CERRADO FINANCIERAMENTE. No se pueden aprobar cotizaciones.' }
         }
 
         await prisma.$transaction([
@@ -275,7 +278,7 @@ export async function approveQuote(quoteId: string) {
             (prisma as any).project.update({
                 where: { id: quote.projectId },
                 data: {
-                    status: 'APROBADO',
+                    status: 'EN_PRODUCCION',
                     totalCotizado: quote.total
                 }
             })

@@ -169,8 +169,11 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
                                     <div className="flex items-center gap-2">
                                         {task.expectedDate && (
                                             <div className={cn(
-                                                "text-muted-foreground text-sm",
-                                                !task.status.includes('COMPLETED') && new Date(task.expectedDate) < new Date() && "text-red-500 font-medium"
+                                                "text-primary/60 text-sm font-medium",
+                                                !task.status.includes('COMPLETED') &&
+                                                new Date(task.expectedDate) < new Date() &&
+                                                (task.project?.status !== 'ENTREGADO' && task.quote?.project?.status !== 'ENTREGADO') &&
+                                                "text-red-500 font-bold"
                                             )}>
                                                 {new Date(task.expectedDate).toLocaleDateString('es-MX')}
                                             </div>

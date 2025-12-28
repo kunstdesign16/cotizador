@@ -9,7 +9,8 @@ export async function createProject(data: { name: string; clientId: string; desc
             name: data.name,
             clientId: data.clientId,
             description: data.description,
-            status: 'COTIZANDO'
+            status: 'COTIZANDO',
+            financialStatus: 'ABIERTO'
         }
     })
 
@@ -18,7 +19,6 @@ export async function createProject(data: { name: string; clientId: string; desc
 }
 
 export async function getProjectClosureEligibility(projectId: string) {
-    const { prisma } = await import('@/lib/prisma')
     try {
         const project = await (prisma as any).project.findUnique({
             where: { id: projectId },
@@ -28,7 +28,7 @@ export async function getProjectClosureEligibility(projectId: string) {
         })
 
         if (!project) return { eligible: false, error: 'Proyecto no encontrado' }
-        if (project.status === 'CERRADO') return { eligible: false, error: 'El proyecto ya está cerrado' }
+        if (project.financialStatus === 'CERRADO') return { eligible: false, error: 'El proyecto ya está cerrado financieramente' }
 
         const pendingOrders = project.supplierOrders.filter((order: any) => order.paymentStatus !== 'PAID')
 
@@ -43,7 +43,6 @@ export async function getProjectClosureEligibility(projectId: string) {
 }
 
 export async function closeProject(projectId: string) {
-    const { prisma } = await import('@/lib/prisma')
     try {
         const eligibility = await getProjectClosureEligibility(projectId)
 
@@ -56,7 +55,7 @@ export async function closeProject(projectId: string) {
 
         await (prisma as any).project.update({
             where: { id: projectId },
-            data: { status: 'CERRADO' }
+            data: { financialStatus: 'CERRADO' }
         })
 
         revalidatePath('/projects')
@@ -71,7 +70,6 @@ export async function closeProject(projectId: string) {
 }
 
 export async function deleteProject(projectId: string) {
-    const { prisma } = await import('@/lib/prisma')
     try {
         // Verificar proyecto existe
         const project = await (prisma as any).project.findUnique({
@@ -143,9 +141,36 @@ export async function deleteProject(projectId: string) {
         return { success: true }
     } catch (_error) {
         console.error('Error:', _error)
-        return {
-            success: false,
-            error: 'Error'
-        }
+        return { success: false, error: 'Error' }
     }
+}
+
+export async function updateProjectStatus(projectId: string, status: 'COTIZANDO' | 'APROBADO' | 'EN_PRODUCCION' | 'ENTREGADO' | 'CANCELADO') {
+    try {
+        const project = await (prisma as any).project.findUnique({
+            where: { id: projectId }
+        })
+
+        if (!project) return { success: false, error: 'Proyecto no encontrado' }
+        if (project.financialStatus === 'CERRADO') {
+            return { success: false, error: 'No se puede cambiar el estado de un proyecto cerrado financieramente.' }
+        }
+
+        await (prisma as any).project.update({
+            where: { id: projectId },
+            data: { status }
+        })
+
+        revalidatePath('/projects')
+        revalidatePath(`/projects/${projectId}`)
+        revalidatePath('/dashboard')
+
+        return { success: true }
+    } catch (_error) {
+        return { success: false, error: 'Error al actualizar estado' }
+    }
+}
+
+export async function cancelProject(projectId: string) {
+    return updateProjectStatus(projectId, 'CANCELADO')
 }

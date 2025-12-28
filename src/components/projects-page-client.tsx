@@ -14,19 +14,19 @@ interface ProjectsPageClientProps {
 }
 
 const STATUS_OPTIONS = [
-    { value: 'ALL', label: 'Todos' },
+    { value: 'ALL', label: 'Todos (Activos)' },
     { value: 'COTIZANDO', label: 'Cotizando' },
     { value: 'APROBADO', label: 'Aprobado' },
-    { value: 'PRODUCCION', label: 'En producción' },
+    { value: 'EN_PRODUCCION', label: 'En producción' },
     { value: 'ENTREGADO', label: 'Entregado' },
-    { value: 'CERRADO', label: 'Cerrado' }
+    { value: 'CANCELADO', label: 'Cancelado' }
 ]
 
 export function ProjectsPageClient({ initialProjects, clients }: ProjectsPageClientProps) {
     const [filter, setFilter] = useState('ALL')
 
     const filteredProjects = filter === 'ALL'
-        ? initialProjects
+        ? initialProjects.filter((p: any) => p.status !== 'CANCELADO')
         : initialProjects.filter((p: any) => p.status === filter)
 
     return (
@@ -92,7 +92,7 @@ export function ProjectsPageClient({ initialProjects, clients }: ProjectsPageCli
                                                 {new Date(project.updatedAt).toLocaleDateString('es-MX')}
                                             </td>
                                             <td className="px-4 py-3 text-right font-medium">
-                                                ${project.totalCotizado?.toLocaleString('es-MX', { minimumFractionDigits: 2 }) || '0.00'}
+                                                ${project.totalCotizado?.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <Badge variant="outline" className={cn(

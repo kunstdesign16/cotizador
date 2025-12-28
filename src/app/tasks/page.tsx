@@ -10,7 +10,10 @@ export default async function TasksPage() {
         const tasks = await (prisma as any).supplierTask.findMany({
             include: {
                 supplier: true,
-                quote: true
+                quote: {
+                    include: { project: true }
+                },
+                project: true
             } as any,
             orderBy: { expectedDate: 'asc' }
         })

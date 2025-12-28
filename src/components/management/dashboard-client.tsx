@@ -37,7 +37,7 @@ export function ManagementDashboardClient({ data }: ManagementDashboardClientPro
                         <CardTitle className="text-xs font-brand-header tracking-widest text-white/70 uppercase">Ingresos Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-brand-header tracking-wider">${currentMonth.ingresos.toLocaleString()}</div>
+                        <div className="text-2xl font-brand-header tracking-wider whitespace-nowrap">${currentMonth.ingresos.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     </CardContent>
                 </Card>
 
@@ -49,7 +49,7 @@ export function ManagementDashboardClient({ data }: ManagementDashboardClientPro
                         <CardTitle className="text-xs font-brand-header tracking-widest text-primary/60 uppercase">Egresos Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-brand-header tracking-wider text-rose-600">${currentMonth.egresos.toLocaleString()}</div>
+                        <div className="text-2xl font-brand-header tracking-wider text-rose-600 whitespace-nowrap">${currentMonth.egresos.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     </CardContent>
                 </Card>
 
@@ -61,7 +61,7 @@ export function ManagementDashboardClient({ data }: ManagementDashboardClientPro
                         <CardTitle className="text-xs font-brand-header tracking-widest text-primary/70 uppercase">Utilidad Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-brand-header tracking-wider">${currentMonth.utilidad.toLocaleString()}</div>
+                        <div className="text-2xl font-brand-header tracking-wider whitespace-nowrap">${currentMonth.utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     </CardContent>
                 </Card>
 

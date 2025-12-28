@@ -13,6 +13,13 @@ export default async function DashboardPage() {
 
         // Fetch All Data Defensively
         const quotes = await (prisma as any).quote.findMany({
+            where: {
+                project: {
+                    is: {
+                        status: { not: 'CANCELADO' }
+                    }
+                }
+            } as any,
             include: {
                 client: true,
                 expenses: true,
@@ -31,14 +38,18 @@ export default async function DashboardPage() {
         const pendingTasks = await (prisma as any).supplierTask.findMany({
             where: {
                 status: { in: ['PENDING', 'IN_PROGRESS'] },
-                NOT: {
-                    quote: { status: 'COBRADO' }
+                project: {
+                    is: {
+                        status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                        financialStatus: { not: 'CERRADO' }
+                    }
                 }
-            },
+            } as any,
             include: {
                 supplier: true,
-                quote: true
-            },
+                quote: true,
+                project: true
+            } as any,
             orderBy: { expectedDate: 'asc' }
         })
 
@@ -46,24 +57,28 @@ export default async function DashboardPage() {
         const serializedClients = JSON.parse(JSON.stringify(clients))
 
 
-        // Calculate Metrics
-        const activeQuotes = quotes.filter((q: any) => q.status === 'DRAFT' || q.status === 'SAVED').length
-        const sentQuotes = quotes.filter((q: any) => q.status === 'SENT').length
-        const approvedQuotes = quotes.filter((q: any) => q.status === 'APPROVED' || q.status === 'FACTURADO').length
+        // Calculate Metrics (considering project states)
+        const activeQuotes = quotes.filter((q: any) => (q.status === 'DRAFT' || q.status === 'SAVED') && q.project?.status === 'COTIZANDO').length
+        const sentQuotes = quotes.filter((q: any) => q.status === 'SENT' && q.project?.status === 'COTIZANDO').length
+        const approvedQuotes = quotes.filter((q: any) => (q.status === 'APPROVED' || q.status === 'FACTURADO') && q.project?.status === 'APROBADO').length
 
         // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
         const urgentTasks = await (prisma as any).supplierTask.findMany({
             where: {
                 status: { in: ['PENDING', 'IN_PROGRESS'] },
                 priority: { in: ['HIGH', 'URGENT'] },
-                NOT: {
-                    quote: { status: 'COBRADO' }
+                project: {
+                    is: {
+                        status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                        financialStatus: { not: 'CERRADO' }
+                    }
                 }
-            },
+            } as any,
             include: {
                 supplier: true,
-                quote: true
-            },
+                quote: true,
+                project: true
+            } as any,
             orderBy: { expectedDate: 'asc' }
         })
 
@@ -75,12 +90,13 @@ export default async function DashboardPage() {
         // Recent 5 supplier orders (not linked to COBRADO projects)
         const recentOrders = await (prisma as any).supplierOrder.findMany({
             where: {
-                NOT: {
-                    quote: { status: 'COBRADO' }
+                project: {
+                    status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                    financialStatus: { not: 'CERRADO' }
                 }
-            },
-            include: { supplier: true },
-            orderBy: { createdAt: 'desc' },
+            } as any,
+            include: { supplier: true, project: true } as any,
+            orderBy: { createdAt: 'desc' } as any,
             take: 5
         })
         const serializedOrders = JSON.parse(JSON.stringify(recentOrders))

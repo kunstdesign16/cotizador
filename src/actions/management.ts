@@ -36,25 +36,34 @@ export async function getManagementDashboardData() {
         }
 
         // 2. Project Counts
-        const activeProjects = await prisma.project.count({
-            where: { status: { not: 'CERRADO' }, isArchived: false }
+        const activeProjects = await (prisma as any).project.count({
+            where: {
+                status: { notIn: ['ENTREGADO', 'CANCELADO'] },
+                financialStatus: 'ABIERTO'
+            }
         })
-        const closedProjects = await prisma.project.count({
-            where: { status: 'CERRADO', isArchived: false }
+        const closedProjects = await (prisma as any).project.count({
+            where: {
+                OR: [
+                    { financialStatus: 'CERRADO' },
+                    { status: 'ENTREGADO' }
+                ],
+                status: { not: 'CANCELADO' }
+            }
         })
 
         // 3. Control Lists
 
         // Projects with negative utility (Real expenses > Real income)
-        // Only counting projects that have actually started (not just COTIZANDO)
-        const negativeUtilityProjects = await prisma.project.findMany({
+        const negativeUtilityProjects = await (prisma as any).project.findMany({
             where: {
-                status: { in: ['PRODUCCION', 'ENTREGADO', 'APROBADO'] },
+                status: { in: ['EN_PRODUCCION', 'ENTREGADO', 'APROBADO'] },
+                financialStatus: 'ABIERTO',
                 totalEgresado: { gt: 0 }
             },
             include: { client: true }
         })
-        const filteredNegativeProjects = negativeUtilityProjects.filter(p => p.totalEgresado > p.totalIngresado)
+        const filteredNegativeProjects = negativeUtilityProjects.filter((p: any) => p.totalEgresado > p.totalIngresado)
 
         // Orders with pending balance
         const pendingOrders = await prisma.supplierOrder.findMany({
@@ -82,9 +91,10 @@ export async function getManagementDashboardData() {
         const thirtyDaysAgo = new Date()
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-        const agedProjects = await prisma.project.findMany({
+        const agedProjects = await (prisma as any).project.findMany({
             where: {
-                status: { in: ['APROBADO', 'PRODUCCION', 'ENTREGADO'] },
+                status: { in: ['APROBADO', 'EN_PRODUCCION'] },
+                financialStatus: 'ABIERTO',
                 createdAt: { lt: thirtyDaysAgo }
             },
             include: { client: true },

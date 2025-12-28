@@ -39,8 +39,9 @@ model Project {
   id           String    @id @default(cuid())
   name         String
   description  String?
-  status       String    @default("COTIZANDO") // COTIZANDO, APROBADO, PRODUCCION, ENTREGADO, CERRADO
-  isArchived   Boolean   @default(false)
+  status           String    @default("COTIZANDO") // COTIZANDO, APROBADO, EN_PRODUCCION, ENTREGADO, CANCELADO
+  financialStatus  String    @default("ABIERTO") // ABIERTO, CERRADO
+  isArchived       Boolean   @default(false)
   
   // Financials (Calculated or snapshotted)
   totalCotizado Float    @default(0)
