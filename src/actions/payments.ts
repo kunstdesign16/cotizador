@@ -7,7 +7,6 @@ export async function registerPayment({
     orderId,
     quoteId,
     supplierId,
-    type,
     amount,
     iva = 0,
     description

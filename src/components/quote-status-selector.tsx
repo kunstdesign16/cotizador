@@ -5,21 +5,17 @@ import { updateQuoteStatus } from '@/actions/quotes'
 import { useRouter } from 'next/navigation'
 
 const STATUSES = {
-    'DRAFT': 'Borrador',
-    'SAVED': 'Guardado',
-    'SENT': 'Enviado',
-    'APPROVED': 'Aprobado',
-    'FACTURADO': 'Facturado',
-    'COBRADO': 'Cobrado'
+    'draft': 'Borrador',
+    'approved': 'Aprobado',
+    'rejected': 'Rechazado',
+    'replaced': 'Reemplazado'
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    'DRAFT': 'bg-gray-100 text-gray-600 ring-gray-500/10',
-    'SAVED': 'bg-blue-50 text-blue-700 ring-blue-600/20',
-    'SENT': 'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
-    'APPROVED': 'bg-green-50 text-green-700 ring-green-600/20',
-    'FACTURADO': 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
-    'COBRADO': 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+    'draft': 'bg-gray-100 text-gray-600 ring-gray-500/10',
+    'approved': 'bg-green-50 text-green-700 ring-green-600/20',
+    'rejected': 'bg-red-50 text-red-700 ring-red-600/20',
+    'replaced': 'bg-orange-50 text-orange-700 ring-orange-600/20'
 }
 
 export function QuoteStatusSelector({ id, currentStatus, compact = false, disabled = false }: { id: string, currentStatus: string, compact?: boolean, disabled?: boolean }) {
@@ -40,7 +36,7 @@ export function QuoteStatusSelector({ id, currentStatus, compact = false, disabl
     return (
         <select
             value={status}
-            onChange={(e) => handleStatusChange(e.target.value)}
+            onChange={(e) => handleStatusChange(e.target.value as any)}
             onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
