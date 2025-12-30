@@ -24,12 +24,10 @@ type QuoteWithClient = Quote & {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-    'DRAFT': 'Borrador',
-    'SAVED': 'Guardado',
-    'SENT': 'Enviado',
-    'APPROVED': 'Aprobado',
-    'FACTURADO': 'Facturado',
-    'COBRADO': 'Cobrado'
+    'draft': 'Borrador',
+    'approved': 'Aprobado',
+    'rejected': 'Rechazado',
+    'replaced': 'Reemplazado'
 }
 
 
