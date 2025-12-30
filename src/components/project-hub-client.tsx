@@ -234,7 +234,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 </Button>
                             </>
                         )}
-                        {!isFinancialmenteCerrado && project.status !== 'COTIZANDO' && (
+                        {!isFinancialmenteCerrado && project.status !== 'draft' && (
                             <>
                                 <Button variant="outline" size="sm" onClick={handleCloseProject} disabled={isClosing} className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
                                     {isClosing ? 'Cerrando...' : 'Cerrar Obra'}

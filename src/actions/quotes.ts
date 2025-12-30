@@ -129,7 +129,7 @@ export async function updateQuote(id: string, data: any) {
 
     const isQuoteDraft = existingQuote.status === 'DRAFT' || existingQuote.status === 'BORRADOR'
 
-    if (!isQuoteDraft && existingQuote.project && existingQuote.project.status !== 'COTIZANDO') {
+    if (!isQuoteDraft && existingQuote.project && existingQuote.project.status !== 'draft') {
         return {
             success: false,
             error: `La cotización no está en borrador y el proyecto ya no está en etapa de cotización. No se permiten ediciones.`

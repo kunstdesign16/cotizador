@@ -371,11 +371,11 @@ export async function getClientReport(clientId: string) {
 
         // Projects by status
         const projectsByStatus = {
-            cotizando: client.projects.filter(p => p.status === 'COTIZANDO').length,
-            aprobado: client.projects.filter(p => p.status === 'APROBADO').length,
-            produccion: client.projects.filter(p => p.status === 'PRODUCCION').length,
-            entregado: client.projects.filter(p => p.status === 'ENTREGADO').length,
-            cerrado: client.projects.filter(p => p.status === 'CERRADO').length
+            cotizando: client.projects.filter(p => p.status === 'draft').length,
+            aprobado: client.projects.filter(p => p.status === 'active').length,
+            produccion: client.projects.filter(p => p.status === 'active').length,
+            entregado: client.projects.filter(p => p.status === 'closed').length,
+            cerrado: client.projects.filter(p => p.financialStatus === 'CERRADO').length
         }
 
         return {

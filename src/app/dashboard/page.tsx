@@ -98,7 +98,7 @@ export default async function DashboardPage() {
         const recentOrders = await (prisma as any).supplierOrder.findMany({
             where: {
                 project: {
-                    status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                    status: { notIn: ['cancelled', 'closed'] },
                     financialStatus: { not: 'CERRADO' }
                 }
             } as any,

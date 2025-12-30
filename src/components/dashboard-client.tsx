@@ -204,7 +204,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                                     id={quote.id}
                                                                     currentStatus={quote.status}
                                                                     compact
-                                                                    disabled={quote.project?.status !== 'COTIZANDO'}
+                                                                    disabled={quote.project?.status !== 'draft'}
                                                                 />
                                                             </div>
                                                         </div>
@@ -261,7 +261,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                             </div>
 
                                                             <div className="flex gap-1" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                                {quote.project?.status === 'COTIZANDO' && (
+                                                                {quote.project?.status === 'draft' && (
                                                                     <>
                                                                         <Button
                                                                             variant="ghost"
