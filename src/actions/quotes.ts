@@ -206,6 +206,9 @@ export async function updateQuote(id: string, data: any) {
 
     revalidatePath('/dashboard')
     revalidatePath(`/quotes/${id}`)
+    if (existingQuote.projectId) {
+        revalidatePath(`/projects/${existingQuote.projectId}`)
+    }
     return { success: true, id: quote.id }
 }
 

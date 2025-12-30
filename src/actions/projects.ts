@@ -15,7 +15,6 @@ export async function createProject(data: { name: string; clientId: string; desc
     })
 
     revalidatePath('/projects')
-    revalidatePath('/projects')
     revalidatePath('/dashboard')
     return project
 }
