@@ -214,9 +214,9 @@ export async function getActiveProjects() {
     try {
         const projects = await prisma.quote.findMany({
             where: {
-                status: { in: ['SENT', 'APPROVED', 'COBRADO'] },
+                status: { in: ['approved'] },
                 project: {
-                    status: { not: 'CANCELADO' }
+                    status: { not: 'cancelled' }
                 }
             },
             select: {

@@ -13,7 +13,7 @@ import {
     ChevronLeft,
     CheckCircle2,
     Lock,
-    ExternalLink,
+
     Plus,
     History,
     Trash2,
@@ -68,7 +68,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const totalCobrado = totalIngresado // Alias for clarity in financials tab
 
     const isFinancialmenteCerrado = project.financialStatus === 'CERRADO'
-    const isCancelled = project.status === 'CANCELADO'
+
 
     const handleApprove = async (quoteId: string) => {
         if (isFinancialmenteCerrado) return
