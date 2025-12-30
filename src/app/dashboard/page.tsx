@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         // I'll simplifiy: Active Quotes = Draft Quotes in Draft Projects.
 
 
-        const approvedQuotes = quotes.filter((q: any) => (q.status === 'approved' || q.status === 'FACTURADO') && q.project?.status === 'active').length
+        const approvedQuotes = quotes.filter((q: any) => q.status === 'approved' && q.project?.status === 'active').length
 
         // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
         const urgentTasks = await (prisma as any).supplierTask.findMany({
