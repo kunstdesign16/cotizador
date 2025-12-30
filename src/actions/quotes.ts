@@ -122,10 +122,17 @@ export async function updateQuote(id: string, data: any) {
         }
     }
 
-    if (existingQuote.project && existingQuote.project.status !== 'COTIZANDO') {
+    // STRICT RULE: Allow editing ONLY if Quote is DRAFT.
+    // Use case: Creating a "New Version" (DRAFT) in an Active project.
+    // If the quote itself is APPROVED or SENT, it should not be editable (unless reverted to draft, effectively).
+    // But currently, we just check Project Status.
+
+    const isQuoteDraft = existingQuote.status === 'DRAFT' || existingQuote.status === 'BORRADOR'
+
+    if (!isQuoteDraft && existingQuote.project && existingQuote.project.status !== 'COTIZANDO') {
         return {
             success: false,
-            error: `El proyecto está en estado ${existingQuote.project.status}. No se permiten ediciones. Por favor, duplique la cotización para crear una nueva versión.`
+            error: `La cotización no está en borrador y el proyecto ya no está en etapa de cotización. No se permiten ediciones.`
         }
     }
 
@@ -264,6 +271,11 @@ export async function approveQuote(quoteId: string) {
             return { success: false, error: 'El proyecto está CERRADO FINANCIERAMENTE. No se pueden aprobar cotizaciones.' }
         }
 
+        // STRICT RULE: Cannot approve a quote if project is already ACTIVE (active) or DELIVERED (closed)
+        if (quote.project.status === 'active' || quote.project.status === 'closed') {
+            return { success: false, error: `El proyecto ya está ${quote.project.status}. No se puede aprobar otra cotización. Genere una Nueva Versión o Cancele la actual.` }
+        }
+
         await prisma.$transaction([
             // 1. Mark this quote as approved and all others as not approved for this project
             prisma.quote.updateMany({
@@ -272,13 +284,13 @@ export async function approveQuote(quoteId: string) {
             }),
             prisma.quote.update({
                 where: { id: quoteId },
-                data: { isApproved: true, status: 'APPROVED' }
+                data: { isApproved: true, status: 'approved' }
             }),
             // 2. Update project status and snapshot financial totals from this quote
             (prisma as any).project.update({
                 where: { id: quote.projectId },
                 data: {
-                    status: 'EN_PRODUCCION',
+                    status: 'active',
                     totalCotizado: quote.total
                 }
             })
@@ -333,7 +345,7 @@ export async function deleteQuote(id: string) {
             include: { project: true }
         })
 
-        if (existing?.project && existing.project.status !== 'COTIZANDO') {
+        if (existing?.project && existing.project.status !== 'draft') {
             return { success: false, error: 'No se puede eliminar una cotización de un proyecto aprobado o en ejecución.' }
         }
 

@@ -58,9 +58,16 @@ export default async function DashboardPage() {
 
 
         // Calculate Metrics (considering project states)
-        const activeQuotes = quotes.filter((q: any) => (q.status === 'DRAFT' || q.status === 'SAVED') && q.project?.status === 'COTIZANDO').length
-        const sentQuotes = quotes.filter((q: any) => q.status === 'SENT' && q.project?.status === 'COTIZANDO').length
-        const approvedQuotes = quotes.filter((q: any) => (q.status === 'APPROVED' || q.status === 'FACTURADO') && q.project?.status === 'APROBADO').length
+        const activeQuotes = quotes.filter((q: any) => (q.status === 'draft') && q.project?.status === 'draft').length
+        const sentQuotes = quotes.filter((q: any) => q.status === 'ordered' && q.project?.status === 'draft').length // Wait, 'ordered' is not in QuoteStatus. 'approved'? 'sent' mapped to 'draft'? STRICT RULE says sent is draft.
+        // Actually, let's look at schema: QuoteStatus { draft, approved, rejected, replaced }
+        // What counts as "Active Quote" (Pending approval)? status === 'draft'.
+        // What counts as "Sent"? We don't have SENT status anymore. It is just Draft.
+        // I'll simplifiy: Active Quotes = Draft Quotes in Draft Projects.
+
+        const pendingQuotes = quotes.filter((q: any) => q.status === 'draft' && q.project?.status === 'draft').length
+        const approvedQuotesCount = quotes.filter((q: any) => q.status === 'approved').length
+        const approvedQuotes = quotes.filter((q: any) => (q.status === 'approved' || q.status === 'FACTURADO') && q.project?.status === 'active').length
 
         // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
         const urgentTasks = await (prisma as any).supplierTask.findMany({

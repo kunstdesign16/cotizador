@@ -39,8 +39,8 @@ model Project {
   id           String    @id @default(cuid())
   name         String
   description  String?
-  status           String    @default("COTIZANDO") // COTIZANDO, APROBADO, EN_PRODUCCION, ENTREGADO, CANCELADO
-  financialStatus  String    @default("ABIERTO") // ABIERTO, CERRADO
+  status           ProjectStatus @default(draft)
+  financialStatus  String        @default("ABIERTO") // ABIERTO, CERRADO
   isArchived       Boolean   @default(false)
   
   // Financials (Calculated or snapshotted)
@@ -68,7 +68,7 @@ model Quote {
   id           String      @id @default(cuid())
   project_name String
   date         DateTime    @default(now())
-  status       String      @default("DRAFT") // DRAFT, SAVED, SENT, APPROVED, FACTURADO, COBRADO
+  status       QuoteStatus @default(draft)
   // Financials
   deliveryDate DateTime?
   version      Int         @default(1)
@@ -288,5 +288,20 @@ model VariableExpense {
     
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
+}
+
+
+enum ProjectStatus {
+  draft
+  active
+  closed
+  cancelled
+}
+
+enum QuoteStatus {
+  draft
+  approved
+  rejected
+  replaced
 }
 

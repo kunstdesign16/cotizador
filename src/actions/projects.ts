@@ -9,7 +9,7 @@ export async function createProject(data: { name: string; clientId: string; desc
             name: data.name,
             clientId: data.clientId,
             description: data.description,
-            status: 'COTIZANDO',
+            status: 'draft',
             financialStatus: 'ABIERTO'
         }
     })
@@ -35,7 +35,7 @@ export async function getProjectClosureEligibility(projectId: string) {
         return {
             eligible: pendingOrders.length === 0,
             pendingCount: pendingOrders.length,
-            status: project.status
+            status: project.status as string
         }
     } catch (_error) {
         return { eligible: false, error: 'Error' }
@@ -61,7 +61,7 @@ export async function closeProject(projectId: string) {
                 where: { id: projectId },
                 data: {
                     financialStatus: 'CERRADO',
-                    status: 'ENTREGADO'
+                    status: 'closed'
                 }
             })
         })
@@ -153,15 +153,23 @@ export async function deleteProject(projectId: string) {
     }
 }
 
-export async function updateProjectStatus(projectId: string, status: 'COTIZANDO' | 'APROBADO' | 'EN_PRODUCCION' | 'ENTREGADO' | 'CANCELADO') {
+export async function updateProjectStatus(projectId: string, status: 'draft' | 'active' | 'closed' | 'cancelled') {
+    const { prisma } = await import('@/lib/prisma')
+
     try {
-        const project = await (prisma as any).project.findUnique({
+        const project = await prisma.project.findUnique({
             where: { id: projectId }
         })
 
         if (!project) return { success: false, error: 'Proyecto no encontrado' }
+
         if (project.financialStatus === 'CERRADO') {
             return { success: false, error: 'No se puede cambiar el estado de un proyecto cerrado financieramente.' }
+        }
+
+        // APROBADO check removed
+        if ((status as any) === 'APROBADO') {
+            return { success: false, error: 'El estado APROBADO no es válido. Use active.' }
         }
 
         await (prisma as any).project.update({
@@ -180,5 +188,23 @@ export async function updateProjectStatus(projectId: string, status: 'COTIZANDO'
 }
 
 export async function cancelProject(projectId: string) {
-    return updateProjectStatus(projectId, 'CANCELADO')
+    const { prisma } = await import('@/lib/prisma')
+
+    // SAFE CANCELLATION CHECK
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        include: { incomes: true, expenses: true }
+    })
+
+    if (!project) return { success: false, error: 'Proyecto no encontrado' }
+
+    if (project.incomes.length > 0) {
+        return { success: false, error: 'No se puede cancelar un proyecto con ingresos registrados. Debe cerrarlo financieramente.' }
+    }
+
+    if (project.expenses.length > 0) {
+        return { success: false, error: 'No se puede cancelar un proyecto con egresos registrados. Debe cerrarlo financieramente.' }
+    }
+
+    return updateProjectStatus(projectId, 'cancelled')
 }

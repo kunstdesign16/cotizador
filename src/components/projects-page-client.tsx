@@ -15,18 +15,17 @@ interface ProjectsPageClientProps {
 
 const STATUS_OPTIONS = [
     { value: 'ALL', label: 'Todos (Activos)' },
-    { value: 'COTIZANDO', label: 'Cotizando' },
-    { value: 'APROBADO', label: 'Aprobado' },
-    { value: 'EN_PRODUCCION', label: 'En producción' },
-    { value: 'ENTREGADO', label: 'Entregado' },
-    { value: 'CANCELADO', label: 'Cancelado' }
+    { value: 'draft', label: 'Cotizando' },
+    { value: 'active', label: 'En Producción' },
+    { value: 'closed', label: 'Entregado' },
+    { value: 'cancelled', label: 'Cancelado' }
 ]
 
 export function ProjectsPageClient({ initialProjects, clients }: ProjectsPageClientProps) {
     const [filter, setFilter] = useState('ALL')
 
     const filteredProjects = filter === 'ALL'
-        ? initialProjects.filter((p: any) => p.status !== 'CANCELADO')
+        ? initialProjects.filter((p: any) => p.status !== 'cancelled')
         : initialProjects.filter((p: any) => p.status === filter)
 
     return (
@@ -96,11 +95,12 @@ export function ProjectsPageClient({ initialProjects, clients }: ProjectsPageCli
                                             </td>
                                             <td className="px-4 py-3">
                                                 <Badge variant="outline" className={cn(
-                                                    project.status === 'APROBADO' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                        project.status === 'PRODUCCION' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                            'bg-gray-50 text-gray-700 border-gray-200'
+                                                    project.status === 'active' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                        project.status === 'closed' ? 'bg-primary text-white border-primary' :
+                                                            project.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                'bg-slate-50 text-slate-700 border-slate-200'
                                                 )}>
-                                                    {STATUS_OPTIONS.find(o => o.value === project.status)?.label || project.status}
+                                                    {project.status === 'active' ? 'EN PRODUCCIÓN' : project.status === 'draft' ? 'COTIZANDO' : project.status === 'closed' ? 'ENTREGADO' : 'CANCELADO'}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-3 text-center">

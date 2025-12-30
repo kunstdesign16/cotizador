@@ -239,7 +239,7 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                                                                     </Link>
                                                                 )}
                                                             </div>
-                                                        ) : quote.project?.status !== 'COTIZANDO' ? (
+                                                        ) : quote.project?.status !== 'draft' ? (
                                                             <Dialog>
                                                                 <DialogTrigger asChild>
                                                                     <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 px-2 border-primary/20 text-primary hover:bg-primary/5">

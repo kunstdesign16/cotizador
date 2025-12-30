@@ -204,7 +204,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         Proyectos
                     </Link>
                     <div className="flex gap-2">
-                        {!isFinancialmenteCerrado && project.status === 'COTIZANDO' && (
+                        {!isFinancialmenteCerrado && project.status === 'draft' && (
                             <>
                                 {project.quotes?.length === 0 ? (
                                     <Link href={`/quotes/new?projectId=${project.id}`}>
@@ -268,19 +268,19 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         onValueChange={handleStatusChange}
                                         disabled={isUpdatingStatus || isFinancialmenteCerrado}
                                     >
-                                        <SelectTrigger className={`w-[180px] h-8 uppercase text-[11px] font-brand-header tracking-widest border-0 flex items-center gap-1.5 shadow-sm rounded-lg ${project.status === 'COTIZANDO' ? 'bg-secondary text-primary' :
-                                            project.status === 'EN_PRODUCCION' ? 'bg-blue-500 text-white' :
-                                                project.status === 'ENTREGADO' ? 'bg-primary text-white' :
-                                                    project.status === 'CANCELADO' ? 'bg-red-500 text-white' :
+                                        <SelectTrigger className={`w-[180px] h-8 uppercase text-[11px] font-brand-header tracking-widest border-0 flex items-center gap-1.5 shadow-sm rounded-lg ${project.status === 'draft' ? 'bg-secondary text-primary' :
+                                            project.status === 'active' ? 'bg-blue-500 text-white' :
+                                                project.status === 'closed' ? 'bg-primary text-white' :
+                                                    project.status === 'cancelled' ? 'bg-red-500 text-white' :
                                                         'bg-secondary text-primary'
                                             }`}>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="COTIZANDO">COTIZANDO</SelectItem>
-                                            <SelectItem value="EN_PRODUCCION">EN PRODUCCIÓN</SelectItem>
-                                            <SelectItem value="ENTREGADO">ENTREGADO</SelectItem>
-                                            <SelectItem value="CANCELADO">CANCELADO</SelectItem>
+                                            <SelectItem value="draft">COTIZANDO</SelectItem>
+                                            <SelectItem value="active">EN PRODUCCIÓN</SelectItem>
+                                            <SelectItem value="closed">ENTREGADO</SelectItem>
+                                            <SelectItem value="cancelled">CANCELADO</SelectItem>
                                         </SelectContent>
                                     </Select>
 
@@ -294,17 +294,17 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         Cotización: {approvedQuote ? 'APROBADA' : 'BORRADOR'}
                                     </Badge>
                                     <Badge variant="outline" className="uppercase text-[10px] tracking-widest bg-slate-50 text-slate-700 border-slate-200">
-                                        Proyecto: {project.status.replace('_', ' ')}
+                                        Proyecto: {project.status === 'active' ? 'EN PRODUCCIÓN' : project.status === 'draft' ? 'COTIZANDO' : project.status === 'closed' ? 'ENTREGADO' : 'CANCELADO'}
                                     </Badge>
                                 </div>
                             </div>
                             <p className="text-foreground/70 max-w-2xl font-brand-ui text-sm leading-relaxed">{project.description || 'Sin descripción adicional disponible para este proyecto.'}</p>
-                            {project.status === 'COTIZANDO' && (
+                            {project.status === 'draft' && (
                                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl max-w-2xl">
                                     <p className="text-xs text-blue-700 font-brand-ui">
                                         <strong>Siguiente paso:</strong> {project.quotes?.length === 0
                                             ? 'Crea una cotización para este proyecto.'
-                                            : 'Aprueba una cotización para continuar el flujo.'}
+                                            : approvedQuote ? 'Proyecto aprobado. Cambie el estatus a Producción.' : 'Aprueba una cotización para continuar el flujo.'}
                                     </p>
                                 </div>
                             )}
@@ -487,7 +487,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                     </div>
 
                                     <div className="pt-4 space-y-3">
-                                        {project.status === 'COTIZANDO' && project.quotes?.length === 0 && (
+                                        {project.status === 'draft' && project.quotes?.length === 0 && (
                                             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                                 <p className="text-xs text-blue-700">
                                                     <strong>Acción requerida:</strong> Crea una cotización para activar el flujo del proyecto.
@@ -541,7 +541,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                {!quote.isApproved && !isFinancialmenteCerrado && (
+                                                {!quote.isApproved && !isFinancialmenteCerrado && project.status === 'draft' && (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
@@ -553,9 +553,10 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                     </Button>
                                                 )}
 
-                                                <Link href={`/quotes/${quote.id}${quote.isApproved || isFinancialmenteCerrado ? '' : '/edit'}`}>
+                                                {/* Edit Rule: Allow edit if DRAFT. Strict rule says: DRAFT checks in backend. UI: Show 'Edit' if DRAFT, 'Ver' otherwise. */}
+                                                <Link href={`/quotes/${quote.id}${quote.status === 'DRAFT' || quote.status === 'BORRADOR' ? '/edit' : ''}`}>
                                                     <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs border">
-                                                        {quote.isApproved || isFinancialmenteCerrado ? 'Ver' : 'Editar'}
+                                                        {quote.status === 'DRAFT' || quote.status === 'BORRADOR' ? 'Editar' : 'Ver'}
                                                         <ChevronLeft className="h-3.5 w-3.5 rotate-180" />
                                                     </Button>
                                                 </Link>
