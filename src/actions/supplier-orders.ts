@@ -36,7 +36,7 @@ export async function createSupplierOrder(
                     where: {
                         productCode: item.code,
                         quote: {
-                            status: { in: ['DRAFT', 'SAVED'] }
+                            status: { in: ['draft'] }
                         }
                     },
                     data: {
@@ -82,7 +82,7 @@ export async function updateSupplierOrder(
                     where: {
                         productCode: item.code,
                         quote: {
-                            status: { in: ['DRAFT', 'SAVED'] }
+                            status: { in: ['draft'] }
                         }
                     },
                     data: {

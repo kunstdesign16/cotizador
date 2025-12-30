@@ -114,11 +114,11 @@ export async function getProjectReport(projectId: string) {
         // Quotes summary
         const quotesSummary = {
             total: project.quotes.length,
-            draft: project.quotes.filter(q => q.status === 'DRAFT').length,
-            sent: project.quotes.filter(q => q.status === 'SENT').length,
-            approved: project.quotes.filter(q => q.status === 'APPROVED').length,
-            facturado: project.quotes.filter(q => q.status === 'FACTURADO').length,
-            cobrado: project.quotes.filter(q => q.status === 'COBRADO').length,
+            draft: project.quotes.filter(q => q.status === 'draft').length,
+            sent: project.quotes.filter(q => q.status === 'draft').length, // SENT is now draft
+            approved: project.quotes.filter(q => q.status === 'approved').length,
+            facturado: 0, // FACTURADO legacy
+            cobrado: 0, // COBRADO legacy
             totalCotizado: project.quotes.reduce((sum, q) => sum + q.total, 0)
         }
 
@@ -363,11 +363,10 @@ export async function getClientReport(clientId: string) {
 
         // Quotes by status
         const quotesByStatus = {
-            draft: client.quotes.filter(q => q.status === 'DRAFT').length,
-            sent: client.quotes.filter(q => q.status === 'SENT').length,
-            approved: client.quotes.filter(q => q.status === 'APPROVED').length,
-            facturado: client.quotes.filter(q => q.status === 'FACTURADO').length,
-            cobrado: client.quotes.filter(q => q.status === 'COBRADO').length
+            draft: client.quotes.filter(q => q.status === 'draft').length,
+            approved: client.quotes.filter(q => q.status === 'approved').length,
+            rejected: client.quotes.filter(q => q.status === 'rejected').length,
+            replaced: client.quotes.filter(q => q.status === 'replaced').length,
         }
 
         // Projects by status
