@@ -389,7 +389,7 @@ export async function duplicateQuote(id: string) {
                 project_name: original.project_name,
                 version: nextVersion,
                 date: new Date(),
-                status: 'DRAFT',
+                status: 'draft',
                 clientId: original.clientId,
                 userId: original.userId,
                 projectId: original.projectId,

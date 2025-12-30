@@ -65,8 +65,7 @@ export default async function DashboardPage() {
         // What counts as "Sent"? We don't have SENT status anymore. It is just Draft.
         // I'll simplifiy: Active Quotes = Draft Quotes in Draft Projects.
 
-        const pendingQuotes = quotes.filter((q: any) => q.status === 'draft' && q.project?.status === 'draft').length
-        const approvedQuotesCount = quotes.filter((q: any) => q.status === 'approved').length
+
         const approvedQuotes = quotes.filter((q: any) => (q.status === 'approved' || q.status === 'FACTURADO') && q.project?.status === 'active').length
 
         // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
