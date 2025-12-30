@@ -242,20 +242,21 @@ export async function updateQuoteStatus(id: string, status: 'draft' | 'approved'
             data: { status }
         })
 
-        // Logic for COBRADO is removed as per Enum refactor. 
-        // If specific behavior for 'approved' is needed, add it here.
-        await syncIncomeFromQuote(id)
-    }
+        // Logic for specific status actions
+        if ((status as string) === 'approved') {
+            await syncIncomeFromQuote(id)
+        }
 
         revalidatePath('/dashboard')
-    revalidatePath('/projects')
-    if (quote.projectId) revalidatePath(`/projects/${quote.projectId}`)
-    revalidatePath('/accounting')
-    revalidatePath(`/quotes/${id}`)
-    return { success: true }
-} catch (_error) {
-    return { success: false, error: 'Error' }
-}
+        revalidatePath('/projects')
+        if (quote.projectId) revalidatePath(`/projects/${quote.projectId}`)
+        revalidatePath('/accounting')
+        revalidatePath(`/quotes/${id}`)
+        return { success: true }
+    } catch (_error) {
+        console.error('Error in updateQuoteStatus:', _error)
+        return { success: false, error: 'Error al actualizar el estado' }
+    }
 }
 
 export async function approveQuote(quoteId: string) {
