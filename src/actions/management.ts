@@ -38,7 +38,7 @@ export async function getManagementDashboardData() {
         // 2. Project Counts
         const activeProjects = await (prisma as any).project.count({
             where: {
-                status: { notIn: ['ENTREGADO', 'CANCELADO'] },
+                status: { notIn: ['closed', 'cancelled'] },
                 financialStatus: 'ABIERTO'
             }
         })
@@ -46,9 +46,9 @@ export async function getManagementDashboardData() {
             where: {
                 OR: [
                     { financialStatus: 'CERRADO' },
-                    { status: 'ENTREGADO' }
+                    { status: 'closed' }
                 ],
-                status: { not: 'CANCELADO' }
+                status: { not: 'cancelled' }
             }
         })
 
@@ -57,7 +57,7 @@ export async function getManagementDashboardData() {
         // Projects with negative utility (Real expenses > Real income)
         const negativeUtilityProjects = await (prisma as any).project.findMany({
             where: {
-                status: { in: ['EN_PRODUCCION', 'ENTREGADO', 'APROBADO'] },
+                status: { in: ['active', 'closed'] },
                 financialStatus: 'ABIERTO',
                 totalEgresado: { gt: 0 }
             },
@@ -93,7 +93,7 @@ export async function getManagementDashboardData() {
 
         const agedProjects = await (prisma as any).project.findMany({
             where: {
-                status: { in: ['APROBADO', 'EN_PRODUCCION'] },
+                status: { in: ['active'] },
                 financialStatus: 'ABIERTO',
                 createdAt: { lt: thirtyDaysAgo }
             },

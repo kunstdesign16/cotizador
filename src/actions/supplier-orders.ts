@@ -321,7 +321,7 @@ export async function createOrderFromQuoteItem(quoteItemId: string, supplierId: 
 
         // 2. CHECK: Only allow if project is APROBADO or higher
         const projectStatus = item.quote.project.status
-        if (projectStatus === 'COTIZANDO') {
+        if (projectStatus === 'draft') {
             return {
                 success: false,
                 error: 'El proyecto debe estar APROBADO para generar órdenes de compra operativos.'

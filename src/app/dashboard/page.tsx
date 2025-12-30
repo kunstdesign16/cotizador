@@ -16,7 +16,7 @@ export default async function DashboardPage() {
             where: {
                 project: {
                     is: {
-                        status: { not: 'CANCELADO' }
+                        status: { not: 'cancelled' }
                     }
                 }
             } as any,
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
                 status: { in: ['PENDING', 'IN_PROGRESS'] },
                 project: {
                     is: {
-                        status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                        status: { notIn: ['cancelled', 'closed'] },
                         financialStatus: { not: 'CERRADO' }
                     }
                 }
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
                 priority: { in: ['HIGH', 'URGENT'] },
                 project: {
                     is: {
-                        status: { notIn: ['CANCELADO', 'ENTREGADO'] },
+                        status: { notIn: ['cancelled', 'closed'] },
                         financialStatus: { not: 'CERRADO' }
                     }
                 }
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
         const serializedUrgentTasks = JSON.parse(JSON.stringify(urgentTasks))
 
         // Recent 5 active quotes (not cobradas)
-        const recentQuotes = serializedQuotes.filter((q: any) => q.status !== 'COBRADO').slice(0, 5)
+        const recentQuotes = serializedQuotes.slice(0, 5)
 
         // Recent 5 supplier orders (not linked to COBRADO projects)
         const recentOrders = await (prisma as any).supplierOrder.findMany({

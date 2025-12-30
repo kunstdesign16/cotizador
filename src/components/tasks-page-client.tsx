@@ -172,7 +172,7 @@ export function TasksPageClient({ initialTasks, suppliers, quotes }: TasksPageCl
                                                 "text-primary/60 text-sm font-medium",
                                                 !task.status.includes('COMPLETED') &&
                                                 new Date(task.expectedDate) < new Date() &&
-                                                (task.project?.status !== 'ENTREGADO' && task.quote?.project?.status !== 'ENTREGADO') &&
+                                                (task.project?.status !== 'closed' && task.quote?.project?.status !== 'closed') &&
                                                 "text-red-500 font-bold"
                                             )}>
                                                 {new Date(task.expectedDate).toLocaleDateString('es-MX')}

@@ -234,7 +234,7 @@ export async function getActiveProjects() {
     }
 }
 
-export async function updateQuoteStatus(id: string, status: string) {
+export async function updateQuoteStatus(id: string, status: 'draft' | 'approved' | 'rejected' | 'replaced') {
     const { prisma } = await import('@/lib/prisma')
     try {
         const quote = await prisma.quote.update({
@@ -242,19 +242,20 @@ export async function updateQuoteStatus(id: string, status: string) {
             data: { status }
         })
 
-        if (status === 'COBRADO') {
-            await syncIncomeFromQuote(id)
-        }
+        // Logic for COBRADO is removed as per Enum refactor. 
+        // If specific behavior for 'approved' is needed, add it here.
+        await syncIncomeFromQuote(id)
+    }
 
         revalidatePath('/dashboard')
-        revalidatePath('/projects')
-        if (quote.projectId) revalidatePath(`/projects/${quote.projectId}`)
-        revalidatePath('/accounting')
-        revalidatePath(`/quotes/${id}`)
-        return { success: true }
-    } catch (_error) {
-        return { success: false, error: 'Error' }
-    }
+    revalidatePath('/projects')
+    if (quote.projectId) revalidatePath(`/projects/${quote.projectId}`)
+    revalidatePath('/accounting')
+    revalidatePath(`/quotes/${id}`)
+    return { success: true }
+} catch (_error) {
+    return { success: false, error: 'Error' }
+}
 }
 
 export async function approveQuote(quoteId: string) {

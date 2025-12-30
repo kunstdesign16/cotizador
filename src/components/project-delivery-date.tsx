@@ -21,7 +21,7 @@ export function ProjectDeliveryDate({ id, date, status }: ProjectDeliveryDatePro
     const [loading, setLoading] = useState(false)
 
     // Calculate delay
-    const isCompleted = ['ENTREGADO', 'FACTURADO', 'COBRADO'].includes(status)
+    const isCompleted = ['closed', 'approved'].includes(status)
     const delayDays = (currentDate && !isCompleted && isPast(currentDate) && !isSameDay(currentDate, new Date()))
         ? differenceInDays(new Date(), currentDate)
         : 0
