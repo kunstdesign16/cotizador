@@ -37,7 +37,7 @@ export async function registerPayment({
                 where: { id: finalQuoteId },
                 include: { project: true }
             }) as any
-            if (quote?.project?.status === 'CERRADO') {
+            if (quote?.project?.status === 'closed') {
                 return { success: false, error: 'El proyecto está CERRADO. No se pueden registrar pagos.' }
             }
         }
