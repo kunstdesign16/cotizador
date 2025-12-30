@@ -27,7 +27,7 @@ export function QuoteStatusSelector({ id, currentStatus, compact = false, disabl
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    const handleStatusChange = async (newStatus: string) => {
+    const handleStatusChange = async (newStatus: 'draft' | 'approved' | 'rejected' | 'replaced') => {
         setLoading(true)
         const res = await updateQuoteStatus(id, newStatus)
         if (res.success) {
