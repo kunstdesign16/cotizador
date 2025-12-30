@@ -19,7 +19,16 @@ const bebasNeue = Bebas_Neue({
 
 export const metadata: Metadata = {
   title: "Kunst & Design",
-  description: "Sistema de Cotizaciones",
+  description: "Sistema de cotización y gestión",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/icon-512.png"
+  }
+};
+
+export const viewport = {
+  themeColor: "#0B3C4D",
 };
 
 export default function RootLayout({
