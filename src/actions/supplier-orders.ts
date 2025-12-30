@@ -48,6 +48,12 @@ export async function createSupplierOrder(
 
         revalidatePath('/suppliers')
         revalidatePath(`/suppliers/${supplierId}`)
+        revalidatePath('/dashboard')
+        revalidatePath('/supplier-orders')
+        if (quoteId) {
+            const q = await prisma.quote.findUnique({ where: { id: quoteId }, select: { projectId: true } }) as any
+            if (q?.projectId) revalidatePath(`/projects/${q.projectId}`)
+        }
         return { success: true, id: order.id }
     } catch (_error) {
         console.error('Error creating order:', _error)
@@ -93,9 +99,12 @@ export async function updateSupplierOrder(
         }
 
         revalidatePath('/suppliers')
-        // We can't easily adhere to the supplierId pattern without fetching it, but usually the UI handles the refresh via router.refresh() 
-        // or revalidating the specific page if we knew the supplier ID. 
-        // For now, revalidate general paths.
+        revalidatePath('/dashboard')
+        revalidatePath('/supplier-orders')
+        if (quoteId) {
+            const q = await prisma.quote.findUnique({ where: { id: quoteId }, select: { projectId: true } }) as any
+            if (q?.projectId) revalidatePath(`/projects/${q.projectId}`)
+        }
         return { success: true }
     } catch (_error) {
         console.error('Error updating order:', _error)
@@ -242,6 +251,8 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
         revalidatePath(`/projects/${order.projectId}`)
         revalidatePath('/supplier-orders')
         revalidatePath('/accounting')
+        revalidatePath('/dashboard')
+        revalidatePath('/suppliers')
 
         return { success: true }
     } catch (_error) {
