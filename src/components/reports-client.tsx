@@ -337,14 +337,38 @@ export function ReportsClient() {
                                 </CardContent>
                                 <div className="p-6 bg-white border-t border-secondary flex justify-end gap-3">
                                     <Button
-                                        disabled={!projectReport}
-                                        onClick={() => projectReport && window.open(`/projects/${projectReport.project.id}/report`, '_blank')}
+                                        disabled={!projectReport || projectReportLoading}
+                                        onClick={async () => {
+                                            if (!projectReport) return;
+                                            setProjectReportLoading(true);
+                                            try {
+                                                const response = await fetch(`/projects/${projectReport.project.id}/report`);
+                                                if (!response.ok) throw new Error('Error al generar PDF');
+                                                const blob = await response.blob();
+                                                const { downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                                await downloadOrShareFile(
+                                                    blob,
+                                                    `Reporte_Proyecto_${projectReport.project.name.replace(/\s+/g, '_')}.pdf`,
+                                                    `Reporte de Proyecto: ${projectReport.project.name}`
+                                                );
+                                            } catch (error) {
+                                                console.error(error);
+                                                toast.error('Error al descargar el reporte');
+                                            } finally {
+                                                setProjectReportLoading(false);
+                                            }
+                                        }}
                                         className={`rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 px-8 transition-all ${!projectReport
                                             ? 'bg-secondary/30 text-primary/30 cursor-not-allowed shadow-none hover:bg-secondary/30'
                                             : 'bg-primary text-white shadow-xl hover:shadow-2xl hover:bg-primary/90'
                                             }`}
                                     >
-                                        <Download className="h-4 w-4 mr-2" /> Descargar PDF Oficial
+                                        {projectReportLoading ? (
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <Download className="h-4 w-4 mr-2" />
+                                        )}
+                                        Descargar PDF Oficial
                                     </Button>
                                 </div>
                             </Card>
@@ -544,11 +568,35 @@ export function ReportsClient() {
 
                                 <Button
                                     variant="outline"
-                                    disabled={!clientReport}
-                                    onClick={() => clientReport && window.open(`/clients/${clientReport.client.id}/resume`, '_blank')}
+                                    disabled={!clientReport || clientReportLoading}
+                                    onClick={async () => {
+                                        if (!clientReport) return;
+                                        setClientReportLoading(true);
+                                        try {
+                                            const response = await fetch(`/clients/${clientReport.client.id}/resume`);
+                                            if (!response.ok) throw new Error('Error al generar PDF');
+                                            const blob = await response.blob();
+                                            const { downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                            await downloadOrShareFile(
+                                                blob,
+                                                `Hoja_Vida_${clientReport.client.name.replace(/\s+/g, '_')}.pdf`,
+                                                `Hoja de Vida: ${clientReport.client.name}`
+                                            );
+                                        } catch (error) {
+                                            console.error(error);
+                                            toast.error('Error al descargar la hoja de vida');
+                                        } finally {
+                                            setClientReportLoading(false);
+                                        }
+                                    }}
                                     className="w-full rounded-xl font-brand-header tracking-widest uppercase text-xs h-12 border-secondary text-primary"
                                 >
-                                    <Download className="h-4 w-4 mr-2" /> Hoja de Vida Comercial (PDF)
+                                    {clientReportLoading ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <Download className="h-4 w-4 mr-2" />
+                                    )}
+                                    Hoja de Vida Comercial (PDF)
                                 </Button>
                             </CardContent>
                         </Card>

@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
+import { downloadOrShareFile } from './mobile-utils'
 
 // Format currency for display
 function formatCurrency(amount: number): string {
@@ -182,8 +183,10 @@ export function generateProjectPDF(reportData: any) {
         )
     }
 
-    // Download
-    doc.save(`Reporte_Proyecto_${reportData.project.name.replace(/\s+/g, '_')}.pdf`)
+    // Download or Share
+    const blob = doc.output('blob')
+    const fileName = `Reporte_Proyecto_${reportData.project.name.replace(/\s+/g, '_')}.pdf`
+    downloadOrShareFile(blob, fileName, `Reporte: ${reportData.project.name}`)
 }
 
 // Generate Financial Kardex Excel
@@ -411,8 +414,10 @@ export function generateClientPDF(reportData: any) {
         )
     }
 
-    // Download
-    doc.save(`Hoja_Vida_${reportData.client.name.replace(/\s+/g, '_')}.pdf`)
+    // Download or Share
+    const blob = doc.output('blob')
+    const fileName = `Hoja_Vida_${reportData.client.name.replace(/\s+/g, '_')}.pdf`
+    downloadOrShareFile(blob, fileName, `Hoja de Vida: ${reportData.client.name}`)
 }
 
 // Generate Supplier Excel Report

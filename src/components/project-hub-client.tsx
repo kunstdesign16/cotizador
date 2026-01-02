@@ -494,11 +494,28 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                                 </p>
                                             </div>
                                         )}
-                                        <Link href={`/projects/${project.id}/report`} className="w-full">
-                                            <Button className="w-full justify-start text-xs h-9" variant="outline">
-                                                <FileText className="mr-2 h-4 w-4" /> Descargar Status PDF
-                                            </Button>
-                                        </Link>
+                                        <Button
+                                            className="w-full justify-start text-xs h-9"
+                                            variant="outline"
+                                            onClick={async () => {
+                                                try {
+                                                    const response = await fetch(`/projects/${project.id}/report`);
+                                                    if (!response.ok) throw new Error('Error al generar PDF');
+                                                    const blob = await response.blob();
+                                                    const { downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                                    await downloadOrShareFile(
+                                                        blob,
+                                                        `Status_Proyecto_${project.name.replace(/\s+/g, '_')}.pdf`,
+                                                        `Status del Proyecto: ${project.name}`
+                                                    );
+                                                } catch (error) {
+                                                    console.error(error);
+                                                    toast.error('Error al descargar el status');
+                                                }
+                                            }}
+                                        >
+                                            <FileText className="mr-2 h-4 w-4" /> Descargar Status PDF
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
