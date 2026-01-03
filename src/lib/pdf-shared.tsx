@@ -8,6 +8,8 @@ Font.registerHyphenationCallback(word => [word]);
 const LOGO_PATH = path.join(process.cwd(), 'public/brand/logo.png');
 const WATERMARK_PATH = path.join(process.cwd(), 'public/brand/watermark.png');
 
+const IS_GENERIC = process.env.NEXT_PUBLIC_GENERIC_PDF === 'true';
+
 export const sharedStyles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
@@ -113,9 +115,11 @@ export const sharedStyles = StyleSheet.create({
 
 export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) => (
     <>
-        <View style={sharedStyles.watermarkContainer} fixed>
-            <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
-        </View>
+        {!IS_GENERIC && (
+            <View style={sharedStyles.watermarkContainer} fixed>
+                <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
+            </View>
+        )}
         {!isApproved && (
             <Text style={sharedStyles.draftWatermark} fixed>PRELIMINAR</Text>
         )}
@@ -124,9 +128,13 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer} fixed>
-        <Image src={LOGO_PATH} style={sharedStyles.logo} />
+        {!IS_GENERIC ? (
+            <Image src={LOGO_PATH} style={sharedStyles.logo} />
+        ) : (
+            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#284960' }}>SISTEMA DE COTIZACIÓN</Text>
+        )}
         <View style={sharedStyles.headerInfo}>
-            <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
+            <Text style={sharedStyles.locationText}>{!IS_GENERIC ? 'Tlajomulco de Zúñiga, Jalisco' : 'Cotización Digital'}</Text>
             <Text style={sharedStyles.dateText}>
                 {new Date(date).toLocaleDateString('es-MX', {
                     year: 'numeric',
@@ -140,12 +148,26 @@ export const PDFHeader = ({ date }: { date: string | Date }) => (
 
 export const PDFFooter = () => (
     <View style={sharedStyles.footerContainer} fixed>
-        <Text style={sharedStyles.contactLine}>
-            mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
-        </Text>
-        <View style={sharedStyles.footerDivider} />
-        <Text style={sharedStyles.slogan}>
-            Desarrollando ideas, creando sueños.
-        </Text>
+        {!IS_GENERIC ? (
+            <>
+                <Text style={sharedStyles.contactLine}>
+                    mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
+                </Text>
+                <View style={sharedStyles.footerDivider} />
+                <Text style={sharedStyles.slogan}>
+                    Desarrollando ideas, creando sueños.
+                </Text>
+            </>
+        ) : (
+            <>
+                <Text style={[sharedStyles.contactLine, { fontSize: 8 }]}>
+                    Documento generado digitalmente por el sistema de gestión de proyectos.
+                </Text>
+                <View style={sharedStyles.footerDivider} />
+                <Text style={[sharedStyles.slogan, { fontSize: 12 }]}>
+                    Gestión Eficiente • Cotización Rápida • Control Total
+                </Text>
+            </>
+        )}
     </View>
 );

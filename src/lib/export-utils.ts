@@ -3,6 +3,8 @@ import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 import { downloadOrShareFile } from './mobile-utils'
 
+const IS_GENERIC = process.env.NEXT_PUBLIC_GENERIC_PDF === 'true';
+
 // Format currency for display
 function formatCurrency(amount: number): string {
     return new Intl.NumberFormat('es-MX', {
@@ -29,11 +31,11 @@ export function generateProjectPDF(reportData: any) {
     // Header
     doc.setFontSize(20)
     doc.setTextColor(40, 40, 40)
-    doc.text('KUNST & DESIGN', pageWidth / 2, 20, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'KUNST & DESIGN' : 'REPORTE DEL SISTEMA', pageWidth / 2, 20, { align: 'center' })
 
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    doc.text('Desarrollando ideas, creando sueños', pageWidth / 2, 27, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'Desarrollando ideas, creando sueños' : 'Gestión Eficiente • Control Total', pageWidth / 2, 27, { align: 'center' })
 
     // Title
     doc.setFontSize(16)
@@ -170,7 +172,7 @@ export function generateProjectPDF(reportData: any) {
         doc.setFontSize(8)
         doc.setTextColor(150, 150, 150)
         doc.text(
-            `Kunst & Design - Reporte generado el ${formatDate(new Date())}`,
+            !IS_GENERIC ? `Kunst & Design - Reporte generado el ${formatDate(new Date())}` : `Sistema de Gestión - Reporte generado el ${formatDate(new Date())}`,
             pageWidth / 2,
             doc.internal.pageSize.getHeight() - 10,
             { align: 'center' }
@@ -195,7 +197,7 @@ export function generateFinancialExcel(kardexData: any) {
 
     // Prepare data
     const data = [
-        ['KUNST & DESIGN'],
+        [!IS_GENERIC ? 'KUNST & DESIGN' : 'SISTEMA DE GESTIÓN'],
         ['Kárdex Financiero'],
         [`Periodo: ${formatDate(kardexData.startDate)} - ${formatDate(kardexData.endDate)}`],
         [`Tipo de Flujo: ${kardexData.flowType === 'all' ? 'Todo' : kardexData.flowType === 'ingresos' ? 'Solo Ingresos' : 'Solo Egresos'}`],
@@ -287,11 +289,11 @@ export function generateClientPDF(reportData: any) {
     // Header
     doc.setFontSize(20)
     doc.setTextColor(40, 40, 40)
-    doc.text('KUNST & DESIGN', pageWidth / 2, 20, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'KUNST & DESIGN' : 'HOJA DE VIDA COMERCIAL', pageWidth / 2, 20, { align: 'center' })
 
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    doc.text('Desarrollando ideas, creando sueños', pageWidth / 2, 27, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'Desarrollando ideas, creando sueños' : 'Sistema de Gestión de Clientes', pageWidth / 2, 27, { align: 'center' })
 
     // Title
     doc.setFontSize(16)
@@ -401,7 +403,7 @@ export function generateClientPDF(reportData: any) {
         doc.setFontSize(8)
         doc.setTextColor(150, 150, 150)
         doc.text(
-            `Kunst & Design - Reporte generado el ${formatDate(new Date())}`,
+            !IS_GENERIC ? `Kunst & Design - Reporte generado el ${formatDate(new Date())}` : `Sistema de Gestión - Reporte generado el ${formatDate(new Date())}`,
             pageWidth / 2,
             doc.internal.pageSize.getHeight() - 10,
             { align: 'center' }
@@ -426,7 +428,7 @@ export function generateSupplierExcel(reportData: any) {
 
     // Summary Sheet
     const summaryData = [
-        ['KUNST & DESIGN'],
+        [!IS_GENERIC ? 'KUNST & DESIGN' : 'SISTEMA DE GESTIÓN'],
         ['Estado de Cuenta de Proveedor'],
         [`Proveedor: ${reportData.supplier.name}`],
         [`Tipo: ${reportData.supplier.type}`],
