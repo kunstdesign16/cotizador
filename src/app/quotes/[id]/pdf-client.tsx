@@ -12,6 +12,13 @@ export default function QuotePDFClient({ quote }: { quote: any }) {
     const fileName = `Cotizacion_${quote.project_name.replace(/[^a-z0-9]/gi, '_')}.pdf`
 
     const handleDownloadOrShare = async () => {
+        const { isShareSupported, downloadOrShareFile } = await import('@/lib/mobile-utils');
+
+        if (!isShareSupported()) {
+            window.location.href = pdfUrl;
+            return;
+        }
+
         setLoading(true)
         try {
             const response = await fetch(pdfUrl)

@@ -7,12 +7,10 @@ export async function downloadOrShareFile(blob: Blob, fileName: string, title?: 
     if (typeof window === 'undefined') return;
 
     // Check for Web Share API support
-    const canShare = !!navigator.share && !!navigator.canShare;
-
-    // Create a File object if sharing is supported
     const file = new File([blob], fileName, { type: blob.type });
+    const canShare = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [file] });
 
-    if (canShare && navigator.canShare({ files: [file] })) {
+    if (canShare) {
         try {
             await navigator.share({
                 files: [file],
@@ -45,4 +43,21 @@ export async function downloadOrShareFile(blob: Blob, fileName: string, title?: 
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }, 100);
+}
+
+/**
+ * Checks if the current browser/device is likely to support the Share API for files.
+ * This is useful for deciding whether to use the Fetch-Blob-Share flow or just a direct link.
+ */
+export function isShareSupported() {
+    if (typeof navigator === 'undefined') return false;
+
+    // Basic check for navigator.share
+    if (!navigator.share || !navigator.canShare) return false;
+
+    // On desktop, we generally prefer direct download even if navigator.share exists
+    // (like in Safari macOS) unless we specifically want the share menu.
+    // For our case, we'll only assume sharing is preferred on mobile devices.
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    return isMobile;
 }

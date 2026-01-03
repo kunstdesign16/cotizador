@@ -498,11 +498,18 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                             className="w-full justify-start text-xs h-9"
                                             variant="outline"
                                             onClick={async () => {
+                                                const { isShareSupported, downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                                const reportUrl = `/projects/${project.id}/report`;
+
+                                                if (!isShareSupported()) {
+                                                    window.location.href = reportUrl;
+                                                    return;
+                                                }
+
                                                 try {
-                                                    const response = await fetch(`/projects/${project.id}/report`);
+                                                    const response = await fetch(reportUrl);
                                                     if (!response.ok) throw new Error('Error al generar PDF');
                                                     const blob = await response.blob();
-                                                    const { downloadOrShareFile } = await import('@/lib/mobile-utils');
                                                     await downloadOrShareFile(
                                                         blob,
                                                         `Status_Proyecto_${project.name.replace(/\s+/g, '_')}.pdf`,

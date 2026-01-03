@@ -340,12 +340,21 @@ export function ReportsClient() {
                                         disabled={!projectReport || projectReportLoading}
                                         onClick={async () => {
                                             if (!projectReport) return;
+
+                                            const { isShareSupported, downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                            const reportUrl = `/projects/${projectReport.project.id}/report`;
+
+                                            // Desktop optimization: direct download
+                                            if (!isShareSupported()) {
+                                                window.location.href = reportUrl;
+                                                return;
+                                            }
+
                                             setProjectReportLoading(true);
                                             try {
-                                                const response = await fetch(`/projects/${projectReport.project.id}/report`);
+                                                const response = await fetch(reportUrl);
                                                 if (!response.ok) throw new Error('Error al generar PDF');
                                                 const blob = await response.blob();
-                                                const { downloadOrShareFile } = await import('@/lib/mobile-utils');
                                                 await downloadOrShareFile(
                                                     blob,
                                                     `Reporte_Proyecto_${projectReport.project.name.replace(/\s+/g, '_')}.pdf`,
@@ -571,12 +580,21 @@ export function ReportsClient() {
                                     disabled={!clientReport || clientReportLoading}
                                     onClick={async () => {
                                         if (!clientReport) return;
+
+                                        const { isShareSupported, downloadOrShareFile } = await import('@/lib/mobile-utils');
+                                        const resumeUrl = `/clients/${clientReport.client.id}/resume`;
+
+                                        // Desktop optimization: direct download
+                                        if (!isShareSupported()) {
+                                            window.location.href = resumeUrl;
+                                            return;
+                                        }
+
                                         setClientReportLoading(true);
                                         try {
-                                            const response = await fetch(`/clients/${clientReport.client.id}/resume`);
+                                            const response = await fetch(resumeUrl);
                                             if (!response.ok) throw new Error('Error al generar PDF');
                                             const blob = await response.blob();
-                                            const { downloadOrShareFile } = await import('@/lib/mobile-utils');
                                             await downloadOrShareFile(
                                                 blob,
                                                 `Hoja_Vida_${clientReport.client.name.replace(/\s+/g, '_')}.pdf`,
