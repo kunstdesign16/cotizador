@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Download, Share2, Loader2 } from 'lucide-react'
-import { downloadOrShareFile } from '@/lib/mobile-utils'
 import { toast } from 'sonner'
 
 export default function QuotePDFClient({ quote }: { quote: any }) {

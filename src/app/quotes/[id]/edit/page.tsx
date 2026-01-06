@@ -50,7 +50,8 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
             cost_other: item.cost_other,
             profit_margin: item.profit_margin,
             unit_cost: item.unit_cost,
-            subtotal: item.subtotal
+            subtotal: item.subtotal,
+            isSubItem: (item as any).isSubItem || false
         }))
     }
 
