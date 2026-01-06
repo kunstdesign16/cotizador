@@ -136,6 +136,8 @@ model QuoteItem {
   unit_cost         Float    @default(0) // Client facing price (Calculated)
   subtotal          Float    @default(0) // quantity * unit_cost
 
+  isSubItem         Boolean  @default(false)
+
   // Order linkage
   orderCreated      Boolean  @default(false)
   supplierOrderId   String?  @unique

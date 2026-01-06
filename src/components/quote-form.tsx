@@ -35,6 +35,7 @@ export type QuoteItem = {
     profit_margin: number // Percentage 0-100
     unit_cost: number // Calculated Client Price
     subtotal: number
+    isSubItem: boolean
 }
 
 export type QuoteFormData = {
@@ -93,7 +94,8 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
         cost_other: 0,
         profit_margin: 30,
         unit_cost: 0,
-        subtotal: 0
+        subtotal: 0,
+        isSubItem: false
     }]).map(item => ({
         ...item,
         internal_unit_cost: item.internal_unit_cost ?? 0,
@@ -104,6 +106,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
         cost_equipment: item.cost_equipment ?? 0,
         cost_other: item.cost_other ?? 0,
         profit_margin: item.profit_margin ?? 30,
+        isSubItem: item.isSubItem ?? false,
     }))
 
     const [items, setItems] = useState<QuoteItem[]>(safeItems)
@@ -147,10 +150,10 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
         }
     }
 
-    const handleItemChange = (id: string, field: keyof QuoteItem, value: string | number) => {
+    const handleItemChange = (id: string, field: keyof QuoteItem, value: string | number | boolean) => {
         setItems(items.map(item => {
             if (item.id === id) {
-                const updates: Partial<QuoteItem> = { [field]: value }
+                const updates: Partial<QuoteItem> = { [field]: value } as any
 
                 // Logic: 
                 // 1. If Internal Cost or Margin changes -> Recalculate Unit Price (Client)
@@ -239,7 +242,8 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
             cost_other: 0,
             profit_margin: 30, // Default 30%
             unit_cost: 0,
-            subtotal: 0
+            subtotal: 0,
+            isSubItem: false
         }])
     }
 
@@ -405,6 +409,14 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                             placeholder="Descripción..."
                                             className="mt-1 font-medium"
                                         />
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Switch
+                                                id={`subitem-mobile-${item.id}`}
+                                                checked={item.isSubItem}
+                                                onCheckedChange={(checked) => handleItemChange(item.id, 'isSubItem', checked)}
+                                            />
+                                            <Label htmlFor={`subitem-mobile-${item.id}`} className="text-[10px] font-medium uppercase text-muted-foreground">Agrupar con anterior</Label>
+                                        </div>
                                     </div>
                                     <Button
                                         variant="ghost"
@@ -485,6 +497,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         <table className="w-full text-left text-sm">
                             <thead className="border-b text-xs uppercase text-muted-foreground bg-muted/50">
                                 <tr>
+                                    <th className="px-4 py-3 w-10 text-center"></th>
                                     <th className="px-4 py-3 min-w-[200px]">Concepto</th>
                                     <th className="px-4 py-3 w-20 text-center">Cant.</th>
                                     <th className="px-4 py-3 w-40 text-right bg-blue-50/50 text-blue-900 border-l">Costo Int.</th>
@@ -497,13 +510,24 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                             <tbody className="divide-y divide-border">
                                 {items.map((item) => (
                                     <tr key={item.id} className="group hover:bg-muted/5">
+                                        <td className="p-2 text-center">
+                                            <div className="flex flex-col items-center gap-1" title="Agrupar con el ítem anterior">
+                                                <Switch
+                                                    checked={item.isSubItem}
+                                                    onCheckedChange={(checked) => handleItemChange(item.id, 'isSubItem', checked)}
+                                                    className="scale-75"
+                                                />
+                                                <span className="text-[8px] text-muted-foreground font-bold leading-none">PDF</span>
+                                            </div>
+                                        </td>
                                         <td className="p-2 relative">
                                             <Input
                                                 value={item.concept}
                                                 onChange={(e) => handleItemChange(item.id, 'concept', e.target.value)}
                                                 placeholder="Descripción..."
-                                                className="border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2"
+                                                className={`border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2 ${item.isSubItem ? 'pl-6 text-muted-foreground italic' : ''}`}
                                             />
+                                            {item.isSubItem && <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/50">↳</div>}
                                         </td>
                                         <td className="p-2">
                                             <Input

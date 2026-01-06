@@ -144,13 +144,41 @@ export const QuoteDocument = ({ quote }: {
         isr_amount: number;
         total: number;
         client?: { name: string; company?: string };
-        items?: Array<{ quantity?: number }>;
+        items?: Array<{
+            concept: string;
+            quantity: number;
+            unit_cost: number;
+            subtotal: number;
+            isSubItem?: boolean;
+            productName?: string;
+        }>;
     }
 }) => {
-    // Logic for dynamic quantities/prices
-    const items = quote.items || [];
-    const totalQuantity = items.length > 0 ? Math.max(...items.map((i: { quantity?: number }) => i.quantity || 0)) : 1;
-    const unitPrice = quote.subtotal / totalQuantity;
+    const rawItems = quote.items || [];
+
+    // Grouping Logic
+    const groupedItems: Array<{
+        concept: string;
+        quantity: number;
+        unit_cost: number;
+        subtotal: number;
+    }> = [];
+
+    rawItems.forEach((item) => {
+        if (item.isSubItem && groupedItems.length > 0) {
+            const lastRow = groupedItems[groupedItems.length - 1];
+            lastRow.concept += ` + ${item.concept || item.productName || ''}`;
+            lastRow.unit_cost += item.unit_cost;
+            lastRow.subtotal += item.subtotal;
+        } else {
+            groupedItems.push({
+                concept: item.concept || item.productName || 'Concepto',
+                quantity: item.quantity,
+                unit_cost: item.unit_cost,
+                subtotal: item.subtotal
+            });
+        }
+    });
 
     const isApproved = quote.status === 'APPROVED';
 
@@ -187,12 +215,14 @@ export const QuoteDocument = ({ quote }: {
                         <Text style={[styles.colTotal, styles.tableHeaderText]}>IMPORTE</Text>
                     </View>
 
-                    <View style={styles.tableRow}>
-                        <Text style={styles.colQty}>{totalQuantity}</Text>
-                        <Text style={[styles.colDesc, { fontWeight: 'bold' }]}>{quote.project_name}</Text>
-                        <Text style={styles.colUnit}>{formatCurrency(unitPrice)}</Text>
-                        <Text style={styles.colTotal}>{formatCurrency(quote.subtotal)}</Text>
-                    </View>
+                    {groupedItems.map((item, index) => (
+                        <View key={index} style={styles.tableRow} wrap={false}>
+                            <Text style={styles.colQty}>{item.quantity}</Text>
+                            <Text style={styles.colDesc}>{item.concept}</Text>
+                            <Text style={styles.colUnit}>{formatCurrency(item.unit_cost)}</Text>
+                            <Text style={styles.colTotal}>{formatCurrency(item.subtotal)}</Text>
+                        </View>
+                    ))}
                 </View>
 
                 {/* Totals Section */}
