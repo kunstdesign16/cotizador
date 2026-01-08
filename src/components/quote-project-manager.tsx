@@ -113,6 +113,9 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <div className="flex bg-card border rounded-lg p-1 shadow-sm">
+                        <QuotePDFClient quote={quote} />
+                    </div>
                     <Link href={`/quotes/${quote.id}/edit`}>
                         <Button variant="outline" className="gap-2">
                             <Pencil className="h-4 w-4" />
@@ -127,7 +130,6 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                     <TabsTrigger value="resume" className="py-2">Resumen</TabsTrigger>
                     <TabsTrigger value="costs" className="py-2">Costos</TabsTrigger>
                     <TabsTrigger value="taxes" className="py-2">Impuestos y Utilidad</TabsTrigger>
-                    <TabsTrigger value="tasks" className="py-2">Tareas ({quote.supplierTasks?.length || 0})</TabsTrigger>
                     <TabsTrigger value="pdf" className="py-2">Documento PDF</TabsTrigger>
                 </TabsList>
 
@@ -354,45 +356,6 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
                     </div>
                 </TabsContent>
 
-                {/* TAREAS */}
-                <TabsContent value="tasks">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle>Tareas con Proveedores</CardTitle>
-                            <Link href="/suppliers">
-                                <Button size="sm" variant="outline">Gestionar Proveedores</Button>
-                            </Link>
-                        </CardHeader>
-                        <CardContent>
-                            {!quote.supplierTasks || quote.supplierTasks.length === 0 ? (
-                                <div className="text-center py-12 text-muted-foreground border border-dashed rounded-lg">
-                                    No hay tareas asignadas para este proyecto.
-                                </div>
-                            ) : (
-                                <div className="divide-y border rounded-md">
-                                    {quote.supplierTasks.map((task: any) => (
-                                        <div key={task.id} className="p-4 flex justify-between items-center">
-                                            <div>
-                                                <p className="font-medium">{task.description}</p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <Badge variant="secondary" className="text-xs font-normal">
-                                                        {task.status === 'PENDING' ? 'Pendiente' : task.status === 'IN_PROGRESS' ? 'En Progreso' : 'Completado'}
-                                                    </Badge>
-                                                    {task.expectedDate && (
-                                                        <span className="text-xs text-muted-foreground">
-                                                            Entrega: {format(new Date(task.expectedDate), 'PPP', { locale: es })}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {/* Link to supplier could be added here if supplier info is included */}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
 
                 {/* PDF */}
                 <TabsContent value="pdf">

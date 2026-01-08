@@ -16,7 +16,8 @@ import {
     Menu,
     X,
     Calculator,
-    UserCog
+    UserCog,
+    Settings
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { UserNav } from '@/components/user-nav'
@@ -24,7 +25,6 @@ import { UserNav } from '@/components/user-nav'
 const navigation = [
     { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Proyectos', href: '/projects', icon: Package },
-    { name: 'Tareas', href: '/tasks', icon: CheckSquare },
     { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Clientes', href: '/clients', icon: Users },
     { name: 'Proveedores', href: '/suppliers', icon: Truck },
@@ -35,6 +35,7 @@ const adminNavigation = [
     { name: 'Reportes', href: '/reports', icon: FileText },
     { name: 'Contabilidad', href: '/accounting', icon: Calculator },
     { name: 'Usuarios', href: '/users', icon: UserCog },
+    { name: 'Configuración', href: '/settings', icon: Settings },
 ]
 
 interface SidebarProps {

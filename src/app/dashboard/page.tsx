@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
-import { DashboardTaskList } from "@/components/dashboard-task-list"
 import { DashboardOrderList } from "@/components/dashboard-order-list"
 
 export const dynamic = 'force-dynamic'
@@ -34,24 +33,6 @@ export default async function DashboardPage() {
             orderBy: { name: 'asc' }
         })
 
-        // Fetch Pending Tasks (not linked to COBRADO projects)
-        const pendingTasks = await (prisma as any).supplierTask.findMany({
-            where: {
-                status: { in: ['PENDING', 'IN_PROGRESS'] },
-                project: {
-                    is: {
-                        status: { notIn: ['cancelled', 'closed'] },
-                        financialStatus: { not: 'CERRADO' }
-                    }
-                }
-            } as any,
-            include: {
-                supplier: true,
-                quote: true,
-                project: true
-            } as any,
-            orderBy: { expectedDate: 'asc' }
-        })
 
         const serializedQuotes = JSON.parse(JSON.stringify(quotes))
         const serializedClients = JSON.parse(JSON.stringify(clients))
@@ -68,27 +49,7 @@ export default async function DashboardPage() {
 
         const approvedQuotes = quotes.filter((q: any) => q.status === 'approved' && q.project?.status === 'active').length
 
-        // Urgent Tasks are High or Urgent priority (not linked to COBRADO projects)
-        const urgentTasks = await (prisma as any).supplierTask.findMany({
-            where: {
-                status: { in: ['PENDING', 'IN_PROGRESS'] },
-                priority: { in: ['HIGH', 'URGENT'] },
-                project: {
-                    is: {
-                        status: { notIn: ['cancelled', 'closed'] },
-                        financialStatus: { not: 'CERRADO' }
-                    }
-                }
-            } as any,
-            include: {
-                supplier: true,
-                quote: true,
-                project: true
-            } as any,
-            orderBy: { expectedDate: 'asc' }
-        })
 
-        const serializedUrgentTasks = JSON.parse(JSON.stringify(urgentTasks))
 
         // Recent 5 active quotes (not cobradas)
         const recentQuotes = serializedQuotes.slice(0, 5)
@@ -107,7 +68,7 @@ export default async function DashboardPage() {
         })
         const serializedOrders = JSON.parse(JSON.stringify(recentOrders))
 
-        const pendingTasksCount = pendingTasks.length
+        const pendingTasksCount = 0
 
         return (
             <div className="min-h-screen bg-background p-8">
@@ -153,21 +114,21 @@ export default async function DashboardPage() {
                         </div>
                         <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
                             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <h3 className="tracking-tight text-sm font-medium">Tareas Pendientes</h3>
+                                <h3 className="tracking-tight text-sm font-medium">Clientes</h3>
                                 <div className="h-4 w-4 text-muted-foreground" />
                             </div>
-                            <div className="text-2xl font-bold">{pendingTasksCount}</div>
+                            <div className="text-2xl font-bold">{clients.length}</div>
                             <p className="text-xs text-muted-foreground">
-                                {urgentTasks.length} Urgentes
+                                Directorio Activo
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Main Content: Recent Quotes */}
-                        <div className="lg:col-span-2 space-y-4">
+                    <div className="space-y-4">
+                        {/* Main Content: Recent Quotes - Expanded to Full Width */}
+                        <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-semibold">Cotizaciones Recientes</h2>
+                                <h2 className="text-xl font-semibold text-primary">Cotizaciones Recientes</h2>
                                 <Link href="/quotes">
                                     <Button variant="outline" size="sm" className="gap-2">
                                         Ver Todas
@@ -179,25 +140,6 @@ export default async function DashboardPage() {
                                 clients={serializedClients}
                                 suppliers={[]} // Placeholder
                             />
-                        </div>
-
-                        {/* Sidebar: Urgent Tasks */}
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-semibold flex items-center gap-2">
-                                Tareas Urgentes
-                                {urgentTasks.length > 0 && (
-                                    <span className="flex h-2 w-2 rounded-full bg-red-600 animate-pulse" />
-                                )}
-                            </h2>
-                            <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                                <DashboardTaskList tasks={serializedUrgentTasks} />
-                            </div>
-
-                            <div className="mt-4 pt-4">
-                                <Link href="/tasks">
-                                    <Button className="w-full" variant="outline">Ver Todas las Tareas</Button>
-                                </Link>
-                            </div>
                         </div>
                     </div>
 

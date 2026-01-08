@@ -11,7 +11,7 @@ export function FullBackupButtons() {
     const router = useRouter()
 
     const handleDownload = () => {
-        window.location.href = '/api/backup/export'
+        window.location.href = '/api/backup'
     }
 
     const handleRestoreClick = () => {
@@ -28,23 +28,30 @@ export function FullBackupButtons() {
         }
 
         setRestoring(true)
-        const formData = new FormData()
-        formData.append('file', file)
 
         try {
-            const res = await fetch('/api/backup/import', {
+            const text = await file.text()
+            const backupData = JSON.parse(text)
+
+            const res = await fetch('/api/backup', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(backupData)
             })
 
-            if (!res.ok) throw new Error('Error en la restauración')
+            if (!res.ok) {
+                const error = await res.json()
+                throw new Error(error.error || 'Error en la restauración')
+            }
 
             alert('Sistema restaurado exitosamente')
             router.refresh()
             router.push('/dashboard')
-        } catch (error) {
+        } catch (error: any) {
             console.error(error)
-            alert('Falló la restauración. Revisa la consola o el formato del archivo.')
+            alert('Falló la restauración: ' + error.message)
         } finally {
             setRestoring(false)
             if (fileInputRef.current) fileInputRef.current.value = ''

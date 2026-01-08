@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import DeleteQuoteButton from '@/components/delete-quote-button'
 import { QuoteProjectManager } from '@/components/quote-project-manager'
+import { BackButton } from "@/components/ui/back-button"
 
 export const dynamic = 'force-dynamic'
 
@@ -34,12 +35,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
             <div className="min-h-screen bg-background p-8">
                 <div className="mx-auto max-w-6xl">
                     <header className="mb-6 flex items-center justify-between print:hidden">
-                        <Link href="/dashboard">
-                            <Button variant="ghost" className="gap-2">
-                                <ArrowLeft className="h-4 w-4" />
-                                Volver al Dashboard
-                            </Button>
-                        </Link>
+                        <BackButton fallbackUrl="/dashboard" />
                         <div className="border-l pl-2">
                             <DeleteQuoteButton id={quote.id} />
                         </div>

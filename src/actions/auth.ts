@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 
 const ADMIN_EMAILS = [
     'kunstdesign16@gmail.com',
-    'direccion@kunstdesign.com.mx'
+    'direccion@kunstdesign.com.mx',
+    'mayelam@kunstdesign.com.mx'
 ]
 
 export async function login(prevState: any, formData: FormData) {

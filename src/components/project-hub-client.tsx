@@ -13,13 +13,13 @@ import {
     ChevronLeft,
     CheckCircle2,
     Lock,
-
     Plus,
-    History,
+    History as HistoryIcon,
     Trash2,
     Info,
     X
 } from 'lucide-react'
+import { BackButton } from "@/components/ui/back-button"
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -199,10 +199,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             <div className="mx-auto max-w-7xl space-y-6">
                 {/* Breadcrumbs & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <Link href="/projects" className="flex items-center text-xs font-brand-header uppercase tracking-widest text-primary/60 hover:text-primary transition-colors">
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Proyectos
-                    </Link>
+                    <BackButton fallbackUrl="/projects" label="Proyectos" className="bg-transparent hover:bg-transparent px-0 font-brand-header uppercase tracking-widest text-primary/60 hover:text-primary h-auto" />
                     <div className="flex gap-2">
                         {!isFinancialmenteCerrado && project.status === 'draft' && (
                             <>
@@ -886,7 +883,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 </div>
                                 <div className="space-y-4">
                                     <h4 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                                        <History className="h-4 w-4" /> Auditoría de Flujo
+                                        <HistoryIcon className="h-4 w-4" /> Auditoría de Flujo
                                     </h4>
                                     <div className="space-y-2">
                                         <div className="flex justify-between p-3 bg-muted/40 rounded-lg border">
