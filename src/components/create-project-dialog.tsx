@@ -46,17 +46,27 @@ export function CreateProjectDialog({ clients }: CreateProjectDialogProps) {
         const description = formData.get('description') as string
 
         try {
-            const project = await createProject({ name, clientId, description })
-            toast({
-                title: "Proyecto creado",
-                description: `El proyecto "${name}" ha sido creado con éxito.`,
-            })
-            setOpen(false)
-            router.push(`/projects/${project.id}`)
-        } catch {
+            const result = await createProject({ name, clientId, description })
+
+            if (result.success && result.data) {
+                toast({
+                    title: "Proyecto creado",
+                    description: `El proyecto "${name}" ha sido creado con éxito.`,
+                })
+                setOpen(false)
+                router.push(`/projects/${result.data.id}`)
+                router.refresh()
+            } else {
+                toast({
+                    title: "Error",
+                    description: result.error || "No se pudo crear el proyecto. Intenta de nuevo.",
+                    variant: "destructive"
+                })
+            }
+        } catch (error) {
             toast({
                 title: "Error",
-                description: "No se pudo crear el proyecto. Intenta de nuevo.",
+                description: "Error de red al crear el proyecto.",
                 variant: "destructive"
             })
         } finally {

@@ -25,21 +25,27 @@ export function ClientsPageClient({ clients }: { clients: any[] }) {
     }
 
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-8">
             <div className="mx-auto max-w-6xl space-y-8">
-                <header className="flex items-center justify-between">
+                <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
                     <div>
                         <h1 className="text-2xl font-bold">Clientes</h1>
                         <p className="text-sm text-muted-foreground">Administra tu base de datos de clientes</p>
                     </div>
-                    <div className="flex gap-2">
-                        <ClientImportButton />
-                        <ClientExportButton />
-                        <ClientFormDialog>
-                            <Button className="gap-2">
-                                <Plus className="h-4 w-4" /> Nuevo Cliente
-                            </Button>
-                        </ClientFormDialog>
+                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <div className="flex-1 sm:flex-none">
+                            <ClientImportButton />
+                        </div>
+                        <div className="flex-1 sm:flex-none text-right">
+                            <ClientExportButton />
+                        </div>
+                        <div className="w-full sm:w-auto">
+                            <ClientFormDialog>
+                                <Button className="gap-2 w-full justify-center">
+                                    <Plus className="h-4 w-4" /> Nuevo Cliente
+                                </Button>
+                            </ClientFormDialog>
+                        </div>
                     </div>
                 </header>
 
@@ -54,30 +60,30 @@ export function ClientsPageClient({ clients }: { clients: any[] }) {
                             const hasQuotes = client.quotes && client.quotes.length > 0
 
                             return (
-                                <div key={client.id} className="rounded-xl border border-border bg-card shadow-sm">
-                                    <div className="p-6">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-start gap-4 flex-1">
-                                                <div className="rounded-full bg-primary/10 p-3 text-primary">
+                                <div key={client.id} className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                                    <div className="p-4 sm:p-6">
+                                        <div className="flex flex-col sm:flex-row items-start justify-between gap-6 sm:gap-4">
+                                            <div className="flex items-start gap-3 sm:gap-4 flex-1">
+                                                <div className="rounded-full bg-primary/10 p-2 sm:p-3 text-primary shrink-0">
                                                     <User className="h-5 w-5" />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-lg">{client.name}</h3>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-base sm:text-lg truncate">{client.name}</h3>
                                                     {client.company && (
-                                                        <p className="text-sm text-muted-foreground mt-1">{client.company}</p>
+                                                        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 truncate">{client.company}</p>
                                                     )}
-                                                    <div className="mt-2 flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                                        {client.email && <span>{client.email}</span>}
-                                                        {client.phone && <span>{client.phone}</span>}
+                                                    <div className="mt-2 flex flex-col sm:flex-wrap sm:flex-row gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                                                        {client.email && <span className="truncate">{client.email}</span>}
+                                                        {client.phone && <span className="whitespace-nowrap">{client.phone}</span>}
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0">
                                                 {hasQuotes && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="gap-2"
+                                                        className="gap-2 text-[10px] sm:text-xs h-8"
                                                         onClick={() => toggleClient(client.id)}
                                                     >
                                                         {isExpanded ? (
@@ -85,11 +91,16 @@ export function ClientsPageClient({ clients }: { clients: any[] }) {
                                                         ) : (
                                                             <ChevronRight className="h-4 w-4" />
                                                         )}
-                                                        {client._count?.quotes || client.quotes.length} {(client._count?.quotes || client.quotes.length) === 1 ? 'Proyecto' : 'Proyectos'}
+                                                        <span className="hidden sm:inline">
+                                                            {client._count?.quotes || client.quotes.length} {(client._count?.quotes || client.quotes.length) === 1 ? 'Proyecto' : 'Proyectos'}
+                                                        </span>
+                                                        <span className="sm:hidden">
+                                                            {client._count?.quotes || client.quotes.length}
+                                                        </span>
                                                     </Button>
                                                 )}
-                                                <Link href={`/clients/${client.id}`}>
-                                                    <Button variant="ghost" size="sm">
+                                                <Link href={`/clients/${client.id}`} className="sm:inline-block">
+                                                    <Button variant="ghost" size="sm" className="text-[10px] sm:text-xs h-8">
                                                         Ver Detalle
                                                     </Button>
                                                 </Link>

@@ -71,18 +71,18 @@ export default async function DashboardPage() {
         const pendingTasksCount = 0
 
         return (
-            <div className="min-h-screen bg-background p-8">
-                <div className="mx-auto max-w-7xl space-y-8">
-                    <header className="flex items-center justify-between">
+            <div className="min-h-screen bg-background p-4 sm:p-8">
+                <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
+                    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Inicio</h1>
-                            <p className="text-muted-foreground">Resumen de actividad</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Inicio</h1>
+                            <p className="text-sm text-muted-foreground">Resumen de actividad</p>
                         </div>
                     </header>
 
                     {/* Summary Cards */}
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
                             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <h3 className="tracking-tight text-sm font-medium">Cotizaciones Activas</h3>
                                 <FileText className="h-4 w-4 text-muted-foreground" />
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
                                 Borradores o Guardadas
                             </p>
                         </div>
-                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
                             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <h3 className="tracking-tight text-sm font-medium">Enviadas</h3>
                                 <div className="h-4 w-4 text-muted-foreground" />
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                                 Pendientes de Aprobación
                             </p>
                         </div>
-                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
                             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <h3 className="tracking-tight text-sm font-medium">Aprobadas</h3>
                                 <div className="h-4 w-4 text-muted-foreground" />
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
                                 Listas para Producción
                             </p>
                         </div>
-                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
                             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <h3 className="tracking-tight text-sm font-medium">Clientes</h3>
                                 <div className="h-4 w-4 text-muted-foreground" />

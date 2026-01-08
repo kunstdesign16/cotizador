@@ -195,12 +195,12 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
 
 
     return (
-        <div className="min-h-screen bg-muted/30 p-4 sm:p-8">
+        <div className="min-h-screen bg-muted/30 p-3 sm:p-8">
             <div className="mx-auto max-w-7xl space-y-6">
                 {/* Breadcrumbs & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <BackButton fallbackUrl="/projects" label="Proyectos" className="bg-transparent hover:bg-transparent px-0 font-brand-header uppercase tracking-widest text-primary/60 hover:text-primary h-auto" />
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {!isFinancialmenteCerrado && project.status === 'draft' && (
                             <>
                                 {project.quotes?.length === 0 ? (
@@ -241,10 +241,10 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                         )}
                         {isFinancialmenteCerrado && (
                             <div className="flex items-center gap-2">
-                                <Badge className="bg-slate-900 text-white gap-1.5 px-4 py-1.5 font-brand-header tracking-widest uppercase">
+                                <Badge className="bg-slate-900 text-white gap-1.5 px-3 py-1.5 font-brand-header tracking-widest uppercase text-[9px] sm:text-xs">
                                     <Lock className="h-3 w-3" /> PROYECTO CERRADO
                                 </Badge>
-                                <span className="text-[10px] text-muted-foreground font-brand-header uppercase tracking-widest max-w-[150px] leading-tight">
+                                <span className="text-[9px] text-muted-foreground font-brand-header uppercase tracking-widest max-w-[120px] sm:max-w-[150px] leading-tight">
                                     Solo lectura por cierre financiero
                                 </span>
                             </div>
@@ -253,19 +253,19 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 </div>
 
                 {/* Header Card */}
-                <div className="bg-white border border-secondary rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                <div className="bg-white border border-secondary rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         <div className="lg:col-span-5 space-y-3">
-                            <div className="flex flex-wrap items-center gap-4">
-                                <h1 className="text-3xl font-brand-header text-primary tracking-tight leading-none break-words">{project.name}</h1>
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                                <h1 className="text-xl sm:text-3xl font-brand-header text-primary tracking-tight leading-tight break-words flex-1 min-w-[200px]">{project.name}</h1>
                                 <div className="flex items-center gap-2">
                                     <Select
                                         value={project.status}
                                         onValueChange={handleStatusChange}
                                         disabled={isUpdatingStatus || isFinancialmenteCerrado}
                                     >
-                                        <SelectTrigger className={`w-[180px] h-8 uppercase text-[11px] font-brand-header tracking-widest border-0 flex items-center gap-1.5 shadow-sm rounded-lg ${project.status === 'draft' ? 'bg-secondary text-primary' :
+                                        <SelectTrigger className={`w-full sm:w-[180px] h-8 uppercase text-[10px] sm:text-[11px] font-brand-header tracking-widest border-0 flex items-center gap-1.5 shadow-sm rounded-lg ${project.status === 'draft' ? 'bg-secondary text-primary' :
                                             project.status === 'active' ? 'bg-blue-500 text-white' :
                                                 project.status === 'closed' ? 'bg-primary text-white' :
                                                     project.status === 'cancelled' ? 'bg-red-500 text-white' :
@@ -281,7 +281,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         </SelectContent>
                                     </Select>
 
-                                    <Badge className={`uppercase text-[11px] px-3 py-1.5 font-brand-header tracking-widest border-0 flex items-center gap-1.5 rounded-lg shadow-sm ${project.financialStatus === 'ABIERTO' ? 'bg-blue-50 text-blue-700' : 'bg-slate-900 text-white'}`}>
+                                    <Badge className={`uppercase text-[9px] sm:text-[11px] px-2 sm:px-3 py-1.5 font-brand-header tracking-widest border-0 flex items-center gap-1.5 rounded-lg shadow-sm whitespace-nowrap ${project.financialStatus === 'ABIERTO' ? 'bg-blue-50 text-blue-700' : 'bg-slate-900 text-white'}`}>
                                         {project.financialStatus === 'CERRADO' ? <Lock className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
                                         FINANZAS: {project.financialStatus}
                                     </Badge>

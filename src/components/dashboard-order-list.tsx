@@ -86,14 +86,14 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                 return (
                     <div key={order.id} className="p-4 hover:bg-muted/50 transition-colors block">
                         <div className="flex justify-between items-start mb-2">
-                            <Link href={`/suppliers/${order.supplier.id}?orderId=${order.id}`} className="block">
-                                <span className="font-semibold text-sm block truncate w-[180px]" title={Array.isArray(items) ? items.map((i: any) => i.name || i.code).join(', ') : ''}>
+                            <Link href={`/suppliers/${order.supplier.id}?orderId=${order.id}`} className="block min-w-0 flex-1">
+                                <span className="font-semibold text-sm block truncate pr-2" title={Array.isArray(items) ? items.map((i: any) => i.name || i.code).join(', ') : ''}>
                                     {Array.isArray(items) && items.length > 0
                                         ? items.map((i: any) => `${i.quantity}x ${i.name || i.code}`).join(', ')
                                         : 'Sin conceptos'}
                                 </span>
-                                <div className="flex flex-col gap-0.5 mt-1">
-                                    <span className="text-xs font-medium text-foreground/80">{order.supplier.name}</span>
+                                <div className="flex flex-col gap-0.5 mt-1 overflow-hidden">
+                                    <span className="text-xs font-medium text-foreground/80 truncate">{order.supplier.name}</span>
                                     <span className="text-[10px] text-muted-foreground">
                                         {new Date(order.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
                                     </span>
@@ -105,8 +105,8 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex gap-2 mt-3 items-center justify-end">
-                            <div className="w-[110px]">
+                        <div className="flex flex-wrap gap-2 mt-3 items-center justify-end">
+                            <div className="min-w-[90px] flex-1 sm:flex-none sm:w-[110px]">
                                 <Select
                                     defaultValue={order.status}
                                     onValueChange={(val: string) => handleStatusChange(order.id, val)}
@@ -127,7 +127,7 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                                 </Select>
                             </div>
 
-                            <div className="w-[100px]">
+                            <div className="min-w-[80px] flex-1 sm:flex-none sm:w-[100px]">
                                 <Select
                                     defaultValue={order.paymentStatus}
                                     onValueChange={(val: string) => handlePaymentStatusChange(order.id, val)}
@@ -152,7 +152,7 @@ export function DashboardOrderList({ orders }: DashboardOrderListProps) {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-6 text-[10px] px-2"
+                                className="h-6 text-[10px] px-2 flex-grow sm:flex-grow-0"
                                 onClick={() => {
                                     setSelectedOrderId(order.id);
                                     setSelectedOrderTotal(total);

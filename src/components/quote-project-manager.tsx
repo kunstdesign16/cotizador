@@ -101,36 +101,37 @@ export function QuoteProjectManager({ quote, suppliers = [] }: QuoteProjectManag
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">{quote.project_name}</h1>
-                    <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                        <Badge variant="outline">{quote.status}</Badge>
-                        <span>•</span>
-                        <span>{quote.client.company || quote.client.name}</span>
-                        <span>•</span>
-                        <span>{format(new Date(quote.date), 'PPP', { locale: es })}</span>
+                    <h1 className="text-xl sm:text-3xl font-bold break-words">{quote.project_name}</h1>
+                    <div className="flex flex-wrap items-center gap-2 text-muted-foreground mt-1 text-xs sm:text-sm">
+                        <Badge variant="outline" className="text-[10px] sm:text-xs">{quote.status}</Badge>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="truncate max-w-[200px]">{quote.client.company || quote.client.name}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>{format(new Date(quote.date), 'd MMM yyyy', { locale: es })}</span>
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <div className="flex bg-card border rounded-lg p-1 shadow-sm">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <div className="flex bg-card border rounded-lg p-1 shadow-sm flex-1 sm:flex-none justify-center">
                         <QuotePDFClient quote={quote} />
                     </div>
-                    <Link href={`/quotes/${quote.id}/edit`}>
-                        <Button variant="outline" className="gap-2">
+                    <Link href={`/quotes/${quote.id}/edit`} className="flex-1 sm:flex-none">
+                        <Button variant="outline" className="gap-2 w-full">
                             <Pencil className="h-4 w-4" />
-                            Editar Cotización
+                            <span className="hidden sm:inline">Editar Cotización</span>
+                            <span className="sm:hidden">Editar</span>
                         </Button>
                     </Link>
                 </div>
             </div>
 
             <Tabs defaultValue="resume" className="w-full space-y-6">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
-                    <TabsTrigger value="resume" className="py-2">Resumen</TabsTrigger>
-                    <TabsTrigger value="costs" className="py-2">Costos</TabsTrigger>
-                    <TabsTrigger value="taxes" className="py-2">Impuestos y Utilidad</TabsTrigger>
-                    <TabsTrigger value="pdf" className="py-2">Documento PDF</TabsTrigger>
+                <TabsList className="flex flex-wrap h-auto p-1 bg-muted/50">
+                    <TabsTrigger value="resume" className="flex-1 py-1.5 text-xs sm:text-sm">Resumen</TabsTrigger>
+                    <TabsTrigger value="costs" className="flex-1 py-1.5 text-xs sm:text-sm">Costos</TabsTrigger>
+                    <TabsTrigger value="taxes" className="flex-1 py-1.5 text-xs sm:text-sm">Finanzas</TabsTrigger>
+                    <TabsTrigger value="pdf" className="flex-1 py-1.5 text-xs sm:text-sm">PDF</TabsTrigger>
                 </TabsList>
 
                 {/* RESUMEN */}

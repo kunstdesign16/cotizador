@@ -4,19 +4,24 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function createProject(data: { name: string; clientId: string; description?: string }) {
-    const project = await (prisma as any).project.create({
-        data: {
-            name: data.name,
-            clientId: data.clientId,
-            description: data.description,
-            status: 'draft',
-            financialStatus: 'ABIERTO'
-        }
-    })
+    try {
+        const project = await (prisma as any).project.create({
+            data: {
+                name: data.name,
+                clientId: data.clientId,
+                description: data.description,
+                status: 'draft',
+                financialStatus: 'ABIERTO'
+            }
+        })
 
-    revalidatePath('/projects')
-    revalidatePath('/dashboard')
-    return project
+        revalidatePath('/projects')
+        revalidatePath('/dashboard')
+        return { success: true, data: project }
+    } catch (error: any) {
+        console.error('Error creating project:', error)
+        return { success: false, error: error.message || 'Error al crear el proyecto' }
+    }
 }
 
 export async function getProjectClosureEligibility(projectId: string) {

@@ -159,7 +159,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                 {/* Collapsible Header */}
                                 <button
                                     onClick={() => toggleClient(clientId)}
-                                    className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-left"
+                                    className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-muted/50 transition-colors text-left"
                                 >
                                     <div className="flex items-center gap-3">
                                         {isExpanded ? (
@@ -168,19 +168,19 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                             <ChevronRight className="h-5 w-5 text-muted-foreground" />
                                         )}
                                         <div>
-                                            <h2 className="text-lg font-bold text-foreground">
+                                            <h2 className="text-base sm:text-lg font-bold text-foreground truncate max-w-[150px] sm:max-w-none">
                                                 {client.company || client.name}
                                             </h2>
                                             {client.company && (
-                                                <span className="text-sm text-muted-foreground">{client.name}</span>
+                                                <span className="text-xs sm:text-sm text-muted-foreground block truncate max-w-[150px] sm:max-w-none">{client.name}</span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 text-sm">
-                                        <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
+                                        <span className="bg-primary/10 text-primary px-2 py-0.5 sm:py-1 rounded-full font-medium whitespace-nowrap">
                                             {clientQuotes.length} proyecto{clientQuotes.length !== 1 ? 's' : ''}
                                         </span>
-                                        <span className="font-semibold text-foreground">
+                                        <span className="font-semibold text-foreground whitespace-nowrap">
                                             ${totalAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                         </span>
                                     </div>
@@ -188,7 +188,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
 
                                 {/* Collapsible Content */}
                                 {isExpanded && (
-                                    <div className="border-t p-4">
+                                    <div className="border-t p-3 sm:p-4">
                                         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                             {clientQuotes.map((quote) => (
                                                 <Link key={quote.id} href={`/quotes/${quote.id}`}>
@@ -208,7 +208,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                         </div>
 
                                                         <div className="flex-1">
-                                                            <h3 className="font-semibold leading-none tracking-tight text-sm sm:text-base">{quote.project_name}</h3>
+                                                            <h3 className="font-semibold leading-tight tracking-tight text-sm sm:text-base line-clamp-2">{quote.project_name}</h3>
                                                         </div>
 
                                                         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm pt-4 border-t gap-2">
@@ -249,7 +249,7 @@ export function DashboardClient({ quotes, clients, suppliers }: {
                                                                                         style={{ width: `${Math.min(progress, 100)}%` }}
                                                                                     />
                                                                                 </div>
-                                                                                <div className="text-[10px] text-muted-foreground text-right italic">
+                                                                                <div className="text-[10px] text-muted-foreground text-right italic truncate">
                                                                                     ${totalPaid.toLocaleString('es-MX')} / ${totalCost.toLocaleString('es-MX')}
                                                                                 </div>
                                                                             </>

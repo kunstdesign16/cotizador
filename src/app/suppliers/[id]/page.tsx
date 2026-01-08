@@ -6,7 +6,7 @@ import { ProductTable } from "@/components/product-table"
 import { Button } from "@/components/ui/button"
 import { Trash2, ArrowLeft, Plus, Pencil, Download } from "lucide-react"
 import Link from "next/link"
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { SupplierOrderForm } from "@/components/supplier-order-form"
 import { SupplierTaskForm } from "@/components/supplier-task-form"
 import { cn } from "@/lib/utils"
@@ -84,6 +84,7 @@ export default async function SupplierDetailPage({
                         <form action={async () => {
                             'use server'
                             await deleteSupplier(id)
+                            redirect('/suppliers')
                         }}>
                             <Button variant="outline" size="sm" className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
                                 <Trash2 className="h-4 w-4" /> Eliminar Proveedor
