@@ -18,9 +18,9 @@ export async function createProject(data: { name: string; clientId: string; desc
         revalidatePath('/projects')
         revalidatePath('/dashboard')
         return { success: true, data: project }
-    } catch (error: any) {
-        console.error('Error creating project:', error)
-        return { success: false, error: error.message || 'Error al crear el proyecto' }
+    } catch (err: any) {
+        console.error('Error creating project:', err)
+        return { success: false, error: err.message || 'Error al crear el proyecto' }
     }
 }
 
