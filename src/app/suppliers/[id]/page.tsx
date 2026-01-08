@@ -57,9 +57,9 @@ export default async function SupplierDetailPage({
         }))
 
         return (
-            <div className="min-h-screen bg-background p-8">
+            <div className="min-h-screen bg-background p-4 sm:p-8">
                 <div className="mx-auto max-w-6xl space-y-8">
-                    <header className="flex items-center justify-between">
+                    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
                         <div className="flex items-center gap-4">
                             <Link href="/suppliers">
                                 <Button variant="ghost" size="icon">
@@ -68,7 +68,7 @@ export default async function SupplierDetailPage({
                             </Link>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h1 className="text-2xl font-bold">{supplier.name}</h1>
+                                    <h1 className="text-xl sm:text-2xl font-bold">{supplier.name}</h1>
                                     <SupplierFormDialog supplier={supplier}>
                                         <Button variant="ghost" size="icon" className="h-6 w-6">
                                             <Pencil className="h-3 w-3" />
@@ -85,8 +85,8 @@ export default async function SupplierDetailPage({
                             'use server'
                             await deleteSupplier(id)
                             redirect('/suppliers')
-                        }}>
-                            <Button variant="outline" size="sm" className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                        }} className="w-full sm:w-auto">
+                            <Button variant="outline" size="sm" className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto justify-center">
                                 <Trash2 className="h-4 w-4" /> Eliminar Proveedor
                             </Button>
                         </form>
@@ -95,12 +95,12 @@ export default async function SupplierDetailPage({
                     {/* Tasks Section (Service / Finished Product) */}
                     {(supplier.type === 'SERVICE' || supplier.type === 'FINISHED_PRODUCT') && (
                         <section className="bg-card border rounded-xl shadow-sm overflow-hidden mb-8">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                                 <h2 className="font-semibold text-lg">
                                     {supplier.type === 'SERVICE' ? 'Tareas Asignadas' : 'Proyectos Asignados'}
                                 </h2>
                                 <SupplierTaskForm supplierId={supplier.id} supplierType={supplier.type} projects={formattedProjects}>
-                                    <Button size="sm" className="gap-2">
+                                    <Button size="sm" className="gap-2 w-full sm:w-auto justify-center">
                                         <Plus className="h-4 w-4" /> Asignar {supplier.type === 'SERVICE' ? 'Tarea' : 'Proyecto'}
                                     </Button>
                                 </SupplierTaskForm>
@@ -153,7 +153,7 @@ export default async function SupplierDetailPage({
                     {/* Orders Section (Raw Material) */}
                     {supplier.type === 'RAW_MATERIAL' && (
                         <section className="bg-card border rounded-xl shadow-sm overflow-hidden mb-8">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                                 <h2 className="font-semibold text-lg">Órdenes de Compra</h2>
                                 <SupplierOrderForm
                                     supplierId={supplier.id}
@@ -162,7 +162,7 @@ export default async function SupplierDetailPage({
                                     tasks={supplier.tasks}
                                     autoOpen={newOrder === 'true'}
                                 >
-                                    <Button size="sm" className="gap-2">
+                                    <Button size="sm" className="gap-2 w-full sm:w-auto justify-center">
                                         <Plus className="h-4 w-4" /> Nueva Orden
                                     </Button>
                                 </SupplierOrderForm>
@@ -218,19 +218,21 @@ export default async function SupplierDetailPage({
 
                     {/* Products Table */}
                     <section className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                        <div className="p-6 border-b flex justify-between items-center">
+                        <div className="p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                             <h2 className="font-semibold text-lg">Catálogo de Productos</h2>
-                            <div className="flex gap-2">
-                                <Link href={"/api/suppliers/" + supplier.id + "/products/export"}>
-                                    <Button variant="outline" size="sm" className="gap-2">
+                            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                                <Link href={"/api/suppliers/" + supplier.id + "/products/export"} className="flex-1 sm:flex-none">
+                                    <Button variant="outline" size="sm" className="gap-2 w-full justify-center text-xs px-2">
                                         <Download className="h-4 w-4" />
-                                        Exportar Excel
+                                        Exportar
                                     </Button>
                                 </Link>
-                                <ProductImportForm supplierId={supplier.id} supplierName={supplier.name} />
+                                <div className="flex-1 sm:flex-none">
+                                    <ProductImportForm supplierId={supplier.id} supplierName={supplier.name} />
+                                </div>
                                 <ProductFormDialog supplierId={id}>
-                                    <Button size="sm" className="gap-2">
-                                        <Plus className="h-4 w-4" /> Agregar Producto
+                                    <Button size="sm" className="gap-2 w-full justify-center text-xs px-2">
+                                        <Plus className="h-4 w-4" /> Agregar
                                     </Button>
                                 </ProductFormDialog>
                             </div>
