@@ -562,7 +562,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                {!quote.isApproved && !isFinancialmenteCerrado && project.status === 'draft' && (
+                                                {!quote.isApproved && !isFinancialmenteCerrado && project.status !== 'closed' && (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"

@@ -278,9 +278,9 @@ export async function approveQuote(quoteId: string) {
             return { success: false, error: 'El proyecto está CERRADO FINANCIERAMENTE. No se pueden aprobar cotizaciones.' }
         }
 
-        // STRICT RULE: Cannot approve a quote if project is already ACTIVE (active) or DELIVERED (closed)
-        if (quote.project.status === 'active' || quote.project.status === 'closed') {
-            return { success: false, error: `El proyecto ya está ${quote.project.status}. No se puede aprobar otra cotización. Genere una Nueva Versión o Cancele la actual.` }
+        // ALLOW approval if project is active, but NOT if it is closed (delivered)
+        if (quote.project.status === 'closed') {
+            return { success: false, error: `El proyecto ya está ENTREGADO. No se pueden aprobar más cotizaciones.` }
         }
 
         await prisma.$transaction([
