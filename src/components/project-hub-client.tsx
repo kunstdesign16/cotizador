@@ -60,7 +60,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const [loadingIncome, setLoadingIncome] = useState(false)
 
     // Calculated metrics
-    const approvedQuote = project.quotes?.find((q: any) => q.isApproved) || project.quotes?.[0]
+    const approvedQuote = project.quotes?.find((q: any) => q.isApproved)
     const totalCotizado = approvedQuote?.total || 0
     const totalIngresado = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
     const totalEgresado = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0

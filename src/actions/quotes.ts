@@ -249,7 +249,7 @@ export async function updateQuoteStatus(id: string, status: 'draft' | 'approved'
 
         // Logic for specific status actions
         if ((status as string) === 'approved') {
-            await syncIncomeFromQuote(id)
+            return await approveQuote(id)
         }
 
         revalidatePath('/dashboard')
