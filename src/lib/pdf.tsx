@@ -167,7 +167,7 @@ export const QuoteDocument = ({ quote }: {
     rawItems.forEach((item) => {
         if (item.isSubItem && groupedItems.length > 0) {
             const lastRow = groupedItems[groupedItems.length - 1];
-            lastRow.concept += ` + ${item.concept || item.productName || ''}`;
+            // Aggregate only numeric values, do NOT append sub-item concept text anymore
             lastRow.unit_cost += item.unit_cost;
             lastRow.subtotal += item.subtotal;
         } else {

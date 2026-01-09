@@ -503,6 +503,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                     <th className="px-4 py-3 w-40 text-right bg-blue-50/50 text-blue-900 border-l">Costo Int.</th>
                                     <th className="px-4 py-3 w-24 text-right bg-blue-50/50 text-blue-900">% Margen</th>
                                     <th className="px-4 py-3 w-32 text-right border-l font-semibold">P. Unitario</th>
+                                    <th className="px-4 py-3 w-32 text-right font-semibold text-emerald-700">P. PDF</th>
                                     <th className="px-4 py-3 w-32 text-right font-semibold">Total</th>
                                     <th className="px-4 py-3 w-12"></th>
                                 </tr>
@@ -571,6 +572,26 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                         <td className="p-2 text-right font-medium text-foreground border-l">
                                             ${item.unit_cost.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
+                                        <td className="p-2 text-right font-bold text-emerald-700">
+                                            {(() => {
+                                                if (item.isSubItem) return '-';
+
+                                                // Find this item's index
+                                                const idx = items.findIndex(i => i.id === item.id);
+                                                let aggregatedPrice = item.unit_cost;
+
+                                                // Look ahead for sub-items
+                                                for (let i = idx + 1; i < items.length; i++) {
+                                                    if (items[i].isSubItem) {
+                                                        aggregatedPrice += items[i].unit_cost;
+                                                    } else {
+                                                        break;
+                                                    }
+                                                }
+
+                                                return `$${aggregatedPrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                            })()}
+                                        </td>
                                         <td className="p-4 text-right font-bold text-foreground">
                                             ${item.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
@@ -582,15 +603,17 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                             </tbody>
                             <tfoot className="bg-muted/50 border-t font-semibold text-sm">
                                 <tr>
-                                    <td colSpan={2} className="px-4 py-3 text-right text-muted-foreground uppercase text-xs">Totales</td>
+                                    <td colSpan={2} className="px-4 py-3 text-right text-muted-foreground uppercase text-[10px] tracking-widest font-brand-header">Totales</td>
+                                    <td className="px-4 py-3 text-right"></td>
                                     <td className="px-4 py-3 text-right text-blue-900 bg-blue-50/50 border-l border-blue-100">
                                         ${totalInternalCost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                     </td>
                                     <td className="px-4 py-3 bg-blue-50/50"></td>
-                                    <td className="px-4 py-3 text-right">
+                                    <td className="px-4 py-3 text-right font-bold border-l">
                                         ${totalUnitPrices.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-lg">
+                                    <td className="px-4 py-3"></td>
+                                    <td className="px-4 py-3 text-right text-lg font-bold">
                                         ${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                     </td>
                                     <td></td>
