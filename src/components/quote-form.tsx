@@ -248,27 +248,8 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     }
 
     const removeItem = (id: string) => {
-        const newItems = items.filter(i => i.id !== id)
-        if (newItems.length === 0) {
-            // Keep at least one empty item
-            setItems([{
-                id: Math.random().toString(36).substr(2, 9),
-                concept: '',
-                quantity: 1,
-                internal_unit_cost: 0,
-                cost_article: 0,
-                cost_workforce: 0,
-                cost_packaging: 0,
-                cost_transport: 0,
-                cost_equipment: 0,
-                cost_other: 0,
-                profit_margin: 30,
-                unit_cost: 0,
-                subtotal: 0,
-                isSubItem: false
-            }])
-        } else {
-            setItems(newItems)
+        if (items.length > 1) {
+            setItems(items.filter(i => i.id !== id))
         }
     }
 
@@ -615,15 +596,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                             ${item.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
                                         <td className="p-2 text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => removeItem(item.id)}
-                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                title="Eliminar concepto"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></Button>
                                         </td>
                                     </tr>
                                 ))}
