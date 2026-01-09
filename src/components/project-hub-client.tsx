@@ -48,7 +48,6 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const router = useRouter()
     const [isApproving, setIsApproving] = useState<string | null>(null)
     const [isClosing, setIsClosing] = useState(false)
-    const [isDeleting, setIsDeleting] = useState(false)
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
     // Income dialog states
@@ -115,32 +114,6 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
         }
     }
 
-    const handleDeleteProject = async () => {
-        const confirmed = confirm(
-            `¿Estás seguro de eliminar el proyecto "${project.name}"?\n\n` +
-            'Esta acción no se puede deshacer. Las cotizaciones en borrador también serán eliminadas.'
-        )
-
-        if (!confirmed) return
-
-        setIsDeleting(true)
-        try {
-            const result = await deleteProject(project.id)
-
-            if (result.success) {
-                toast.success('Proyecto eliminado correctamente')
-                router.push('/projects')
-                router.refresh()
-            } else {
-                toast.error(result.error || 'Error al eliminar proyecto')
-            }
-        } catch {
-            console.error('Error al eliminar proyecto')
-            toast.error('Error al eliminar proyecto')
-        } finally {
-            setIsDeleting(false)
-        }
-    }
 
     const handleStatusChange = async (newStatus: string) => {
         setIsUpdatingStatus(true)
@@ -218,16 +191,6 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 )}
                                 <Button variant="outline" size="sm" className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
                                     Editar Proyecto
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleDeleteProject}
-                                    disabled={isDeleting}
-                                    className="rounded-xl font-brand-header uppercase tracking-wider text-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-                                >
-                                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                                    {isDeleting ? 'Eliminando...' : 'Eliminar'}
                                 </Button>
                             </>
                         )}

@@ -36,9 +36,6 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
                 <div className="mx-auto max-w-6xl">
                     <header className="mb-6 flex items-center justify-between print:hidden">
                         <BackButton fallbackUrl="/dashboard" />
-                        <div className="border-l pl-2">
-                            <DeleteQuoteButton id={quote.id} />
-                        </div>
                     </header>
 
                     <QuoteProjectManager quote={serializedQuote} suppliers={suppliers} />
