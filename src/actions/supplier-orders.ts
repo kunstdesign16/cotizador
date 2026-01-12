@@ -223,7 +223,7 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
                 data: {
                     description: description || `Pago Orden: ${order.supplier.name}`,
                     amount: amount,
-                    iva: amount * 0.16, // Consistent with our tax policy
+                    iva: amount - (amount / 1.16),
                     category: 'Material',
                     date: new Date(),
                     supplierId: order.supplierId,

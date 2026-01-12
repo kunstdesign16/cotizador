@@ -107,8 +107,14 @@ export async function getProjectReport(projectId: string) {
 
         // Calculate financial summary
         const approvedQuote = project.quotes.find(q => q.isApproved)
-        const totalIngresos = project.incomes.reduce((sum, income) => sum + (income.amount - (income.iva || 0)), 0)
-        const totalEgresos = project.expenses.reduce((sum, expense) => sum + (expense.amount - (expense.iva || 0)), 0)
+        const totalIngresos = project.incomes.reduce((sum, income) => {
+            const iva = income.iva > 0 ? income.iva : (income.amount - (income.amount / 1.16))
+            return sum + (income.amount - iva)
+        }, 0)
+        const totalEgresos = project.expenses.reduce((sum, expense) => {
+            const iva = expense.iva > 0 ? expense.iva : (expense.amount - (expense.amount / 1.16))
+            return sum + (expense.amount - iva)
+        }, 0)
         const isrRetenido = approvedQuote?.isr_amount || 0
         const utilidad = totalIngresos - totalEgresos - isrRetenido
         const margenUtilidad = totalIngresos > 0 ? (utilidad / totalIngresos) * 100 : 0
@@ -353,11 +359,17 @@ export async function getClientReport(clientId: string) {
         // Calculate metrics
         const totalProyectos = client.projects.length
         const totalCotizaciones = client.quotes.length
-        const totalIngresos = client.incomes.reduce((sum, income) => sum + (income.amount - (income.iva || 0)), 0)
+        const totalIngresos = client.incomes.reduce((sum, income) => {
+            const iva = income.iva > 0 ? income.iva : (income.amount - (income.amount / 1.16))
+            return sum + (income.amount - iva)
+        }, 0)
 
         // Calculate total expenses from projects
         const totalEgresos = client.projects.reduce((sum, project) => {
-            return sum + project.expenses.reduce((expSum, exp) => expSum + (exp.amount - (exp.iva || 0)), 0)
+            return sum + project.expenses.reduce((expSum, exp) => {
+                const iva = exp.iva > 0 ? exp.iva : (exp.amount - (exp.amount / 1.16))
+                return expSum + (exp.amount - iva)
+            }, 0)
         }, 0)
 
         // Total ISR retenido de cotizaciones aprobadas

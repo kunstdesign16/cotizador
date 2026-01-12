@@ -65,10 +65,16 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const isrRetenido = approvedQuote?.isr_amount || 0
 
     const totalIngresado = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
-    const totalIngresadoSubtotal = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount - (i.iva || 0)), 0) || 0
+    const totalIngresadoSubtotal = project.incomes?.reduce((sum: number, i: any) => {
+        const incomeIva = i.iva > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+        return sum + (i.amount - incomeIva)
+    }, 0) || 0
 
     const totalEgresado = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0
-    const totalEgresadoSubtotal = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount - (e.iva || 0)), 0) || 0
+    const totalEgresadoSubtotal = project.expenses?.reduce((sum: number, e: any) => {
+        const expenseIva = e.iva > 0 ? e.iva : (e.amount - (e.amount / 1.16))
+        return sum + (e.amount - expenseIva)
+    }, 0) || 0
 
     // Utilidad Real = Ingresos (sin IVA) - Egresos (sin IVA) - ISR Retenido
     const utilidad = totalIngresadoSubtotal - totalEgresadoSubtotal - isrRetenido
@@ -146,8 +152,10 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
 
         try {
             const { createIncome } = await import('@/actions/accounting')
+            const amount = parseFloat(incomeAmount)
             const result = await createIncome({
-                amount: parseFloat(incomeAmount),
+                amount: amount,
+                iva: amount - (amount / 1.16),
                 description: incomeDescription || 'Pago del cliente',
                 date: new Date(incomeDate),
                 projectId: project.id,
@@ -816,7 +824,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2 text-white">
                                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Utilidad Final</span>
                                     <div className="text-3xl font-black text-white truncate" title={`$${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}>${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                    <p className="text-[10px] text-slate-400">Margen neto: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%</p>
+                                    <p className="text-[10px] text-slate-400">Margen neto: {totalIngresadoSubtotal > 0 ? ((utilidad / totalIngresadoSubtotal) * 100).toFixed(1) : 0}%</p>
                                 </div>
                             </div>
 
