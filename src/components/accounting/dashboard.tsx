@@ -64,8 +64,14 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
         router.push(`/accounting?month=${val}`)
     }
 
-    const totalIncome = summary.incomes.reduce((sum: number, i: any) => sum + i.amount, 0)
-    const totalIVAIncome = summary.incomes.reduce((sum: number, i: any) => sum + (i.iva || 0), 0)
+    const totalIncomeSubtotal = summary.incomes.reduce((sum: number, i: any) => {
+        const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+        return sum + (i.amount - iva)
+    }, 0)
+
+    const totalIVAClaimed = summary.incomes.reduce((sum: number, i: any) => {
+        return sum + ((i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16)))
+    }, 0)
 
     const totalVariable = summary.variableExpenses.reduce((sum: number, e: any) => sum + e.amount, 0)
     const totalIVAVariable = summary.variableExpenses.reduce((sum: number, e: any) => sum + (e.iva || 0), 0)
@@ -73,12 +79,16 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
     const totalFixed = summary.fixedExpenses.reduce((sum: number, e: any) => sum + e.amount, 0)
     const totalExpenses = totalVariable + totalFixed
 
-    // Sum ISR from approved quotes in this month
-    const totalISR = summary.incomes
-        .filter((i: any) => i.quote?.isApproved && i.quote?.isr_amount)
-        .reduce((sum: number, i: any) => sum + (i.quote.isr_amount || 0), 0)
+    // Sum ISR from approved quotes in this month (unique per quote)
+    const uniqueApprovedQuotes = Array.from(new Set(
+        summary.incomes
+            .filter((i: any) => i.quote?.isApproved && i.quote?.isr_amount)
+            .map((i: any) => i.quote.id)
+    )).map(id => summary.incomes.find((i: any) => i.quote.id === id).quote)
 
-    const netProfit = (totalIncome - totalIVAIncome) - totalExpenses - totalISR
+    const totalISR = uniqueApprovedQuotes.reduce((sum: number, q: any) => sum + (q.isr_amount || 0), 0)
+
+    const netProfit = totalIncomeSubtotal - totalExpenses - totalISR
 
     return (
         <div className="space-y-6">
@@ -115,7 +125,7 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <KPICard
                             title="Ingreso Neto (s/IVA)"
-                            amount={totalIncome - totalIVAIncome}
+                            amount={totalIncomeSubtotal}
                             icon={TrendingUp}
                             trend="Facturación subtotal (sin IVA)"
                             color="text-green-600"
@@ -124,12 +134,12 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                             title="Utilidad Real"
                             amount={netProfit}
                             icon={Wallet}
-                            trend={`Margen real: ${totalIncome > 0 ? ((netProfit / (totalIncome - totalIVAIncome)) * 100).toFixed(1) : 0}%`}
+                            trend={`Margen real: ${totalIncomeSubtotal > 0 ? ((netProfit / totalIncomeSubtotal) * 100).toFixed(1) : 0}%`}
                             color={netProfit >= 0 ? "text-blue-600" : "text-red-600"}
                         />
                         <KPICard
                             title="IVA Cobrado"
-                            amount={totalIVAIncome}
+                            amount={totalIVAClaimed}
                             icon={Calculator}
                             color="text-green-600"
                         />
@@ -251,8 +261,11 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
 }
 
 function CashFlowChart({ incomes, expenses }: { incomes: any[], expenses: any[] }) {
-    const totalInc = incomes.reduce((s, i) => s + i.amount + (i.iva || 0), 0)
-    const totalExp = expenses.reduce((s, e) => s + e.amount + (e.iva || 0), 0)
+    const totalInc = incomes.reduce((s, i) => {
+        const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+        return s + (i.amount - iva)
+    }, 0)
+    const totalExp = expenses.reduce((s, e) => s + e.amount, 0)
     const max = Math.max(totalInc, totalExp, 1)
 
     return (
@@ -262,7 +275,7 @@ function CashFlowChart({ incomes, expenses }: { incomes: any[], expenses: any[] 
                     className="w-full bg-green-500 rounded-t-lg transition-all duration-500"
                     style={{ height: `${(totalInc / max) * 100}%`, minHeight: '4px' }}
                 />
-                <span className="text-xs font-medium">Ingresos</span>
+                <span className="text-xs font-medium">Ingresos (s/IVA)</span>
                 <span className="text-[10px] text-muted-foreground">${totalInc.toLocaleString()}</span>
             </div>
             <div className="flex-1 flex flex-col items-center gap-2">
@@ -270,7 +283,7 @@ function CashFlowChart({ incomes, expenses }: { incomes: any[], expenses: any[] 
                     className="w-full bg-red-500 rounded-t-lg transition-all duration-500"
                     style={{ height: `${(totalExp / max) * 100}%`, minHeight: '4px' }}
                 />
-                <span className="text-xs font-medium">Egresos</span>
+                <span className="text-xs font-medium">Egresos (c/IVA)</span>
                 <span className="text-[10px] text-muted-foreground">${totalExp.toLocaleString()}</span>
             </div>
         </div>
@@ -278,7 +291,7 @@ function CashFlowChart({ incomes, expenses }: { incomes: any[], expenses: any[] 
 }
 
 function ExpenseDistributionChart({ variable, fixed }: { variable: any[], fixed: any[] }) {
-    const totalVar = variable.reduce((s, e) => s + e.amount + (e.iva || 0), 0)
+    const totalVar = variable.reduce((s, e) => s + e.amount, 0)
     const totalFix = fixed.reduce((s, e) => s + e.amount, 0)
     const total = totalVar + totalFix || 1
 
@@ -286,7 +299,7 @@ function ExpenseDistributionChart({ variable, fixed }: { variable: any[], fixed:
         <div className="h-full flex flex-col justify-center space-y-6">
             <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                    <span>Gastos Variables</span>
+                    <span>Gastos Variables (c/IVA)</span>
                     <span className="font-medium">${totalVar.toLocaleString()}</span>
                 </div>
                 <div className="w-full h-4 bg-muted rounded-full overflow-hidden">

@@ -14,32 +14,33 @@ export async function getManagementDashboardData() {
             const end = endOfMonth(date)
             const monthLabel = format(date, 'MMM yy')
 
-            const incomes = await prisma.income.aggregate({
-                where: { date: { gte: start, lte: end } },
-                _sum: { amount: true, iva: true }
-            })
+            const [incomes, expenses, quotes] = await Promise.all([
+                prisma.income.findMany({
+                    where: { date: { gte: start, lte: end } },
+                    select: { amount: true, iva: true }
+                }),
+                prisma.variableExpense.findMany({
+                    where: { date: { gte: start, lte: end } },
+                    select: { amount: true, iva: true }
+                }),
+                prisma.quote.findMany({
+                    where: {
+                        isApproved: true,
+                        project: {
+                            createdAt: { gte: start, lte: end }
+                        }
+                    },
+                    select: { isr_amount: true }
+                })
+            ])
 
-            const expenses = await prisma.variableExpense.aggregate({
-                where: { date: { gte: start, lte: end } },
-                _sum: { amount: true, iva: true }
-            })
+            const incomeSubtotal = incomes.reduce((sum, i) => {
+                const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+                return sum + (i.amount - iva)
+            }, 0)
 
-            const quotes = await prisma.quote.aggregate({
-                _sum: { isr_amount: true },
-                where: {
-                    isApproved: true,
-                    project: {
-                        createdAt: { gte: start, lte: end }
-                    }
-                }
-            })
-
-            const incomeTotal = (incomes._sum.amount || 0)
-            const incomeIva = (incomes._sum.iva || 0)
-            const incomeSubtotal = incomeIva > 0 ? (incomeTotal - incomeIva) : (incomeTotal / 1.16)
-
-            const expenseTotal = (expenses._sum.amount || 0)
-            const isrTotal = (quotes._sum.isr_amount || 0)
+            const expenseTotal = expenses.reduce((sum, e) => sum + e.amount, 0)
+            const isrTotal = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
 
             monthlyStats.push({
                 month: monthLabel,

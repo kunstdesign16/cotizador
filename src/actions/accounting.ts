@@ -202,32 +202,36 @@ export async function getAccountingTrends() {
         const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
 
         const [incomes, variableExpenses, fixedExpenses, quotes] = await Promise.all([
-            prisma.income.aggregate({
-                _sum: { amount: true, iva: true },
-                where: { date: { gte: startDate, lt: endDate } }
+            prisma.income.findMany({
+                where: { date: { gte: startDate, lt: endDate } },
+                select: { amount: true, iva: true }
             }),
-            prisma.variableExpense.aggregate({
-                _sum: { amount: true, iva: true },
-                where: { date: { gte: startDate, lt: endDate } }
+            prisma.variableExpense.findMany({
+                where: { date: { gte: startDate, lt: endDate } },
+                select: { amount: true, iva: true }
             }),
-            prisma.fixedExpense.aggregate({
-                _sum: { amount: true },
-                where: { date: { gte: startDate, lt: endDate } }
+            prisma.fixedExpense.findMany({
+                where: { date: { gte: startDate, lt: endDate } },
+                select: { amount: true }
             }),
-            prisma.quote.aggregate({
-                _sum: { isr_amount: true },
+            prisma.quote.findMany({
                 where: {
                     isApproved: true,
                     project: {
                         createdAt: { gte: startDate, lt: endDate }
                     }
-                }
+                },
+                select: { isr_amount: true }
             })
         ])
 
-        const totalIncome = (incomes._sum.amount || 0) - (incomes._sum.iva || 0)
-        const totalExpense = (variableExpenses._sum.amount || 0) + (fixedExpenses._sum.amount || 0)
-        const totalISR = (quotes._sum.isr_amount || 0)
+        const totalIncome = incomes.reduce((sum, i) => {
+            const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+            return sum + (i.amount - iva)
+        }, 0)
+
+        const totalExpense = variableExpenses.reduce((sum, e) => sum + e.amount, 0) + fixedExpenses.reduce((sum, e) => sum + e.amount, 0)
+        const totalISR = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
 
         return {
             month,
