@@ -72,7 +72,13 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
 
     const totalFixed = summary.fixedExpenses.reduce((sum: number, e: any) => sum + e.amount, 0)
     const totalExpenses = totalVariable + totalFixed
-    const netProfit = totalIncome - totalExpenses
+
+    // Sum ISR from approved quotes in this month
+    const totalISR = summary.incomes
+        .filter((i: any) => i.quote?.isApproved && i.quote?.isr_amount)
+        .reduce((sum: number, i: any) => sum + (i.quote.isr_amount || 0), 0)
+
+    const netProfit = (totalIncome - totalIVAIncome) - totalExpenses - totalISR
 
     return (
         <div className="space-y-6">
@@ -108,17 +114,17 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                 <TabsContent value="overview" className="space-y-4">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <KPICard
-                            title="Ingreso Total (Subtotal)"
-                            amount={totalIncome}
+                            title="Ingreso Neto (s/IVA)"
+                            amount={totalIncome - totalIVAIncome}
                             icon={TrendingUp}
-                            trend="Monto facturado antes de impuestos"
+                            trend="Facturación subtotal (sin IVA)"
                             color="text-green-600"
                         />
                         <KPICard
-                            title="Utilidad Neta del Mes"
+                            title="Utilidad Real"
                             amount={netProfit}
                             icon={Wallet}
-                            trend={`Margen: ${totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : 0}%`}
+                            trend={`Margen real: ${totalIncome > 0 ? ((netProfit / (totalIncome - totalIVAIncome)) * 100).toFixed(1) : 0}%`}
                             color={netProfit >= 0 ? "text-blue-600" : "text-red-600"}
                         />
                         <KPICard
@@ -230,7 +236,7 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                                                 <td className="p-3 font-medium capitalize">{t.label}</td>
                                                 <td className="p-3 text-right text-green-600">${t.income.toLocaleString()}</td>
                                                 <td className="p-3 text-right text-red-600">${t.expense.toLocaleString()}</td>
-                                                <td className="p-3 text-right font-bold">${(t.income - t.expense).toLocaleString()}</td>
+                                                <td className="p-3 text-right font-bold">${t.utilidad.toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>

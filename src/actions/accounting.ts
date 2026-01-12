@@ -201,26 +201,40 @@ export async function getAccountingTrends() {
         const startDate = new Date(`${month}-01`)
         const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1))
 
-        const [incomes, variableExpenses, fixedExpenses] = await Promise.all([
+        const [incomes, variableExpenses, fixedExpenses, quotes] = await Promise.all([
             prisma.income.aggregate({
-                _sum: { amount: true },
+                _sum: { amount: true, iva: true },
                 where: { date: { gte: startDate, lt: endDate } }
             }),
             prisma.variableExpense.aggregate({
-                _sum: { amount: true },
+                _sum: { amount: true, iva: true },
                 where: { date: { gte: startDate, lt: endDate } }
             }),
             prisma.fixedExpense.aggregate({
                 _sum: { amount: true },
                 where: { date: { gte: startDate, lt: endDate } }
+            }),
+            prisma.quote.aggregate({
+                _sum: { isr_amount: true },
+                where: {
+                    isApproved: true,
+                    project: {
+                        createdAt: { gte: startDate, lt: endDate }
+                    }
+                }
             })
         ])
+
+        const totalIncome = (incomes._sum.amount || 0) - (incomes._sum.iva || 0)
+        const totalExpense = (variableExpenses._sum.amount || 0) + (fixedExpenses._sum.amount || 0)
+        const totalISR = (quotes._sum.isr_amount || 0)
 
         return {
             month,
             label: format(startDate, 'MMM yy', { locale: es }),
-            income: incomes._sum.amount || 0,
-            expense: (variableExpenses._sum.amount || 0) + (fixedExpenses._sum.amount || 0)
+            income: totalIncome,
+            expense: totalExpense,
+            utilidad: totalIncome - totalExpense - totalISR
         }
     }))
 

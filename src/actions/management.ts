@@ -24,17 +24,28 @@ export async function getManagementDashboardData() {
                 _sum: { amount: true, iva: true }
             })
 
+            const quotes = await prisma.quote.aggregate({
+                _sum: { isr_amount: true },
+                where: {
+                    isApproved: true,
+                    project: {
+                        createdAt: { gte: start, lte: end }
+                    }
+                }
+            })
+
             const incomeTotal = (incomes._sum.amount || 0)
             const incomeIva = (incomes._sum.iva || 0)
             const incomeSubtotal = incomeIva > 0 ? (incomeTotal - incomeIva) : (incomeTotal / 1.16)
 
             const expenseTotal = (expenses._sum.amount || 0)
+            const isrTotal = (quotes._sum.isr_amount || 0)
 
             monthlyStats.push({
                 month: monthLabel,
                 ingresos: incomeSubtotal,
                 egresos: expenseTotal,
-                utilidad: incomeSubtotal - expenseTotal
+                utilidad: incomeSubtotal - expenseTotal - isrTotal
             })
         }
 
