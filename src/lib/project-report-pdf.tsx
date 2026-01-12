@@ -110,15 +110,15 @@ export const ProjectReportDocument = ({ data }: {
                 <Text style={styles.sectionTitle}>Resumen Financiero</Text>
                 <View style={styles.grid}>
                     <View style={styles.gridItem}>
-                        <Text style={styles.gridLabel}>Total Ingresos</Text>
+                        <Text style={styles.gridLabel}>Ingresos (s/IVA)</Text>
                         <Text style={styles.gridValue}>{formatCurrency(financial.totalIngresos)}</Text>
                     </View>
                     <View style={styles.gridItem}>
-                        <Text style={styles.gridLabel}>Total Egresos</Text>
+                        <Text style={styles.gridLabel}>Egresos (s/IVA)</Text>
                         <Text style={styles.gridValue}>{formatCurrency(financial.totalEgresos)}</Text>
                     </View>
                     <View style={styles.gridItem}>
-                        <Text style={styles.gridLabel}>Utilidad</Text>
+                        <Text style={styles.gridLabel}>Utilidad Real</Text>
                         <Text style={[styles.gridValue, { color: financial.utilidad >= 0 ? '#10B981' : '#EF4444' }]}>
                             {formatCurrency(financial.utilidad)}
                         </Text>

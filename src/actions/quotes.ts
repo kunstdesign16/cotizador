@@ -25,7 +25,8 @@ export async function saveQuote(data: any) {
 
     const subtotal = items.reduce((acc: number, item: any) => acc + item.subtotal, 0)
     const iva_amount = subtotal * 0.16
-    const total = subtotal + iva_amount - (subtotal * Number(data.isr_rate || 0))
+    const isr_amount = subtotal * Number(data.isr_rate || 0)
+    const total = subtotal + iva_amount - isr_amount
 
     let finalClientId = clientId
 
@@ -63,6 +64,7 @@ export async function saveQuote(data: any) {
             iva_rate: data.iva_rate,
             iva_amount: iva_amount,
             isr_rate: Number(data.isr_rate || 0),
+            isr_amount: isr_amount,
             total: total,
             clientId: finalClientId,
             projectId: projectId || null,
@@ -149,7 +151,8 @@ export async function updateQuote(id: string, data: any) {
 
     const subtotal = data.items.reduce((acc: number, item: any) => acc + item.subtotal, 0)
     const iva_amount = subtotal * 0.16
-    const total = subtotal + iva_amount
+    const isr_amount = subtotal * Number(data.isr_rate || 0)
+    const total = subtotal + iva_amount - isr_amount
 
     // 2. Update Quote & Items
     // Strategy: Delete all items and re-create.
@@ -172,7 +175,8 @@ export async function updateQuote(id: string, data: any) {
                 iva_rate: data.iva_rate || 0.16,
                 iva_amount,
                 isr_rate: Number(data.isr_rate || 0),
-                total: total - (subtotal * Number(data.isr_rate || 0))
+                isr_amount,
+                total: total
             }
         })
 

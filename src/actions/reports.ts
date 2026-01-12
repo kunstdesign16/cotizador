@@ -106,9 +106,11 @@ export async function getProjectReport(projectId: string) {
         }
 
         // Calculate financial summary
-        const totalIngresos = project.incomes.reduce((sum, income) => sum + income.amount, 0)
-        const totalEgresos = project.expenses.reduce((sum, expense) => sum + expense.amount, 0)
-        const utilidad = totalIngresos - totalEgresos
+        const approvedQuote = project.quotes.find(q => q.isApproved)
+        const totalIngresos = project.incomes.reduce((sum, income) => sum + (income.amount - (income.iva || 0)), 0)
+        const totalEgresos = project.expenses.reduce((sum, expense) => sum + (expense.amount - (expense.iva || 0)), 0)
+        const isrRetenido = approvedQuote?.isr_amount || 0
+        const utilidad = totalIngresos - totalEgresos - isrRetenido
         const margenUtilidad = totalIngresos > 0 ? (utilidad / totalIngresos) * 100 : 0
 
         // Quotes summary
@@ -351,14 +353,20 @@ export async function getClientReport(clientId: string) {
         // Calculate metrics
         const totalProyectos = client.projects.length
         const totalCotizaciones = client.quotes.length
-        const totalIngresos = client.incomes.reduce((sum, income) => sum + income.amount, 0)
+        const totalIngresos = client.incomes.reduce((sum, income) => sum + (income.amount - (income.iva || 0)), 0)
 
         // Calculate total expenses from projects
         const totalEgresos = client.projects.reduce((sum, project) => {
-            return sum + project.expenses.reduce((expSum, exp) => expSum + exp.amount, 0)
+            return sum + project.expenses.reduce((expSum, exp) => expSum + (exp.amount - (exp.iva || 0)), 0)
         }, 0)
 
-        const utilidadTotal = totalIngresos - totalEgresos
+        // Total ISR retenido de cotizaciones aprobadas
+        const totalISR = client.projects.reduce((sum, project) => {
+            const approvedQuote = project.quotes.find(q => q.isApproved)
+            return sum + (approvedQuote?.isr_amount || 0)
+        }, 0)
+
+        const utilidadTotal = totalIngresos - totalEgresos - totalISR
         const margenPromedio = totalIngresos > 0 ? (utilidadTotal / totalIngresos) * 100 : 0
 
         // Quotes by status

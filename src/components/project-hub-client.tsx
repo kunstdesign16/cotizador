@@ -61,9 +61,17 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     // Calculated metrics
     const approvedQuote = project.quotes?.find((q: any) => q.isApproved)
     const totalCotizado = approvedQuote?.total || 0
+    const totalCotizadoSubtotal = approvedQuote?.subtotal || 0
+    const isrRetenido = approvedQuote?.isr_amount || 0
+
     const totalIngresado = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount || 0), 0) || 0
+    const totalIngresadoSubtotal = project.incomes?.reduce((sum: number, i: any) => sum + (i.amount - (i.iva || 0)), 0) || 0
+
     const totalEgresado = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount || 0), 0) || 0
-    const utilidad = totalIngresado - totalEgresado
+    const totalEgresadoSubtotal = project.expenses?.reduce((sum: number, e: any) => sum + (e.amount - (e.iva || 0)), 0) || 0
+
+    // Utilidad Real = Ingresos (sin IVA) - Egresos (sin IVA) - ISR Retenido
+    const utilidad = totalIngresadoSubtotal - totalEgresadoSubtotal - isrRetenido
     const totalCobrado = totalIngresado // Alias for clarity in financials tab
 
     const isFinancialmenteCerrado = project.financialStatus === 'CERRADO'
@@ -350,49 +358,50 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
                                     <div className="space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Ingresos Totales</span>
+                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Ingresos (Sin IVA)</span>
                                             <div className="text-2xl sm:text-3xl font-brand-header text-primary whitespace-nowrap">
-                                                ${totalIngresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                ${totalIngresadoSubtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </div>
                                         </div>
                                         <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-primary transition-all"
-                                                style={{ width: `${Math.min((totalIngresado / (totalCotizado || 1)) * 100, 100)}%` }}
+                                                style={{ width: `${Math.min((totalIngresadoSubtotal / (totalCotizadoSubtotal || 1)) * 100, 100)}%` }}
                                             />
                                         </div>
                                         <p className="text-[10px] text-foreground/60 font-medium">
-                                            {((totalIngresado / (totalCotizado || 1)) * 100).toFixed(1)}% RECAUDADO DEL TOTAL
+                                            {((totalIngresadoSubtotal / (totalCotizadoSubtotal || 1)) * 100).toFixed(1)}% RECAUDADO DEL SUBTOTAL
                                         </p>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="space-y-1">
-                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Egresos Ejecutados</span>
+                                            <span className="text-[11px] text-primary/50 uppercase font-brand-header tracking-widest">Egresos (Sin IVA)</span>
                                             <div className="text-2xl sm:text-3xl font-brand-header text-primary whitespace-nowrap">
-                                                ${totalEgresado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                ${totalEgresadoSubtotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </div>
                                         </div>
                                         <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-primary/60 transition-all shadow-[0_0_8px_rgba(40,73,96,0.2)]"
-                                                style={{ width: `${Math.min((totalEgresado / (totalIngresado || 1)) * 100, 100)}%` }}
+                                                style={{ width: `${Math.min((totalEgresadoSubtotal / (totalIngresadoSubtotal || 1)) * 100, 100)}%` }}
                                             />
                                         </div>
                                         <p className="text-[10px] text-foreground/60 font-medium">
-                                            {totalIngresado > 0 ? ((totalEgresado / totalIngresado) * 100).toFixed(1) : 0}% DEL CAPITAL ABSORBIDO
+                                            {totalIngresadoSubtotal > 0 ? ((totalEgresadoSubtotal / totalIngresadoSubtotal) * 100).toFixed(1) : 0}% DEL CAPITAL ABSORBIDO
                                         </p>
                                     </div>
 
                                     <div className="space-y-4 bg-primary text-white p-6 rounded-2xl shadow-xl shadow-primary/10">
                                         <div className="space-y-1">
-                                            <span className="text-[11px] text-white/70 uppercase font-brand-header tracking-widest">Utilidad Obra</span>
+                                            <span className="text-[11px] text-white/70 uppercase font-brand-header tracking-widest">Utilidad Real</span>
                                             <div className="text-2xl sm:text-3xl font-brand-header tracking-wider whitespace-nowrap">
                                                 ${utilidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </div>
                                         </div>
                                         <div className="text-[11px] font-brand-header tracking-widest uppercase border-t border-white/20 pt-2">
-                                            MARGEN: {totalIngresado > 0 ? ((utilidad / totalIngresado) * 100).toFixed(1) : 0}%
+                                            {isrRetenido > 0 && <span>ISR: ${isrRetenido.toLocaleString('es-MX')} | </span>}
+                                            MARGEN: {totalIngresadoSubtotal > 0 ? ((utilidad / totalIngresadoSubtotal) * 100).toFixed(1) : 0}%
                                         </div>
                                     </div>
                                 </div>

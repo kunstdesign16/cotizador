@@ -16,22 +16,22 @@ export async function getManagementDashboardData() {
 
             const incomes = await prisma.income.aggregate({
                 where: { date: { gte: start, lte: end } },
-                _sum: { amount: true }
+                _sum: { amount: true, iva: true }
             })
 
             const expenses = await prisma.variableExpense.aggregate({
                 where: { date: { gte: start, lte: end } },
-                _sum: { amount: true }
+                _sum: { amount: true, iva: true }
             })
 
-            const incomeTotal = incomes._sum.amount || 0
-            const expenseTotal = expenses._sum.amount || 0
+            const incomeSubtotal = (incomes._sum.amount || 0) - (incomes._sum.iva || 0)
+            const expenseSubtotal = (expenses._sum.amount || 0) - (expenses._sum.iva || 0)
 
             monthlyStats.push({
                 month: monthLabel,
-                ingresos: incomeTotal,
-                egresos: expenseTotal,
-                utilidad: incomeTotal - expenseTotal
+                ingresos: incomeSubtotal,
+                egresos: expenseSubtotal,
+                utilidad: incomeSubtotal - expenseSubtotal
             })
         }
 
