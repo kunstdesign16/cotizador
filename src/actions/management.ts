@@ -29,14 +29,12 @@ export async function getManagementDashboardData() {
             const incomeSubtotal = incomeIva > 0 ? (incomeTotal - incomeIva) : (incomeTotal / 1.16)
 
             const expenseTotal = (expenses._sum.amount || 0)
-            const expenseIva = (expenses._sum.iva || 0)
-            const expenseSubtotal = expenseIva > 0 ? (expenseTotal - expenseIva) : (expenseTotal / 1.16)
 
             monthlyStats.push({
                 month: monthLabel,
                 ingresos: incomeSubtotal,
-                egresos: expenseSubtotal,
-                utilidad: incomeSubtotal - expenseSubtotal
+                egresos: expenseTotal,
+                utilidad: incomeSubtotal - expenseTotal
             })
         }
 
