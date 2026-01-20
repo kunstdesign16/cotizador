@@ -8,9 +8,6 @@ export const prisma = globalForPrisma.prisma || new PrismaClient({
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
-// Gracefully disconnect on process termination
-if (process.env.NODE_ENV !== 'production') {
-    process.on('beforeExit', async () => {
-        await prisma.$disconnect()
-    })
-}
+// Note: Next.js HMR can cause multiple client instances or listeners.
+// The global prisma pattern above handles the client instance.
+// We avoid adding process.on('beforeExit') here as it causes MaxListenersExceededWarning in dev.
