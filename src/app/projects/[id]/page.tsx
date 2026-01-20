@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation'
 import { ProjectHubClient } from '@/components/project-hub-client'
+import { getCurrentUser } from '@/lib/auth-utils'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +14,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     const { id } = await params
 
     try {
+        const user = await getCurrentUser()
         const { prisma } = await import('@/lib/prisma')
 
         const project = await (prisma as any).project.findUnique({
@@ -40,6 +44,19 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         if (!project) {
             notFound()
+        }
+
+        // Staff access guard
+        if (user && user.role === 'staff' && project.userId !== user.id) {
+            return (
+                <div className="p-8 text-center space-y-4">
+                    <h1 className="text-xl font-bold text-red-600">Acceso Denegado</h1>
+                    <p className="text-sm text-muted-foreground">No tienes permiso para ver este proyecto.</p>
+                    <Link href="/dashboard">
+                        <Button variant="outline">Volver al Dashboard</Button>
+                    </Link>
+                </div>
+            )
         }
 
         const serializedProject = JSON.parse(JSON.stringify(project))

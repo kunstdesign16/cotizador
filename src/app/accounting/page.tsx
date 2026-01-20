@@ -2,6 +2,7 @@ import { AccountingDashboard } from '@/components/accounting/dashboard'
 import { getAccountingSummary } from '@/actions/accounting'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 // Allow searchParams
 export const dynamic = 'force-dynamic'
@@ -11,6 +12,19 @@ export default async function AccountingPage({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+    const user = await getCurrentUser()
+
+    if (!user || user.role !== 'admin') {
+        return (
+            <div className="container mx-auto py-32 text-center space-y-4">
+                <h1 className="text-2xl font-bold text-red-600">Acceso Restringido</h1>
+                <p className="text-muted-foreground">Solo los administradores pueden ver el panel de contabilidad.</p>
+                <Link href="/dashboard">
+                    <Button variant="outline">Ir a Mis Proyectos</Button>
+                </Link>
+            </div>
+        )
+    }
     const resolvedParams = await searchParams
     // Default to current month if not specified
     const month = typeof resolvedParams?.month === 'string' ? resolvedParams.month : new Date().toISOString().slice(0, 7)

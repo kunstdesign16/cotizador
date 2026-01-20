@@ -10,6 +10,7 @@ import { notFound, redirect } from 'next/navigation'
 import { SupplierOrderForm } from "@/components/supplier-order-form"
 import { SupplierTaskForm } from "@/components/supplier-task-form"
 import { cn } from "@/lib/utils"
+import { DeletePriceListButton } from "@/components/delete-price-list-button"
 
 export const dynamic = 'force-dynamic'
 
@@ -220,7 +221,9 @@ export default async function SupplierDetailPage({
                     <section className="bg-card border rounded-xl shadow-sm overflow-hidden">
                         <div className="p-4 sm:p-6 border-b flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                             <h2 className="font-semibold text-lg">Catálogo de Productos</h2>
-                            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                                <DeletePriceListButton supplierId={id} />
+                                <div className="h-8 w-[1px] bg-border mx-1 hidden sm:block" /> {/* Separator */}
                                 <Link href={"/api/suppliers/" + supplier.id + "/products/export"} className="flex-1 sm:flex-none">
                                     <Button variant="outline" size="sm" className="gap-2 w-full justify-center text-xs px-2">
                                         <Download className="h-4 w-4" />

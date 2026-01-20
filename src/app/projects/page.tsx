@@ -1,12 +1,20 @@
 import { ProjectsPageClient } from '@/components/projects-page-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectsPage() {
     try {
+        const user = await getCurrentUser()
         const { prisma } = await import('@/lib/prisma')
 
+        const projectFilter: any = {}
+        if (user && user.role === 'staff') {
+            projectFilter.userId = user.id
+        }
+
         const projects = await (prisma as any).project.findMany({
+            where: projectFilter,
             include: {
                 client: true,
                 quotes: {

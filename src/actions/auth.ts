@@ -4,7 +4,6 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 const ADMIN_EMAILS = [
-    'kunstdesign16@gmail.com',
     'direccion@kunstdesign.com.mx',
     'mayelam@kunstdesign.com.mx'
 ]

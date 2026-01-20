@@ -2,16 +2,19 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function createProject(data: { name: string; clientId: string; description?: string }) {
     try {
+        const user = await getCurrentUser()
         const project = await (prisma as any).project.create({
             data: {
                 name: data.name,
                 clientId: data.clientId,
                 description: data.description,
                 status: 'draft',
-                financialStatus: 'ABIERTO'
+                financialStatus: 'ABIERTO',
+                userId: user?.id || null
             }
         })
 

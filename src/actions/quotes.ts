@@ -1,8 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function saveQuote(data: any) {
+    const user = await getCurrentUser()
     const { prisma } = await import('@/lib/prisma')
     // data is the JSON payload from the client state
     // In a real app we should validate this with Zod again
@@ -67,6 +69,7 @@ export async function saveQuote(data: any) {
             isr_amount: isr_amount,
             total: total,
             clientId: finalClientId,
+            userId: user?.id || null,
             projectId: projectId || null,
             items: {
                 create: data.items.map((item: any) => ({
@@ -373,6 +376,7 @@ export async function deleteQuote(id: string) {
 export async function duplicateQuote(id: string) {
     const { prisma } = await import('@/lib/prisma')
     try {
+        const user = await getCurrentUser()
         // 1. Get original quote with items
         const original = await prisma.quote.findUnique({
             where: { id },
@@ -400,7 +404,7 @@ export async function duplicateQuote(id: string) {
                 date: new Date(),
                 status: 'draft',
                 clientId: original.clientId,
-                userId: original.userId,
+                userId: user?.id || original.userId,
                 projectId: original.projectId,
                 isApproved: false,
 

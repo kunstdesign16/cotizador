@@ -3,22 +3,32 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
 import { DashboardOrderList } from "@/components/dashboard-order-list"
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
     try {
+        const user = await getCurrentUser()
         const { prisma } = await import('@/lib/prisma')
+
+        // Build base filters
+        const quotesFilter: any = {
+            project: {
+                is: {
+                    status: { not: 'cancelled' }
+                }
+            }
+        }
+
+        // Apply staff restriction
+        if (user && user.role === 'staff') {
+            quotesFilter.userId = user.id
+        }
 
         // Fetch All Data Defensively
         const quotes = await (prisma as any).quote.findMany({
-            where: {
-                project: {
-                    is: {
-                        status: { not: 'cancelled' }
-                    }
-                }
-            } as any,
+            where: quotesFilter,
             include: {
                 client: true,
                 expenses: true,
@@ -55,13 +65,18 @@ export default async function DashboardPage() {
         const recentQuotes = serializedQuotes.slice(0, 5)
 
         // Recent 5 supplier orders (not linked to COBRADO projects)
+        const orderFilter: any = {
+            project: {
+                status: { notIn: ['cancelled', 'closed'] },
+                financialStatus: { not: 'CERRADO' }
+            }
+        }
+        if (user && user.role === 'staff') {
+            orderFilter.project.userId = user.id
+        }
+
         const recentOrders = await (prisma as any).supplierOrder.findMany({
-            where: {
-                project: {
-                    status: { notIn: ['cancelled', 'closed'] },
-                    financialStatus: { not: 'CERRADO' }
-                }
-            } as any,
+            where: orderFilter,
             include: { supplier: true, project: true } as any,
             orderBy: { createdAt: 'desc' } as any,
             take: 5

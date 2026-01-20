@@ -114,3 +114,16 @@ export async function exportProductsToCSV() {
 
     return csvContent
 }
+
+export async function deleteAllProductsBySupplier(supplierId: string) {
+    try {
+        await prisma.product.deleteMany({
+            where: { supplierId }
+        })
+        revalidatePath(`/suppliers/${supplierId}`)
+        return { success: true }
+    } catch (_error) {
+        console.error('Error deleting all products:', _error)
+        return { success: false, error: 'Error al borrar los productos' }
+    }
+}
