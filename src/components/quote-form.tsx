@@ -69,6 +69,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [loading, setLoading] = useState(false)
     const [editingCostId, setEditingCostId] = useState<string | null>(null)
     const [isrRate, setIsrRate] = useState(initialData?.isr_rate || 0)
+    const [applyIsr, setApplyIsr] = useState(initialData?.isr_rate ? initialData.isr_rate > 0 : false)
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
     const [projectId] = useState<string | null>(initialData?.projectId || null) // Store projectId from initialData
     const [showNewClientDialog, setShowNewClientDialog] = useState(false)
@@ -646,16 +647,19 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                 <span>${iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div className="flex justify-between items-center text-amber-700/80">
-                                <span className="text-sm">Retención ISR</span>
-                                <div className="flex items-center gap-1">
-                                    <Input
-                                        type="number"
-                                        className="h-6 w-12 text-right p-1 text-xs bg-transparent border-amber-200 focus-visible:ring-amber-500"
-                                        value={isrRate}
-                                        onChange={e => setIsrRate(Number(e.target.value))}
+                                <div className="flex items-center gap-2">
+                                    <Switch
+                                        id="apply-isr"
+                                        checked={applyIsr}
+                                        onCheckedChange={(checked) => {
+                                            setApplyIsr(checked)
+                                            setIsrRate(checked ? 1.25 : 0)
+                                        }}
                                     />
-                                    <span className="text-xs">%</span>
-                                    <span className="ml-2 font-medium">-${isrRetention.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                    <Label htmlFor="apply-isr" className="text-xs cursor-pointer">Aplicar ISR (1.25%)</Label>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="font-medium">-${isrRetention.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                                 </div>
                             </div>
                             <div className="border-t pt-2 flex justify-between font-bold text-lg text-primary">

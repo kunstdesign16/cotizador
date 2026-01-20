@@ -4,9 +4,31 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 
+async function generateUniqueNumber(prefix: string, model: string, field: string) {
+    let attempts = 0
+    while (attempts < 10) {
+        // Generate a 6-digit random number
+        const num = Math.floor(100000 + Math.random() * 900000).toString()
+        const fullNumber = num
+
+        const existing = await (prisma as any)[model].findUnique({
+            where: { [field]: fullNumber }
+        })
+
+        if (!existing) return fullNumber
+        attempts++
+    }
+    return Math.floor(100000 + Math.random() * 900000).toString() // Fallback after 10 tries
+}
+
 export async function createProject(data: { name: string; clientId: string; description?: string }) {
     try {
         const user = await getCurrentUser()
+
+        // Generate unique Order and Folio (6 digits)
+        const orderNumber = await generateUniqueNumber('', 'project', 'orderNumber')
+        const folioNumber = await generateUniqueNumber('', 'project', 'folioNumber')
+
         const project = await (prisma as any).project.create({
             data: {
                 name: data.name,
@@ -14,7 +36,9 @@ export async function createProject(data: { name: string; clientId: string; desc
                 description: data.description,
                 status: 'draft',
                 financialStatus: 'ABIERTO',
-                userId: user?.id || null
+                userId: user?.id || null,
+                orderNumber,
+                folioNumber
             }
         })
 
@@ -24,6 +48,49 @@ export async function createProject(data: { name: string; clientId: string; desc
     } catch (err: any) {
         console.error('Error creating project:', err)
         return { success: false, error: err.message || 'Error al crear el proyecto' }
+    }
+}
+
+export async function updateDeliveryInfo(projectId: string, data: {
+    deliveryDate?: Date | null,
+    transportType?: string,
+    deliveryNotes?: string,
+    sellerName?: string,
+    invoiceUrl?: string,
+    deliveryExtraItems?: any
+}) {
+    try {
+        await (prisma as any).project.update({
+            where: { id: projectId },
+            data: {
+                ...data,
+                updatedAt: new Date()
+            }
+        })
+        revalidatePath(`/projects/${projectId}`)
+        return { success: true }
+    } catch (err: any) {
+        console.error('Error updating delivery info:', err)
+        return { success: false, error: 'Error al actualizar información de entrega' }
+    }
+}
+
+export async function updateDeliveryItemDimensions(itemId: string, data: {
+    packagingConcept?: string,
+    boxes?: number,
+    piecesPerBox?: number,
+    deliveryObservations?: string
+}) {
+    try {
+        const { prisma } = await import('@/lib/prisma')
+        await (prisma as any).quoteItem.update({
+            where: { id: itemId },
+            data
+        })
+        return { success: true }
+    } catch (err: any) {
+        console.error('Error updating item delivery info:', err)
+        return { success: false, error: 'Error al actualizar cajas' }
     }
 }
 
@@ -216,4 +283,40 @@ export async function cancelProject(projectId: string) {
     }
 
     return updateProjectStatus(projectId, 'cancelled')
+}
+
+export async function fixLegacyProjectNumbers() {
+    try {
+        const projects = await (prisma as any).project.findMany({
+            where: {
+                OR: [
+                    { orderNumber: null },
+                    { folioNumber: null }
+                ]
+            }
+        });
+
+        for (const project of projects) {
+            const updates: any = {};
+            if (!project.orderNumber) {
+                updates.orderNumber = await generateUniqueNumber('', 'project', 'orderNumber');
+            }
+            if (!project.folioNumber) {
+                updates.folioNumber = await generateUniqueNumber('', 'project', 'folioNumber');
+            }
+
+            if (Object.keys(updates).length > 0) {
+                await (prisma as any).project.update({
+                    where: { id: project.id },
+                    data: updates
+                });
+            }
+        }
+
+        revalidatePath('/projects');
+        return { success: true, count: projects.length };
+    } catch (error) {
+        console.error('Error fixing legacy numbers:', error);
+        return { success: false };
+    }
 }

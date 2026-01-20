@@ -5,8 +5,9 @@ import path from 'path';
 Font.registerHyphenationCallback(word => [word]);
 
 // Portable paths for branding assets - loaded from public dir but using process.cwd() for the PDF renderer
-const LOGO_PATH = path.join(process.cwd(), 'public/brand/logo.png');
-const WATERMARK_PATH = path.join(process.cwd(), 'public/brand/watermark.png');
+const SITIO_ROOT = '/Users/kunstdesign/Documents/Kunst Design/Sitios/cotizador_kunst/sitio';
+const LOGO_PATH = `${SITIO_ROOT}/public/brand/logo.png`;
+const WATERMARK_PATH = `${SITIO_ROOT}/public/brand/watermark.png`;
 
 const IS_GENERIC = process.env.NEXT_PUBLIC_GENERIC_PDF === 'true';
 
@@ -19,7 +20,6 @@ export const sharedStyles = StyleSheet.create({
         paddingRight: '20mm',
         fontSize: 10,
         color: '#545555',
-        backgroundColor: '#FFFFFF',
     },
     // Watermark - Full Page Image KD Carta (as provided by user)
     watermarkContainer: {
@@ -28,8 +28,8 @@ export const sharedStyles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: -1,
-        opacity: 0.05, // 5% opacity
+        zIndex: -10, // Far back
+        opacity: 0.1, // 10% opacity as requested
     },
     watermark: {
         width: '100%',
@@ -40,7 +40,7 @@ export const sharedStyles = StyleSheet.create({
         position: 'absolute',
         fontSize: 110,
         color: '#94A3B8',
-        opacity: 0.12,
+        opacity: 0.1, // Restore visibility
         transform: 'rotate(-45deg)',
         fontWeight: 'bold',
         width: 800,
@@ -62,6 +62,7 @@ export const sharedStyles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#E2E8F0',
         paddingBottom: 10,
+        zIndex: 100, // Ensure logo is on top
     },
     logo: {
         width: '58mm', // Match the width used in the successful Quote PDF
@@ -74,12 +75,13 @@ export const sharedStyles = StyleSheet.create({
     locationText: {
         fontSize: 10,
         color: '#545555',
-        marginBottom: 2
+        marginBottom: 6 // Increased to prevent overlap
     },
     dateText: {
         fontSize: 11,
         fontWeight: 'bold',
         color: '#284960',
+        lineHeight: 1.2
     },
     // Footer
     footerContainer: {
@@ -88,6 +90,7 @@ export const sharedStyles = StyleSheet.create({
         left: '20mm',
         right: '20mm',
         alignItems: 'center',
+        zIndex: 100, // Ensure footer is on top
     },
     contactLine: {
         fontSize: 10, // Reduced 2pt (was 12)
@@ -104,22 +107,21 @@ export const sharedStyles = StyleSheet.create({
         marginBottom: 10
     },
     slogan: {
-        fontSize: 18, // Reduced 2pt (was 20)
-        fontWeight: 'normal', // Regular as requested
+        fontSize: 12, // Reduced to prevent cutoff or wrapping
+        fontWeight: 'normal',
         color: '#545555',
         textAlign: 'center',
         width: '100%',
-        letterSpacing: 1.5,
+        letterSpacing: 1,
+        marginTop: 5,
     }
 });
 
 export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) => (
     <>
-        {!IS_GENERIC && (
-            <View style={sharedStyles.watermarkContainer} fixed>
-                <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
-            </View>
-        )}
+        <View style={sharedStyles.watermarkContainer} fixed>
+            <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
+        </View>
         {!isApproved && (
             <Text style={sharedStyles.draftWatermark} fixed>PRELIMINAR</Text>
         )}
@@ -128,13 +130,9 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer} fixed>
-        {!IS_GENERIC ? (
-            <Image src={LOGO_PATH} style={sharedStyles.logo} />
-        ) : (
-            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#284960' }}>SISTEMA DE COTIZACIÓN</Text>
-        )}
+        <Image src={LOGO_PATH} style={sharedStyles.logo} />
         <View style={sharedStyles.headerInfo}>
-            <Text style={sharedStyles.locationText}>{!IS_GENERIC ? 'Tlajomulco de Zúñiga, Jalisco' : 'Cotización Digital'}</Text>
+            <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
             <Text style={sharedStyles.dateText}>
                 {new Date(date).toLocaleDateString('es-MX', {
                     year: 'numeric',

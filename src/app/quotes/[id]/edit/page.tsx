@@ -36,7 +36,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
             name: quote.project_name,
             date: quote.createdAt.toISOString().split('T')[0]
         },
-        isr_rate: quote.isr_rate,
+        isr_rate: (quote.isr_rate || 0) * 100,
         items: quote.items.map(item => ({
             id: item.id,
             concept: item.concept,

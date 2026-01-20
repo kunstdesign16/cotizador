@@ -17,6 +17,8 @@ export async function GET(
             include: {
                 client: true,
                 items: true,
+                project: true,
+                user: true
             }
         });
 
@@ -30,9 +32,15 @@ export async function GET(
         // Normalize data for the component
         const normalizedQuote = {
             ...quote,
+            folioNumber: (quote as any).project?.folioNumber || undefined,
+            orderNumber: (quote as any).project?.orderNumber || undefined,
             client: quote.client ? {
                 ...quote.client,
-                company: quote.client.company ?? undefined,
+                company: (quote as any).client.company ?? undefined,
+            } : undefined,
+            user: quote.user ? {
+                name: (quote as any).user.name,
+                email: (quote as any).user.email
             } : undefined
         };
 

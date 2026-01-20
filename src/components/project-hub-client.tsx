@@ -17,7 +17,8 @@ import {
     History as HistoryIcon,
     Trash2,
     Info,
-    X
+    X,
+    ExternalLink
 } from 'lucide-react'
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from '@/components/ui/button'
@@ -31,7 +32,7 @@ import { approveQuote } from '@/actions/quotes'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { RegisterOrderPaymentDialog } from './register-order-payment-dialog'
-import { closeProject, getProjectClosureEligibility, deleteProject, updateProjectStatus } from '@/actions/projects'
+import { closeProject, getProjectClosureEligibility, deleteProject, updateProjectStatus, updateDeliveryInfo, updateDeliveryItemDimensions, fixLegacyProjectNumbers } from '@/actions/projects'
 import {
     Select,
     SelectContent,
@@ -57,6 +58,16 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const [incomePaymentMethod, setIncomePaymentMethod] = useState('')
     const [incomeDate, setIncomeDate] = useState(new Date().toISOString().split('T')[0])
     const [loadingIncome, setLoadingIncome] = useState(false)
+
+    // Delivery states
+    const [deliveryTransport, setDeliveryTransport] = useState(project.transportType || '')
+    const [deliveryDateStr, setDeliveryDateStr] = useState(project.deliveryDate ? new Date(project.deliveryDate).toISOString().split('T')[0] : '')
+    const [deliveryNotes, setDeliveryNotes] = useState(project.deliveryNotes || '')
+    const [localSellerName, setLocalSellerName] = useState(project.sellerName || '')
+    const [invoiceUrl, setInvoiceUrl] = useState(project.invoiceUrl || '')
+    const [isSavingDelivery, setIsSavingDelivery] = useState(false)
+    const [localItems, setLocalItems] = useState(project.quotes?.find((q: any) => q.isApproved)?.items || [])
+    const [extraItems, setExtraItems] = useState<any[]>(project.deliveryExtraItems || [])
 
     // Calculated metrics
     const approvedQuote = project.quotes?.find((q: any) => q.isApproved)
@@ -146,6 +157,56 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
         }
     }
 
+    const handleDeliverySave = async () => {
+        setIsSavingDelivery(true)
+        try {
+            // 1. Save general delivery info + extra items
+            await updateDeliveryInfo(project.id, {
+                deliveryDate: deliveryDateStr ? new Date(deliveryDateStr) : null,
+                transportType: deliveryTransport,
+                deliveryNotes: deliveryNotes,
+                sellerName: localSellerName,
+                invoiceUrl: invoiceUrl,
+                deliveryExtraItems: extraItems
+            })
+
+            // 2. Save items boxes / pieces
+            for (const item of localItems) {
+                await updateDeliveryItemDimensions(item.id, {
+                    packagingConcept: item.packagingConcept,
+                    boxes: item.boxes,
+                    piecesPerBox: item.piecesPerBox,
+                    deliveryObservations: item.deliveryObservations
+                })
+            }
+
+            toast.success('Información de entrega guardada')
+            router.refresh()
+        } catch (error) {
+            toast.error('Error al guardar información de entrega')
+        } finally {
+            setIsSavingDelivery(false)
+        }
+    }
+
+    const handleAddExtraItem = () => {
+        setExtraItems([...extraItems, { id: 'extra-' + Date.now(), concept: '', boxes: 0, piecesPerBox: 0, deliveryObservations: '' }])
+    }
+
+    const handleExtraItemChange = (id: string, field: string, value: any) => {
+        setExtraItems(extraItems.map(item => item.id === id ? { ...item, [field]: value } : item))
+    }
+
+    const handleRemoveExtraItem = (id: string) => {
+        setExtraItems(extraItems.filter(item => item.id !== id))
+    }
+
+    const handleItemLocalUpdate = (itemId: string, field: string, value: any) => {
+        setLocalItems((prev: any) => prev.map((item: any) =>
+            item.id === itemId ? { ...item, [field]: value } : item
+        ))
+    }
+
     const handleIncomeSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoadingIncome(true)
@@ -169,7 +230,6 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 setIncomeAmount('')
                 setIncomeDescription('')
                 setIncomePaymentMethod('')
-                setIncomeDate(new Date().toISOString().split('T')[0])
                 router.refresh()
             } else {
                 toast.error(result.error || 'Error al registrar ingreso')
@@ -182,6 +242,20 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
         }
     }
 
+    const handleFixLegacyNumbers = async () => {
+        if (!confirm('¿Desea generar números de seguimiento para todos los proyectos antiguos que no los tengan?')) return
+        try {
+            const res = await fixLegacyProjectNumbers()
+            if (res.success) {
+                toast.success(`Se actualizaron ${res.count} proyectos.`)
+                router.refresh()
+            } else {
+                toast.error('Error al actualizar números legados')
+            }
+        } catch {
+            toast.error('Error de red')
+        }
+    }
 
     return (
         <div className="min-h-screen bg-muted/30 p-3 sm:p-8">
@@ -189,7 +263,24 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                 {/* Breadcrumbs & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <BackButton fallbackUrl="/projects" label="Proyectos" className="bg-transparent hover:bg-transparent px-0 font-brand-header uppercase tracking-widest text-primary/60 hover:text-primary h-auto" />
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 items-center">
+                        {project.orderNumber && (
+                            <Badge variant="outline" className="font-brand-header tracking-widest border-primary/20 bg-primary/5 text-primary text-[10px] sm:text-xs py-1.5 px-3">
+                                ORDEN: {project.orderNumber}
+                            </Badge>
+                        )}
+                        {project.folioNumber && (
+                            <Badge variant="outline" className="font-brand-header tracking-widest border-primary/20 bg-primary/5 text-primary text-[10px] sm:text-xs py-1.5 px-3">
+                                FOLIO: {project.folioNumber}
+                            </Badge>
+                        )}
+                        <div className="w-px h-4 bg-muted mx-1 hidden sm:block" />
+
+                        {!project.orderNumber && (
+                            <Button variant="ghost" size="sm" onClick={handleFixLegacyNumbers} className="text-[10px] text-muted-foreground hover:text-primary h-7">
+                                Generar Números Faltantes
+                            </Button>
+                        )}
                         {!isFinancialmenteCerrado && project.status === 'draft' && (
                             <>
                                 {project.quotes?.length === 0 ? (
@@ -346,6 +437,10 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                             <TabsTrigger value="financials" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2.5 px-4 rounded-lg flex gap-2">
                                 <DollarSign className="h-4 w-4" />
                                 <span className="hidden sm:inline">Finanzas</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="delivery" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2.5 px-4 rounded-lg flex gap-2">
+                                <Truck className="h-4 w-4" />
+                                <span className="hidden sm:inline">Entrega</span>
                             </TabsTrigger>
                             <TabsTrigger value="closure" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white py-2.5 px-4 rounded-lg flex gap-2">
                                 <CheckCircle2 className="h-4 w-4" />
@@ -784,6 +879,283 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                             </div>
                         </div>
                     </TabsContent>
+
+                    <TabsContent value="delivery" className="m-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 space-y-6">
+                                {/* Datos de Entrega Card */}
+                                <div className="bg-white border border-secondary rounded-2xl p-6 shadow-sm space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-bold flex items-center gap-2">
+                                            <Truck className="h-5 w-5 text-primary" />
+                                            Logística de Entrega
+                                        </h3>
+                                        <Button
+                                            size="sm"
+                                            onClick={handleDeliverySave}
+                                            disabled={isSavingDelivery}
+                                            className="gap-2"
+                                        >
+                                            {isSavingDelivery ? 'Guardando...' : 'Guardar Información'}
+                                        </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Vendedor</label>
+                                            <div className="relative">
+                                                <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    className="pl-10"
+                                                    placeholder="Nombre del Vendedor"
+                                                    value={localSellerName}
+                                                    onChange={(e) => setLocalSellerName(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Transporte</label>
+                                            <Input
+                                                placeholder="Ej. Paquetería, Del Cliente, Propio..."
+                                                value={deliveryTransport}
+                                                onChange={(e) => setDeliveryTransport(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Fecha Estimada de Entrega</label>
+                                            <Input
+                                                type="date"
+                                                value={deliveryDateStr}
+                                                onChange={(e) => setDeliveryDateStr(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Números de Seguimiento</label>
+                                            <div className="flex gap-2">
+                                                <div className="flex-1 h-10 px-3 flex items-center bg-primary/5 rounded-md text-[10px] border border-primary/20 text-primary font-bold">
+                                                    ORDEN: {project.orderNumber}
+                                                </div>
+                                                <div className="flex-1 h-10 px-3 flex items-center bg-primary/5 rounded-md text-[10px] border border-primary/20 text-primary font-bold">
+                                                    FOLIO: {project.folioNumber}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="md:col-span-2 space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observaciones de Entrega</label>
+                                            <Input
+                                                placeholder="Notas adicionales para el chofer o almacén..."
+                                                value={deliveryNotes}
+                                                onChange={(e) => setDeliveryNotes(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4 border-t">
+                                        <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
+                                            <LayoutDashboard className="h-4 w-4" />
+                                            Detalle de Empaque (según cotización)
+                                        </h4>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-xs">
+                                                <thead className="bg-muted/50 border-b">
+                                                    <tr>
+                                                        <th className="p-2 text-left">Concepto (Empaque)</th>
+                                                        <th className="p-2 text-center w-24">Paquetes</th>
+                                                        <th className="p-2 text-center w-24">Pzas/Paquete</th>
+                                                        <th className="p-2 text-center w-24">Total Pzas.</th>
+                                                        <th className="p-2 text-left">Obs. Internas</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y">
+                                                    {localItems.map((item: any) => (
+                                                        <tr key={item.id}>
+                                                            <td className="p-2">
+                                                                <Input
+                                                                    placeholder={item.concept}
+                                                                    className="h-7 text-[11px]"
+                                                                    value={item.packagingConcept || ''}
+                                                                    onChange={(e) => handleItemLocalUpdate(item.id, 'packagingConcept', e.target.value)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-2 text-center">
+                                                                <Input
+                                                                    type="number"
+                                                                    className="h-7 text-center w-20 mx-auto"
+                                                                    value={item.boxes || 0}
+                                                                    onChange={(e) => handleItemLocalUpdate(item.id, 'boxes', parseInt(e.target.value) || 0)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-2 text-center">
+                                                                <Input
+                                                                    type="number"
+                                                                    className="h-7 text-center w-20 mx-auto"
+                                                                    value={item.piecesPerBox || 0}
+                                                                    onChange={(e) => handleItemLocalUpdate(item.id, 'piecesPerBox', parseInt(e.target.value) || 0)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-2 text-center font-bold">
+                                                                {(item.boxes || 0) * (item.piecesPerBox || 0)}
+                                                            </td>
+                                                            <td className="p-2">
+                                                                <Input
+                                                                    className="h-7 text-[10px]"
+                                                                    value={item.deliveryObservations || ''}
+                                                                    onChange={(e) => handleItemLocalUpdate(item.id, 'deliveryObservations', e.target.value)}
+                                                                />
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+
+                                                    {/* Extra Items */}
+                                                    {extraItems.map((item: any) => (
+                                                        <tr key={item.id} className="bg-primary/5">
+                                                            <td className="p-2">
+                                                                <div className="flex items-center gap-1">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-6 w-6 text-destructive"
+                                                                        onClick={() => handleRemoveExtraItem(item.id)}
+                                                                    >
+                                                                        <X className="h-3 w-3" />
+                                                                    </Button>
+                                                                    <Input
+                                                                        placeholder="Nuevo concepto..."
+                                                                        className="h-7 text-[11px]"
+                                                                        value={item.packagingConcept || ''}
+                                                                        onChange={(e) => handleExtraItemChange(item.id, 'packagingConcept', e.target.value)}
+                                                                    />
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-2 text-center">
+                                                                <Input
+                                                                    type="number"
+                                                                    className="h-7 text-center w-20 mx-auto"
+                                                                    value={item.boxes || 0}
+                                                                    onChange={(e) => handleExtraItemChange(item.id, 'boxes', parseInt(e.target.value) || 0)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-2 text-center">
+                                                                <Input
+                                                                    type="number"
+                                                                    className="h-7 text-center w-20 mx-auto"
+                                                                    value={item.piecesPerBox || 0}
+                                                                    onChange={(e) => handleExtraItemChange(item.id, 'piecesPerBox', parseInt(e.target.value) || 0)}
+                                                                />
+                                                            </td>
+                                                            <td className="p-2 text-center font-bold">
+                                                                {(item.boxes || 0) * (item.piecesPerBox || 0)}
+                                                            </td>
+                                                            <td className="p-2">
+                                                                <Input
+                                                                    placeholder="Obs..."
+                                                                    className="h-7 text-[10px]"
+                                                                    value={item.deliveryObservations || ''}
+                                                                    onChange={(e) => handleExtraItemChange(item.id, 'deliveryObservations', e.target.value)}
+                                                                />
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+
+                                                    {/* Add line button row */}
+                                                    <tr>
+                                                        <td colSpan={5} className="p-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={handleAddExtraItem}
+                                                                className="w-full text-[10px] h-7 dashed border-dashed"
+                                                            >
+                                                                <Plus className="h-3 w-3 mr-1" /> Agregar Concepto Personalizado
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot className="bg-muted/30 font-bold border-t-2">
+                                                    <tr>
+                                                        <td className="p-2 text-right">TOTAL PIEZAS EN ENVÍO:</td>
+                                                        <td colSpan={2}></td>
+                                                        <td className="p-2 text-center bg-primary/10 text-primary">
+                                                            {[...localItems, ...extraItems].reduce((sum: number, item: any) => sum + ((item.boxes || 0) * (item.piecesPerBox || 0)), 0)}
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* Facturación Card */}
+                                <div className="bg-white border border-secondary rounded-2xl p-6 shadow-sm space-y-4">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <DollarSign className="h-5 w-5 text-primary" />
+                                        Documentación
+                                    </h3>
+
+                                    <div className="p-4 bg-muted/20 border border-dashed rounded-xl space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold">Factura del Proyecto</p>
+                                                <p className="text-[9px] text-muted-foreground">Pega el link de la factura (Drive, Dropbox, etc.)</p>
+                                            </div>
+                                        </div>
+                                        <Input
+                                            placeholder="https://link-a-la-factura..."
+                                            className="h-8 text-[10px]"
+                                            value={invoiceUrl}
+                                            onChange={(e) => setInvoiceUrl(e.target.value)}
+                                        />
+                                        {invoiceUrl && (
+                                            <Button variant="ghost" size="sm" className="w-full h-6 text-[9px] text-primary" onClick={() => window.open(invoiceUrl, '_blank')}>
+                                                <ExternalLink className="h-3 w-3 mr-1" /> Ver Factura Actual
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-2 space-y-2">
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Formatos de Impresión</h4>
+                                        <Button
+                                            className="w-full justify-start text-[11px] h-9 gap-2"
+                                            variant="outline"
+                                            onClick={() => window.open(`/projects/${project.id}/delivery-pdf`, '_blank')}
+                                        >
+                                            <Truck className="h-4 w-4" /> Orden de Entrega (Duplicado)
+                                        </Button>
+                                        <Button
+                                            className="w-full justify-start text-[11px] h-9 gap-2"
+                                            variant="outline"
+                                            onClick={() => window.open(`/quotes/${approvedQuote?.id}/pdf`, '_blank')}
+                                        >
+                                            <FileText className="h-4 w-4" /> Cotización con Folio
+                                        </Button>
+                                        <p className="text-[9px] text-muted-foreground leading-tight italic pt-1">
+                                            * Se requiere haber guardado la información de entrega para que aparezca en el PDF.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4">
+                                    <h4 className="text-sm font-bold flex items-center gap-2">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        Nota de Conformidad
+                                    </h4>
+                                    <p className="text-xs text-slate-400 leading-relaxed">
+                                        El formato de entrega incluye automáticamente la leyenda de conformidad y espacio para la firma del cliente.
+                                    </p>
+                                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-[10px]">
+                                        "Recibi de conformidad de Kunst & Design lo siguiente..."
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+
                     <TabsContent value="closure" className="m-0 space-y-6">
                         <div className="bg-card border rounded-2xl p-8 shadow-sm space-y-8 relative overflow-hidden">
                             {project.status === 'CERRADO' && (

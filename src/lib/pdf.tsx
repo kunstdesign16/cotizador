@@ -1,4 +1,4 @@
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 import { sharedStyles, PDFHeader, PDFFooter, PDFWatermark } from './pdf-shared';
 
 const styles = StyleSheet.create({
@@ -8,7 +8,6 @@ const styles = StyleSheet.create({
         marginBottom: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: '#F8FAFC',
         padding: 12,
         borderRadius: 4,
         marginTop: 20,
@@ -143,7 +142,11 @@ export const QuoteDocument = ({ quote }: {
         iva_amount: number;
         isr_amount: number;
         total: number;
+        folioNumber?: string;
+        orderNumber?: string;
         client?: { name: string; company?: string };
+        sellerName?: string;
+        user?: { name: string | null; email: string };
         items?: Array<{
             concept: string;
             quantity: number;
@@ -196,6 +199,12 @@ export const QuoteDocument = ({ quote }: {
                         <Text style={styles.projectTitle}>{quote.project_name}</Text>
                     </View>
                     <View style={[styles.projectInfoColumn, { alignItems: 'flex-end' }]}>
+                        {quote.folioNumber && (
+                            <Text style={[styles.clientDetail, { color: '#284960', fontWeight: 'bold', fontSize: 10, marginBottom: 4 }]}>FOLIO: {quote.folioNumber}</Text>
+                        )}
+                        {quote.orderNumber && (
+                            <Text style={[styles.clientDetail, { color: '#284960', fontWeight: 'bold', fontSize: 10, marginBottom: 8 }]}>ORDEN: {quote.orderNumber}</Text>
+                        )}
                         <Text style={[styles.clientDetail, { marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }]}>Cliente</Text>
                         <Text style={styles.clientName}>
                             {quote.client?.company || quote.client?.name}
