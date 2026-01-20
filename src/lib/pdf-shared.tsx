@@ -1,13 +1,29 @@
 import { Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+import fs from 'fs';
 import path from 'path';
 
 // Disable Hyphenation globally for institutional documents
 Font.registerHyphenationCallback(word => [word]);
 
-// Portable paths for branding assets - loaded from public dir but using process.cwd() for the PDF renderer
-const SITIO_ROOT = '/Users/kunstdesign/Documents/Kunst Design/Sitios/cotizador_kunst/sitio';
-const LOGO_PATH = `${SITIO_ROOT}/public/brand/logo.png`;
-const WATERMARK_PATH = `${SITIO_ROOT}/public/brand/watermark.png`;
+// Base64 Image loading for robust rendering
+const SITIO_ROOT = process.cwd();
+const LOGO_PATH = path.join(SITIO_ROOT, 'public/brand/logo.png');
+const WATERMARK_PATH = path.join(SITIO_ROOT, 'public/brand/watermark.png');
+
+// Helper to get base64 image
+const getBase64Image = (filePath: string) => {
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        return `data:image/png;base64,${fileBuffer.toString('base64')}`;
+    } catch (e) {
+        console.error(`Error loading image ${filePath}:`, e);
+        return '';
+    }
+};
+
+const LOGO_BASE64 = getBase64Image(LOGO_PATH);
+const WATERMARK_BASE64 = getBase64Image(WATERMARK_PATH);
 
 const IS_GENERIC = process.env.NEXT_PUBLIC_GENERIC_PDF === 'true';
 
@@ -120,7 +136,9 @@ export const sharedStyles = StyleSheet.create({
 export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) => (
     <>
         <View style={sharedStyles.watermarkContainer} fixed>
-            <Image src={WATERMARK_PATH} style={sharedStyles.watermark} />
+            {WATERMARK_BASE64 ? (
+                <Image src={WATERMARK_BASE64} style={sharedStyles.watermark} />
+            ) : null}
         </View>
         {!isApproved && (
             <Text style={sharedStyles.draftWatermark} fixed>PRELIMINAR</Text>
@@ -130,7 +148,9 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer} fixed>
-        <Image src={LOGO_PATH} style={sharedStyles.logo} />
+        {LOGO_BASE64 ? (
+            <Image src={LOGO_BASE64} style={sharedStyles.logo} />
+        ) : null}
         <View style={sharedStyles.headerInfo}>
             <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
             <Text style={sharedStyles.dateText}>

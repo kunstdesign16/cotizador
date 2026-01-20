@@ -1,4 +1,4 @@
-import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 import { sharedStyles, PDFHeader, PDFFooter, PDFWatermark } from './pdf-shared';
 
 const styles = StyleSheet.create({

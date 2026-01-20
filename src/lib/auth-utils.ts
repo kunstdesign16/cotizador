@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 export async function getCurrentUser() {
     const cookieStore = await cookies()
     const email = cookieStore.get('user_email')?.value
-    const role = cookieStore.get('user_role')?.value
+    const _role = cookieStore.get('user_role')?.value
 
     if (!email) return null
 

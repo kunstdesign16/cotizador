@@ -1,7 +1,11 @@
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
+import fs from 'fs';
 import path from 'path';
 
 const LOGO_PATH = path.join(process.cwd(), 'public/brand/logo.png');
+const LOGO_BASE64 = fs.existsSync(LOGO_PATH)
+    ? `data:image/png;base64,${fs.readFileSync(LOGO_PATH).toString('base64')}`
+    : '';
 
 const styles = StyleSheet.create({
     page: {
@@ -178,7 +182,9 @@ const DeliveryCopy = ({ project, label }: { project: any, label: string }) => {
             <View style={styles.header}>
                 <View>
                     <Text style={styles.title}>Entrega de Mercancia</Text>
-                    <Image src={LOGO_PATH} style={styles.logo} />
+                    {LOGO_BASE64 ? (
+                        <Image src={LOGO_BASE64} style={styles.logo} />
+                    ) : null}
                 </View>
 
                 <View style={styles.idStats}>

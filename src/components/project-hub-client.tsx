@@ -15,10 +15,16 @@ import {
     Lock,
     Plus,
     History as HistoryIcon,
-    Trash2,
     Info,
     X,
-    ExternalLink
+    ExternalLink,
+    Construction,
+    Hammer,
+    Package,
+    Save,
+    Share2,
+    User,
+    ChevronDown,
 } from 'lucide-react'
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from '@/components/ui/button'
@@ -32,7 +38,7 @@ import { approveQuote } from '@/actions/quotes'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { RegisterOrderPaymentDialog } from './register-order-payment-dialog'
-import { closeProject, getProjectClosureEligibility, deleteProject, updateProjectStatus, updateDeliveryInfo, updateDeliveryItemDimensions, fixLegacyProjectNumbers } from '@/actions/projects'
+import { closeProject, getProjectClosureEligibility, updateProjectStatus, updateDeliveryInfo, updateDeliveryItemDimensions, fixLegacyProjectNumbers } from '@/actions/projects'
 import {
     Select,
     SelectContent,
@@ -182,7 +188,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
 
             toast.success('Información de entrega guardada')
             router.refresh()
-        } catch (error) {
+        } catch (_error) {
             toast.error('Error al guardar información de entrega')
         } finally {
             setIsSavingDelivery(false)
@@ -1149,7 +1155,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         El formato de entrega incluye automáticamente la leyenda de conformidad y espacio para la firma del cliente.
                                     </p>
                                     <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-[10px]">
-                                        "Recibi de conformidad de Kunst & Design lo siguiente..."
+                                        &quot;Recibi de conformidad de Kunst &amp; Design lo siguiente...&quot;
                                     </div>
                                 </div>
                             </div>
