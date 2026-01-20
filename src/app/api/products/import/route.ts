@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import ExcelJS from 'exceljs'
+import { revalidatePath } from 'next/cache'
 
 // Prevent static generation + long timeout
 export const dynamic = 'force-dynamic'
@@ -148,14 +149,8 @@ export async function POST(req: NextRequest) {
 
         console.log(`Processing ${productsToUpsert.length} products...`)
 
-        // 3. Sequential Upsert (Better for safety than giant Promise.all on serverless)
-        // Or createMany if we don't care about duplicates? No, we want to update prices.
-        // We defined @@unique([supplierId, code]), so we can use upsert.
-
-
-
-        // Processing in chunks to avoid blocking too long
-        const CHUNK_SIZE = 50
+        // 3. Sequential Upsert in larger chunks
+        const CHUNK_SIZE = 100
         for (let i = 0; i < productsToUpsert.length; i += CHUNK_SIZE) {
             const chunk = productsToUpsert.slice(i, i + CHUNK_SIZE)
             await Promise.all(chunk.map(p =>
@@ -175,12 +170,17 @@ export async function POST(req: NextRequest) {
                     create: p
                 })
             ))
-
+            console.log(`Import progress: ${Math.min(i + CHUNK_SIZE, productsToUpsert.length)}/${productsToUpsert.length}`)
         }
+
+        if (supplierId) {
+            revalidatePath(`/suppliers/${supplierId}`)
+        }
+        revalidatePath('/suppliers')
 
         return NextResponse.json({
             success: true,
-            message: `Procesados ${productsToUpsert.length} productos del proveedor ${supplierName}`,
+            message: `Procesados ${productsToUpsert.length} productos del proveedor ${supplierName || supplier.name}`,
             count: productsToUpsert.length
         })
 

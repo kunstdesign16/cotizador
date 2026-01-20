@@ -45,14 +45,20 @@ export function ProductImportForm({ supplierId, supplierName }: { supplierId?: s
                 body: formData
             })
 
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(data.message || 'Error en la importación')
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await res.json()
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error en la importación')
+                }
+                setStatus({ type: 'success', message: data.message })
+                router.refresh()
+            } else {
+                const text = await res.text();
+                console.error('Non-JSON response:', text);
+                throw new Error(`Error del servidor (Status ${res.status}): ${text.slice(0, 100)}...`)
             }
 
-            setStatus({ type: 'success', message: data.message })
-            router.refresh()
             setFile(null)
             setTimeout(() => {
                 setOpen(false)
