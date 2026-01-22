@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import * as XLSX from 'xlsx'
 
 import {
     Dialog,
@@ -20,6 +21,7 @@ export function ProductImportForm({ supplierId, supplierName }: { supplierId?: s
     const [file, setFile] = useState<File | null>(null)
     const [supplierNameInput, setSupplierNameInput] = useState(supplierName || 'LP Mexico')
     const [uploading, setUploading] = useState(false)
+    const [progress, setProgress] = useState(0)
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const [open, setOpen] = useState(false)
     const router = useRouter()
@@ -30,40 +32,116 @@ export function ProductImportForm({ supplierId, supplierName }: { supplierId?: s
 
         setUploading(true)
         setStatus(null)
-
-        const formData = new FormData()
-        formData.append('file', file)
-        if (supplierId) {
-            formData.append('supplierId', supplierId)
-        } else {
-            formData.append('supplierName', supplierNameInput)
-        }
+        setProgress(0)
 
         try {
-            const res = await fetch('/api/products/import', {
-                method: 'POST',
-                body: formData
-            })
+            // 1. Read file as ArrayBuffer
+            const data = await file.arrayBuffer()
+            const workbook = XLSX.read(data)
+            const sheetName = workbook.SheetNames[0]
+            const sheet = workbook.Sheets[sheetName]
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][]
 
-            const contentType = res.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                const data = await res.json()
-                if (!res.ok) {
-                    throw new Error(data.message || 'Error en la importación')
-                }
-                setStatus({ type: 'success', message: data.message })
-                router.refresh()
-            } else {
-                const text = await res.text();
-                console.error('Non-JSON response:', text);
-                throw new Error(`Error del servidor (Status ${res.status}): ${text.slice(0, 100)}...`)
+            if (jsonData.length < 2) {
+                throw new Error('El archivo está vacío o no tiene el formato correcto')
             }
+
+            // 2. Detect Format & Parse Rows
+            const headerRow = jsonData[0]
+            const col1Header = String(headerRow[0] || '').toUpperCase()
+            const col2Header = String(headerRow[1] || '').toUpperCase()
+            const col3Header = String(headerRow[2] || '').toUpperCase()
+
+            let format: 'LP_MEXICO' | 'PROMO_OPCION' = 'LP_MEXICO'
+            if (col1Header.includes('CÓDIGO') && col2Header.includes('NOMBRE') && col3Header.includes('PRECIO')) {
+                format = 'PROMO_OPCION'
+            } else if (col2Header.includes('NOMBRE') && col3Header.includes('PRECIO')) {
+                format = 'PROMO_OPCION'
+            }
+
+            const START_ROW = format === 'PROMO_OPCION' ? 1 : 7
+            const products = []
+
+            for (let i = START_ROW; i < jsonData.length; i++) {
+                const row = jsonData[i]
+                if (!row || row.length === 0) continue
+
+                let code, parentCode = null, name, category = null, priceType = null, price = 0
+
+                if (format === 'PROMO_OPCION') {
+                    code = String(row[0] || '').trim()
+                    name = String(row[1] || '').trim()
+                    const priceVal = row[2]
+
+                    if (!code || !name) continue
+
+                    if (typeof priceVal === 'string') {
+                        price = parseFloat(priceVal.replace(/[$,\s]/g, '')) || 0
+                    } else {
+                        price = Number(priceVal) || 0
+                    }
+                } else {
+                    // LP_MEXICO: Cols 3-8 (index 2-7)
+                    code = String(row[2] || '').trim()
+                    parentCode = row[3] ? String(row[3]).trim() : null
+                    name = String(row[4] || '').trim()
+                    category = row[5] ? String(row[5]).trim() : null
+                    const priceVal = row[6]
+                    priceType = row[7] ? String(row[7]).trim() : null
+
+                    if (!code || !name) continue
+
+                    if (typeof priceVal === 'string') {
+                        price = parseFloat(priceVal.replace(/[^0-9.]/g, '')) || 0
+                    } else {
+                        price = Number(priceVal) || 0
+                    }
+                }
+
+                products.push({ code, parentCode, name, category, price, priceType })
+            }
+
+            // 3. Sequential Chunk Upload
+            const CHUNK_SIZE = 150
+            let uploadedSupplierId = supplierId
+
+            for (let i = 0; i < products.length; i += CHUNK_SIZE) {
+                const chunk = products.slice(i, i + CHUNK_SIZE)
+                const currentProgress = Math.round((i / products.length) * 100)
+                setProgress(currentProgress)
+
+                const res = await fetch('/api/products/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        products: chunk,
+                        supplierId: uploadedSupplierId,
+                        supplierName: supplierNameInput
+                    })
+                })
+
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.message || 'Error en un bloque de carga')
+                }
+
+                const result = await res.json()
+                if (!uploadedSupplierId) {
+                    uploadedSupplierId = result.supplierId
+                }
+            }
+
+            setProgress(100)
+            setStatus({ type: 'success', message: `Importación completa: ${products.length} productos procesados.` })
+            router.refresh()
 
             setFile(null)
             setTimeout(() => {
                 setOpen(false)
                 setStatus(null)
+                setProgress(0)
             }, 2000)
+
         } catch (error: any) {
             console.error(error)
             setStatus({ type: 'error', message: error.message || 'Ocurrió un error inesperado' })
@@ -115,6 +193,21 @@ export function ProductImportForm({ supplierId, supplierName }: { supplierId?: s
                             El archivo debe tener las columnas estándar (Código, Nombre, Precio...).
                         </p>
                     </div>
+
+                    {uploading && (
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                                <span>Procesando catálogo...</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div
+                                    className="bg-primary h-full transition-all duration-300"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {status && (
                         <div className={`p-3 rounded-md flex items-center gap-2 text-sm ${status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
