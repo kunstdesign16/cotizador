@@ -22,9 +22,7 @@ import {
     Hammer,
     Package,
     Save,
-    Share2,
-    User,
-    ChevronDown,
+    Loader2
 } from 'lucide-react'
 import { BackButton } from "@/components/ui/back-button"
 import { Button } from '@/components/ui/button'
@@ -74,6 +72,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
     const [isSavingDelivery, setIsSavingDelivery] = useState(false)
     const [localItems, setLocalItems] = useState(project.quotes?.find((q: any) => q.isApproved)?.items || [])
     const [extraItems, setExtraItems] = useState<any[]>(project.deliveryExtraItems || [])
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState<string | null>(null)
 
     // Calculated metrics
     const approvedQuote = project.quotes?.find((q: any) => q.isApproved)
@@ -142,6 +141,29 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
             toast.error('Error de red al cerrar')
         } finally {
             setIsClosing(false)
+        }
+    }
+
+
+    const handleDownloadOrShare = async (url: string, fileName: string, title?: string) => {
+        const { isShareSupported, downloadOrShareFile } = await import('@/lib/mobile-utils');
+
+        if (!isShareSupported()) {
+            window.open(url, '_blank');
+            return;
+        }
+
+        setIsGeneratingPDF(url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al generar PDF');
+            const blob = await response.blob();
+            await downloadOrShareFile(blob, fileName, title);
+        } catch (error: any) {
+            console.error(error);
+            toast.error('Error al descargar el PDF');
+        } finally {
+            setIsGeneratingPDF(null);
         }
     }
 
@@ -1129,16 +1151,36 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         <Button
                                             className="w-full justify-start text-[11px] h-9 gap-2"
                                             variant="outline"
-                                            onClick={() => window.open(`/projects/${project.id}/delivery-pdf`, '_blank')}
+                                            onClick={() => handleDownloadOrShare(
+                                                `/projects/${project.id}/delivery-pdf`,
+                                                `Orden_Entrega_${(project.folioNumber || project.name).replace(/\s+/g, '_')}.pdf`,
+                                                `Orden de Entrega: ${project.name}`
+                                            )}
+                                            disabled={!!isGeneratingPDF}
                                         >
-                                            <Truck className="h-4 w-4" /> Orden de Entrega (Duplicado)
+                                            {isGeneratingPDF === `/projects/${project.id}/delivery-pdf` ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Truck className="h-4 w-4" />
+                                            )}
+                                            Orden de Entrega (Duplicado)
                                         </Button>
                                         <Button
                                             className="w-full justify-start text-[11px] h-9 gap-2"
                                             variant="outline"
-                                            onClick={() => window.open(`/quotes/${approvedQuote?.id}/pdf`, '_blank')}
+                                            onClick={() => handleDownloadOrShare(
+                                                `/quotes/${approvedQuote?.id}/pdf`,
+                                                `Cotizacion_${project.folioNumber || project.name}.pdf`,
+                                                `Cotización: ${project.name}`
+                                            )}
+                                            disabled={!!isGeneratingPDF}
                                         >
-                                            <FileText className="h-4 w-4" /> Cotización con Folio
+                                            {isGeneratingPDF === `/quotes/${approvedQuote?.id}/pdf` ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <FileText className="h-4 w-4" />
+                                            )}
+                                            Cotización con Folio
                                         </Button>
                                         <p className="text-[9px] text-muted-foreground leading-tight italic pt-1">
                                             * Se requiere haber guardado la información de entrega para que aparezca en el PDF.
