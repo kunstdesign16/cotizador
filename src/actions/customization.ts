@@ -25,11 +25,11 @@ export async function calculateCustomizationCost(input: CustomizationCalculation
     }
 
     // Find the matching range
-    const range = service.ranges.find(r => quantity >= r.minQty && quantity <= r.maxQty)
+    const range = service.ranges.find((r: any) => quantity >= r.minQty && quantity <= r.maxQty)
 
     // If no range found, use the one with the highest minQty if quantity is higher, 
     // or lowest if lower. But usually we should have exhaustive ranges.
-    const effectiveRange = range || service.ranges.sort((a, b) => b.minQty - a.minQty).find(r => quantity >= r.minQty)
+    const effectiveRange = range || service.ranges.sort((a: any, b: any) => b.minQty - a.minQty).find((r: any) => quantity >= r.minQty)
 
     if (!effectiveRange) {
         throw new Error(`No se encontró un rango de costos para la cantidad ${quantity}`)
