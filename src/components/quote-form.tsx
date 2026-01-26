@@ -10,8 +10,10 @@ import { Plus, Trash2, Save, ArrowLeft, Settings2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import QuoteItemCostDialog from './quote-item-cost-dialog'
-
+import CustomizationDialog from './customization-dialog'
 import { ClientCombobox } from './client-combobox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { ChevronDown, Sparkles } from 'lucide-react'
 
 // Types
 export type QuoteItem = {
@@ -36,6 +38,7 @@ export type QuoteItem = {
     unit_cost: number // Calculated Client Price
     subtotal: number
     isSubItem: boolean
+    costBreakdown?: any
 }
 
 export type QuoteFormData = {
@@ -73,6 +76,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
     const [projectId] = useState<string | null>(initialData?.projectId || null) // Store projectId from initialData
     const [showNewClientDialog, setShowNewClientDialog] = useState(false)
+    const [showCustomizationDialog, setShowCustomizationDialog] = useState(false)
 
     const [client, setClient] = useState(initialData?.client || { name: '', company: '', email: '', phone: '' })
     const [project, setProject] = useState(initialData?.project || { name: '', date: new Date().toISOString().split('T')[0], deliveryDate: '' })
@@ -254,6 +258,21 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
         }
     }
 
+    const handleCustomizationConfirm = (customData: any) => {
+        setItems([...items, {
+            id: Math.random().toString(36).substr(2, 9),
+            ...customData,
+            isSubItem: false,
+            // Fill mandatory manual costs with 0 since it's automated
+            cost_article: 0,
+            cost_workforce: 0,
+            cost_packaging: 0,
+            cost_transport: 0,
+            cost_equipment: 0,
+            cost_other: 0
+        }])
+    }
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="mx-auto max-w-6xl space-y-8">
@@ -391,9 +410,23 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                             )}
                         </div>
 
-                        <Button variant="outline" size="sm" onClick={addItem} className="gap-2">
-                            <Plus className="h-4 w-4" /> Agregar Item
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="gap-2 border-primary text-primary hover:bg-primary/5">
+                                        <Plus className="h-4 w-4" /> Agregar Item <ChevronDown className="h-3 w-3 opacity-50" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={addItem} className="gap-2">
+                                        <Plus className="h-4 w-4" /> Concepto Manual
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setShowCustomizationDialog(true)} className="gap-2 text-primary font-medium">
+                                        <Sparkles className="h-4 w-4" /> Personalización
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
 
                     {/* Mobile Card View (Visible on small screens) */}
@@ -523,12 +556,15 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                             </div>
                                         </td>
                                         <td className="p-2 relative">
-                                            <Input
-                                                value={item.concept}
-                                                onChange={(e) => handleItemChange(item.id, 'concept', e.target.value)}
-                                                placeholder="Descripción..."
-                                                className={`border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2 ${item.isSubItem ? 'pl-6 text-muted-foreground italic' : ''}`}
-                                            />
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    value={item.concept}
+                                                    onChange={(e) => handleItemChange(item.id, 'concept', e.target.value)}
+                                                    placeholder="Descripción..."
+                                                    className={`border-transparent shadow-none focus-visible:ring-0 bg-transparent px-2 ${item.isSubItem ? 'pl-6 text-muted-foreground italic' : ''}`}
+                                                />
+                                                {item.costBreakdown && <span title="Cálculo Automático"><Sparkles className="h-3 w-3 text-primary shrink-0" /></span>}
+                                            </div>
                                             {item.isSubItem && <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/50">↳</div>}
                                         </td>
                                         <td className="p-2">
@@ -691,6 +727,12 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                         />
                     )
                 })()}
+
+                <CustomizationDialog
+                    isOpen={showCustomizationDialog}
+                    onClose={() => setShowCustomizationDialog(false)}
+                    onConfirm={handleCustomizationConfirm}
+                />
 
                 {/* Quick Add Client Dialog */}
                 {showNewClientDialog && (

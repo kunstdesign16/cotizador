@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
-import { FileText } from 'lucide-react'
+import { FileText, Sparkles } from 'lucide-react'
 import { DashboardClient } from '@/components/dashboard-client'
 import { DashboardOrderList } from "@/components/dashboard-order-list"
 import { getCurrentUser } from '@/lib/auth-utils'
@@ -93,6 +93,17 @@ export default async function DashboardPage() {
                             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Inicio</h1>
                             <p className="text-sm text-muted-foreground">Resumen de actividad</p>
                         </div>
+                        {user && user.role === 'admin' && (
+                            <form action={async () => {
+                                'use server'
+                                const { seedCustomizationServices } = await import('@/actions/customization')
+                                await seedCustomizationServices()
+                            }}>
+                                <Button size="sm" variant="outline" className="text-xs gap-2 text-primary border-primary/20 bg-primary/5">
+                                    <Sparkles className="h-3 w-3" /> Inicializar Costos Automatizados
+                                </Button>
+                            </form>
+                        )}
                     </header>
 
                     {/* Summary Cards */}

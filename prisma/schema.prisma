@@ -124,6 +124,7 @@ model QuoteItem {
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   packagingConcept     String?
+  costBreakdown        Json?
   product              Product?       @relation(fields: [productId], references: [id])
   quote                Quote          @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   supplierOrder        SupplierOrder? @relation("QuoteItemToOrder", fields: [supplierOrderId], references: [id])
@@ -269,4 +270,29 @@ enum QuoteStatus {
   approved
   rejected
   replaced
+}
+
+model CustomizationService {
+  id                  String               @id @default(cuid())
+  name                String               @unique // LASER, VINYL, SERIGRAFIA, etc.
+  label               String               // Label para UI
+  machineCostPerMin   Float                @default(0)
+  wearCost            Float                @default(0)
+  setupFee            Float                @default(0) // Aplicable si qty <= 50
+  defaultMargin       Float                @default(30)
+  isActive            Boolean              @default(true)
+  ranges              CustomizationRange[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model CustomizationRange {
+  id            String               @id @default(cuid())
+  serviceId     String
+  minQty        Int
+  maxQty        Int
+  laborCost     Float                @default(0)
+  service       CustomizationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, minQty, maxQty])
 }

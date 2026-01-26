@@ -92,7 +92,8 @@ export async function saveQuote(data: any) {
                     profit_margin: Number(item.profit_margin || 0),
                     unit_cost: Number(item.unit_cost),
                     subtotal: Number(item.subtotal),
-                    isSubItem: item.isSubItem || false
+                    isSubItem: item.isSubItem || false,
+                    costBreakdown: item.costBreakdown || null
                 }))
             }
         }
@@ -206,7 +207,8 @@ export async function updateQuote(id: string, data: any) {
                 profit_margin: Number(item.profit_margin || 0),
                 unit_cost: Number(item.unit_cost),
                 subtotal: Number(item.subtotal),
-                isSubItem: item.isSubItem || false
+                isSubItem: item.isSubItem || false,
+                costBreakdown: item.costBreakdown || null
             }))
         })
 
@@ -418,7 +420,7 @@ export async function duplicateQuote(id: string) {
                 total: original.total,
 
                 items: {
-                    create: original.items.map(item => ({
+                    create: original.items.map((item: any) => ({
                         concept: item.concept,
                         quantity: item.quantity,
                         productId: item.productId,
@@ -435,7 +437,8 @@ export async function duplicateQuote(id: string) {
                         profit_margin: item.profit_margin,
                         unit_cost: item.unit_cost,
                         subtotal: item.subtotal,
-                        isSubItem: item.isSubItem
+                        isSubItem: item.isSubItem,
+                        costBreakdown: item.costBreakdown
                     }))
                 }
             }
