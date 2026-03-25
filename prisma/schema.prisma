@@ -35,34 +35,34 @@ model Client {
 }
 
 model Project {
-  id              String            @id @default(cuid())
-  name            String
-  description     String?
-  status          ProjectStatus     @default(draft)
-  financialStatus String            @default("ABIERTO")
-  isArchived      Boolean           @default(false)
-  totalCotizado   Float             @default(0)
-  totalIngresado  Float             @default(0)
-  totalEgresado   Float             @default(0)
-  clientId        String
-  userId          String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  deliveryDate    DateTime?
-  deliveryNotes   String?
+  id                 String            @id @default(cuid())
+  name               String
+  description        String?
+  status             ProjectStatus     @default(draft)
+  financialStatus    String            @default("ABIERTO")
+  isArchived         Boolean           @default(false)
+  totalCotizado      Float             @default(0)
+  totalIngresado     Float             @default(0)
+  totalEgresado      Float             @default(0)
+  clientId           String
+  userId             String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deliveryDate       DateTime?
+  deliveryNotes      String?
+  folioNumber        String?           @unique
+  invoiceUrl         String?
+  orderNumber        String?           @unique
+  transportType      String?
   deliveryExtraItems Json?
   sellerName         String?
-  folioNumber     String?           @unique
-  invoiceUrl      String?
-  orderNumber     String?           @unique
-  transportType   String?
-  incomes         Income[]
-  client          Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  user            User?             @relation(fields: [userId], references: [id])
-  quotes          Quote[]
-  supplierOrders  SupplierOrder[]
-  supplierTasks   SupplierTask[]
-  expenses        VariableExpense[]
+  incomes            Income[]
+  client             Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user               User?             @relation(fields: [userId], references: [id])
+  quotes             Quote[]
+  supplierOrders     SupplierOrder[]
+  supplierTasks      SupplierTask[]
+  expenses           VariableExpense[]
 }
 
 model Quote {
@@ -252,6 +252,31 @@ model VariableExpense {
   supplierOrder   SupplierOrder? @relation(fields: [supplierOrderId], references: [id])
 }
 
+model CustomizationService {
+  id                String               @id @default(cuid())
+  name              String               @unique
+  label             String
+  machineCostPerMin Float                @default(0)
+  wearCost          Float                @default(0)
+  setupFee          Float                @default(0)
+  defaultMargin     Float                @default(30)
+  isActive          Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  ranges            CustomizationRange[]
+}
+
+model CustomizationRange {
+  id        String               @id @default(cuid())
+  serviceId String
+  minQty    Int
+  maxQty    Int
+  laborCost Float                @default(0)
+  service   CustomizationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, minQty, maxQty])
+}
+
 enum SupplierType {
   RAW_MATERIAL
   SERVICE
@@ -270,29 +295,4 @@ enum QuoteStatus {
   approved
   rejected
   replaced
-}
-
-model CustomizationService {
-  id                  String               @id @default(cuid())
-  name                String               @unique // LASER, VINYL, SERIGRAFIA, etc.
-  label               String               // Label para UI
-  machineCostPerMin   Float                @default(0)
-  wearCost            Float                @default(0)
-  setupFee            Float                @default(0) // Aplicable si qty <= 50
-  defaultMargin       Float                @default(30)
-  isActive            Boolean              @default(true)
-  ranges              CustomizationRange[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-}
-
-model CustomizationRange {
-  id            String               @id @default(cuid())
-  serviceId     String
-  minQty        Int
-  maxQty        Int
-  laborCost     Float                @default(0)
-  service       CustomizationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@unique([serviceId, minQty, maxQty])
 }
