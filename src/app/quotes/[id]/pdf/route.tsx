@@ -42,6 +42,11 @@ export async function GET(
             user: quote.user ? {
                 name: (quote as any).user.name,
                 email: (quote as any).user.email
+            } : undefined,
+            seller: (quote as any).seller ? {
+                name: (quote as any).seller.name,
+                email: (quote as any).seller.email || null,
+                phone: (quote as any).seller.phone || null
             } : undefined
         };
 
