@@ -20,8 +20,8 @@
   --color-muted-foreground: var(--muted-foreground);
 
   /* Brand Fonts */
-  --font-sans: var(--font-fira-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-header: var(--font-bebas-neue), sans-serif;
+  --font-sans: var(--font-moga), ui-sans-serif, system-ui, sans-serif;
+  --font-header: var(--font-oswald), sans-serif;
 }
 
 :root {

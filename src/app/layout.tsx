@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { Fira_Sans, Bebas_Neue } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
 import { Toaster } from 'sonner'
 
-const firaSans = Fira_Sans({
-  variable: "--font-fira-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+const oswald = localFont({
+  src: "../../public/fonts/Oswald-VariableFont_wght.ttf",
+  variable: "--font-oswald",
 });
 
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  subsets: ["latin"],
-  weight: ["400"],
+const moga = localFont({
+  src: "../../public/fonts/moga.otf",
+  variable: "--font-moga",
 });
 
 export const metadata: Metadata = {
@@ -22,8 +20,8 @@ export const metadata: Metadata = {
   description: "Sistema de cotización y gestión",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/icon-192.png",
-    apple: "/icons/icon-512.png"
+    icon: "/icons/icon-192-v2.png",
+    apple: "/icons/icon-512-v2.png"
   }
 };
 
@@ -39,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${firaSans.variable} ${bebasNeue.variable} font-sans antialiased bg-muted/5`}
+        className={`${moga.variable} ${oswald.variable} font-sans antialiased bg-muted/5`}
       >
         <DashboardLayout>
           {children}

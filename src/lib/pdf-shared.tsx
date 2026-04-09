@@ -45,7 +45,7 @@ export const sharedStyles = StyleSheet.create({
         right: 0,
         bottom: 0,
         zIndex: -10, // Far back
-        opacity: 0.1, // 10% opacity as requested
+        opacity: 1, // 100% opacity as requested
     },
     watermark: {
         width: '100%',
@@ -148,9 +148,6 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer} fixed>
-        {LOGO_BASE64 ? (
-            <Image src={LOGO_BASE64} style={sharedStyles.logo} />
-        ) : null}
         <View style={sharedStyles.headerInfo}>
             <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
             <Text style={sharedStyles.dateText}>
@@ -172,9 +169,6 @@ export const PDFFooter = () => (
                     mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
                 </Text>
                 <View style={sharedStyles.footerDivider} />
-                <Text style={sharedStyles.slogan}>
-                    Desarrollando ideas, creando sueños.
-                </Text>
             </>
         ) : (
             <>

@@ -252,7 +252,7 @@ const DeliveryCopy = ({ project, label }: { project: any, label: string }) => {
                     <Text>Cliente</Text>
                 </View>
                 <View style={[styles.signatureBlock, { borderTopWidth: 0, textAlign: 'right', width: 250 }]}>
-                    <Text style={{ fontSize: 7, textAlign: 'right' }}>Kunst & Design - Desarrollando ideas, creando sueños.</Text>
+                    <Text style={{ fontSize: 7, textAlign: 'right' }}>Kunst & Design</Text>
                 </View>
             </View>
         </View>

@@ -35,7 +35,7 @@ export function generateProjectPDF(reportData: any) {
 
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    doc.text(!IS_GENERIC ? 'Desarrollando ideas, creando sueños' : 'Gestión Eficiente • Control Total', pageWidth / 2, 27, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'Kunst & Design' : 'Gestión Eficiente • Control Total', pageWidth / 2, 27, { align: 'center' })
 
     // Title
     doc.setFontSize(16)
@@ -293,7 +293,7 @@ export function generateClientPDF(reportData: any) {
 
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
-    doc.text(!IS_GENERIC ? 'Desarrollando ideas, creando sueños' : 'Sistema de Gestión de Clientes', pageWidth / 2, 27, { align: 'center' })
+    doc.text(!IS_GENERIC ? 'Kunst & Design' : 'Sistema de Gestión de Clientes', pageWidth / 2, 27, { align: 'center' })
 
     // Title
     doc.setFontSize(16)

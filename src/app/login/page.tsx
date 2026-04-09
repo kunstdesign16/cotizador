@@ -20,10 +20,7 @@ export default function LoginPage() {
                 className="w-full max-w-md space-y-8 rounded-3xl border border-secondary bg-white p-10 shadow-2xl"
             >
                 <div className="text-center flex flex-col items-center">
-                    <Image src="/logo.svg" alt="Kunst Design" width={150} height={150} className="h-36 w-auto mb-4" />
-                    <p className="text-[10px] font-brand-ui text-foreground/40 uppercase tracking-[0.2em] mb-8">
-                        Desarrollando ideas, creando sueños.
-                    </p>
+                    <Image src="/logo.svg" alt="Kunst Design" width={240} height={240} className="h-48 w-auto mb-4" />
                     <h1 className="text-4xl font-brand-header text-primary tracking-wide">Acceso al Sistema</h1>
                     <p className="text-sm text-foreground mt-2 font-light">Gestión de Cotizaciones y Proyectos</p>
                 </div>
