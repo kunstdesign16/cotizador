@@ -18,7 +18,7 @@ export async function getSellers() {
         });
         return sellers;
     } catch (_error) {
-        console.error("Error fetching sellers:", error);
+        console.error("Error fetching sellers:", _error);
         return [];
     }
 }
@@ -40,8 +40,8 @@ export async function createSeller(data: unknown) {
         revalidatePath('/sellers')
         revalidatePath('/quotes/new')
         return { success: true, seller }
-    } catch (error) {
-        console.error("Error creating seller:", error)
+    } catch (_error) {
+        console.error("Error creating seller:", _error)
         return { error: 'No se pudo crear el vendedor' }
     }
 }
@@ -65,7 +65,7 @@ export async function updateSeller(id: string, data: unknown) {
         revalidatePath('/quotes/[id]', 'layout')
         return { success: true, seller }
     } catch (_error) {
-        console.error("Error updating seller:", error)
+        console.error("Error updating seller:", _error)
         return { error: 'No se pudo actualizar el vendedor' }
     }
 }
@@ -81,7 +81,7 @@ export async function deleteSeller(id: string) {
         revalidatePath('/quotes/new')
         return { success: true }
     } catch (_error) {
-        console.error("Error deleting seller:", error)
+        console.error("Error deleting seller:", _error)
         return { error: 'No se pudo eliminar el vendedor' }
     }
 }
