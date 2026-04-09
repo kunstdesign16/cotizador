@@ -145,8 +145,7 @@ export const QuoteDocument = ({ quote }: {
         folioNumber?: string;
         orderNumber?: string;
         client?: { name: string; company?: string };
-        sellerName?: string;
-        user?: { name: string | null; email: string };
+        seller?: { name: string; email?: string | null; phone?: string | null };
         items?: Array<{
             concept: string;
             quantity: number;
