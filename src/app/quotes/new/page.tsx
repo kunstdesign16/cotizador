@@ -1,5 +1,6 @@
 import { saveQuote } from '@/actions/quotes'
 import { getClients } from '@/actions/clients'
+import { getSellers } from '@/actions/sellers'
 import QuoteForm from '@/components/quote-form'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +13,7 @@ export default async function NewQuotePage({
     try {
         const { client: clientId, projectId } = await searchParams
         const clients = await getClients()
+        const sellers = await getSellers()
 
         // Pre-fill data if clientId or projectId is present
         let initialData = undefined
@@ -69,6 +71,7 @@ export default async function NewQuotePage({
                 title={projectId ? `Nueva Cotización - ${projectName}` : "Nueva Cotización (Costo + Margen)"}
                 action={saveQuote}
                 clients={serializedClients}
+                sellers={sellers}
                 initialData={initialData}
             />
         )

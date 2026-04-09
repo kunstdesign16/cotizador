@@ -57,16 +57,18 @@ export type QuoteFormData = {
     }
     items: QuoteItem[]
     isr_rate?: number
+    sellerId?: string
 }
 
 interface QuoteFormProps {
     initialData?: QuoteFormData
     clients?: { id: string, name: string, company?: string | null, email?: string | null, phone?: string | null }[]
+    sellers?: { id: string, name: string }[]
     action: (data: any) => Promise<{ success: boolean; id?: string }>
     title: string
 }
 
-export default function QuoteForm({ initialData, clients = [], action, title }: QuoteFormProps) {
+export default function QuoteForm({ initialData, clients = [], sellers = [], action, title }: QuoteFormProps) {
     const router = useRouter()
     // Client State
     const [loading, setLoading] = useState(false)
@@ -74,6 +76,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
     const [isrRate, setIsrRate] = useState(initialData?.isr_rate || 0)
     const [applyIsr, setApplyIsr] = useState(initialData?.isr_rate ? initialData.isr_rate > 0 : false)
     const [selectedClientId, setSelectedClientId] = useState<string | null>(initialData?.clientId || null)
+    const [selectedSellerId, setSelectedSellerId] = useState<string | null>(initialData?.sellerId || null)
     const [projectId] = useState<string | null>(initialData?.projectId || null) // Store projectId from initialData
     const [showNewClientDialog, setShowNewClientDialog] = useState(false)
     const [showCustomizationDialog, setShowCustomizationDialog] = useState(false)
@@ -137,6 +140,7 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                 iva_rate: 0.16,
                 isr_rate: isrRate / 100,
                 clientId: selectedClientId,
+                sellerId: selectedSellerId,
                 projectId: projectId // Pass projectId to action
             })
             if (result && result.success) {
@@ -368,12 +372,17 @@ export default function QuoteForm({ initialData, clients = [], action, title }: 
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">Fecha de Entrega</label>
-                                    <Input
-                                        type="date"
-                                        value={project.deliveryDate || ''}
-                                        onChange={e => setProject({ ...project, deliveryDate: e.target.value })}
-                                    />
+                                    <label className="text-xs text-muted-foreground">Vendedor (Opcional)</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={selectedSellerId || ""}
+                                        onChange={(e) => setSelectedSellerId(e.target.value || null)}
+                                    >
+                                        <option value="">Selecciona un vendedor...</option>
+                                        {sellers.map((s) => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         </div>

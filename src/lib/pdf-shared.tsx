@@ -46,6 +46,7 @@ export const sharedStyles = StyleSheet.create({
         bottom: 0,
         zIndex: -10, // Far back
         opacity: 1, // 100% opacity as requested
+        left: '6mm', // Mueve la imagen 6mm  hacia la derecha para alinear el logo
     },
     watermark: {
         width: '100%',
@@ -75,8 +76,8 @@ export const sharedStyles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
+        borderBottomWidth: 0, // Removed intersecting line
+        borderBottomColor: 'transparent',
         paddingBottom: 10,
         zIndex: 100, // Ensure logo is on top
     },
@@ -148,6 +149,7 @@ export const PDFWatermark = ({ isApproved = true }: { isApproved?: boolean }) =>
 
 export const PDFHeader = ({ date }: { date: string | Date }) => (
     <View style={sharedStyles.headerContainer} fixed>
+        <View style={{ flex: 1 }} />
         <View style={sharedStyles.headerInfo}>
             <Text style={sharedStyles.locationText}>Tlajomulco de Zúñiga, Jalisco</Text>
             <Text style={sharedStyles.dateText}>
@@ -161,12 +163,14 @@ export const PDFHeader = ({ date }: { date: string | Date }) => (
     </View>
 );
 
-export const PDFFooter = () => (
+export const PDFFooter = ({ seller }: { seller?: { name?: string, email?: string, phone?: string } | null }) => (
     <View style={sharedStyles.footerContainer} fixed>
         {!IS_GENERIC ? (
             <>
                 <Text style={sharedStyles.contactLine}>
-                    mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign
+                    {seller ?
+                        `${seller.name || ''}  |  ${seller.email || ''}  |  ${seller.phone || ''}  |  @kunstanddesign`
+                        : `mayelam@kunstdesign.com.mx  |  +52 33 51 18 11 22  |  @kunstanddesign`}
                 </Text>
                 <View style={sharedStyles.footerDivider} />
             </>

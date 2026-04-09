@@ -9,7 +9,7 @@ export async function saveQuote(data: any) {
     // data is the JSON payload from the client state
     // In a real app we should validate this with Zod again
 
-    const { client, project: _project, items, iva_rate: _iva_rate, clientId, projectId } = data
+    const { client, project: _project, items, iva_rate: _iva_rate, clientId, projectId, sellerId } = data
 
     // VALIDATION: If projectId is provided, verify the project exists
     if (projectId) {
@@ -71,6 +71,7 @@ export async function saveQuote(data: any) {
             clientId: finalClientId,
             userId: user?.id || null,
             projectId: projectId || null,
+            sellerId: sellerId || null,
             items: {
                 create: data.items.map((item: any) => ({
                     concept: item.concept,
@@ -180,7 +181,8 @@ export async function updateQuote(id: string, data: any) {
                 iva_amount,
                 isr_rate: Number(data.isr_rate || 0),
                 isr_amount,
-                total: total
+                total: total,
+                sellerId: data.sellerId || null
             }
         })
 
@@ -408,6 +410,7 @@ export async function duplicateQuote(id: string) {
                 clientId: original.clientId,
                 userId: user?.id || original.userId,
                 projectId: original.projectId,
+                sellerId: original.sellerId,
                 isApproved: false,
 
                 subtotal: original.subtotal,

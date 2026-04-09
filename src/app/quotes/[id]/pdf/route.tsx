@@ -18,7 +18,8 @@ export async function GET(
                 client: true,
                 items: true,
                 project: true,
-                user: true
+                user: true,
+                seller: true
             }
         });
 

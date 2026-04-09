@@ -1,5 +1,6 @@
 import { updateQuote } from '@/actions/quotes'
 import { getClients } from '@/actions/clients'
+import { getSellers } from '@/actions/sellers'
 import QuoteForm, { QuoteFormData } from '@/components/quote-form'
 import { notFound } from "next/navigation"
 
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export default async function EditQuotePage({ params }: { params: Promise<{ id: string }> }) {
     const { prisma } = await import('@/lib/prisma')
     const { id } = await params
-    const [quote, clients] = await Promise.all([
+    const [quote, clients, sellers] = await Promise.all([
         prisma.quote.findUnique({
             where: { id },
             include: {
@@ -16,7 +17,8 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
                 items: true
             }
         }),
-        getClients()
+        getClients(),
+        getSellers()
     ])
 
     if (!quote) {
@@ -32,6 +34,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
             phone: quote.client.phone || ''
         },
         clientId: quote.clientId,
+        sellerId: quote.sellerId || undefined,
         project: {
             name: quote.project_name,
             date: quote.createdAt.toISOString().split('T')[0]
@@ -65,6 +68,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
             title="Editar Cotización"
             initialData={formData}
             clients={serializedClients}
+            sellers={sellers}
             action={updateQuoteWithId}
         />
     )

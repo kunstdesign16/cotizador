@@ -265,7 +265,7 @@ export const QuoteDocument = ({ quote }: {
                     </Text>
                 </View>
 
-                <PDFFooter />
+                <PDFFooter seller={quote.seller} />
             </Page>
         </Document>
     );
