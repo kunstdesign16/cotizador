@@ -63,6 +63,20 @@ model Project {
   supplierOrders     SupplierOrder[]
   supplierTasks      SupplierTask[]
   expenses           VariableExpense[]
+  sellerId           String?
+  seller             Seller?           @relation(fields: [sellerId], references: [id])
+}
+
+model Seller {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+  projects  Project[]
 }
 
 model Quote {
@@ -86,10 +100,12 @@ model Quote {
   isApproved     Boolean           @default(false)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+  sellerId       String?
   incomes        Income[]
   client         Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   project        Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user           User?             @relation(fields: [userId], references: [id])
+  seller         Seller?           @relation(fields: [sellerId], references: [id])
   items          QuoteItem[]
   supplierOrders SupplierOrder[]
   supplierTasks  SupplierTask[]

@@ -280,7 +280,10 @@ export async function approveQuote(quoteId: string) {
     try {
         const quote = await (prisma as any).quote.findUnique({
             where: { id: quoteId },
-            include: { project: true }
+            include: { 
+                project: true,
+                seller: true
+            }
         }) as any
 
         if (!quote || !quote.projectId) return { success: false, error: 'Cotización o Proyecto no encontrado' }
@@ -304,12 +307,15 @@ export async function approveQuote(quoteId: string) {
                 where: { id: quoteId },
                 data: { isApproved: true, status: 'approved' }
             }),
-            // 2. Update project status and snapshot financial totals from this quote
+            // 2. Update project status and snapshot financial totals (and seller) from this quote
             (prisma as any).project.update({
                 where: { id: quote.projectId },
                 data: {
                     status: 'active',
-                    totalCotizado: quote.total
+                    totalCotizado: quote.total,
+                    sellerId: quote.sellerId,
+                    // If we have a seller relationship pre-loaded or can find it
+                    sellerName: quote.seller?.name || null
                 }
             })
         ])

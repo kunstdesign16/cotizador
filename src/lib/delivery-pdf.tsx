@@ -171,7 +171,7 @@ const DeliveryCopy = ({ project, label }: { project: any, label: string }) => {
         }))
     ].filter(item => item.boxes > 0 && item.piecesPerBox > 0);
 
-    const sellerName = project.sellerName || (project.user?.name && project.user.name !== 'Administrador'
+    const sellerName = project.seller?.name || project.sellerName || (project.user?.name && project.user.name !== 'Administrador'
         ? project.user.name
         : project.user?.email || 'Vendedor Kunst');
 

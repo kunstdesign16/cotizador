@@ -73,74 +73,98 @@ export default function SellersPage() {
     }
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+        <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-secondary/50 shadow-sm">
                 <div>
-                    <h1 className="text-3xl font-brand-header text-primary">Vendedores</h1>
-                    <p className="text-muted-foreground">Administra los vendedores para las cotizaciones</p>
+                    <h1 className="text-3xl font-brand-header text-primary tracking-tight">Gestión de Vendedores</h1>
+                    <p className="text-muted-foreground text-sm">Administra el equipo comercial y sus datos de contacto para documentos oficiales.</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={openCreate} className="font-brand-header">
+                        <Button onClick={openCreate} className="font-brand-header rounded-xl hover:scale-105 transition-transform">
                             <Plus className="w-4 h-4 mr-2" />
-                            Nuevo Vendedor
+                            Añadir Vendedor
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[425px] rounded-2xl">
                         <DialogHeader>
-                            <DialogTitle className="font-brand-header text-xl">
-                                {editingSeller ? 'Editar Vendedor' : 'Nuevo Vendedor'}
+                            <DialogTitle className="font-brand-header text-2xl text-primary">
+                                {editingSeller ? 'Editar Perfil' : 'Nuevo Integrante'}
                             </DialogTitle>
+                            <p className="text-xs text-muted-foreground">Ingresa los datos tal como deben aparecer en los pies de página de los PDFs.</p>
                         </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Nombre</label>
-                                <Input name="name" defaultValue={editingSeller?.name} required placeholder="Nombre completo" />
+                                <label className="text-xs font-bold text-primary/70 uppercase tracking-wider ml-1">Nombre Completo</label>
+                                <Input name="name" defaultValue={editingSeller?.name} required placeholder="Ej. Juan Pérez" className="rounded-xl border-secondary focus:ring-primary/20" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Email</label>
-                                <Input name="email" type="email" defaultValue={editingSeller?.email} placeholder="correo@ejemplo.com" />
+                                <label className="text-xs font-bold text-primary/70 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                                <Input name="email" type="email" defaultValue={editingSeller?.email} placeholder="juan@kunstdesign.com.mx" className="rounded-xl border-secondary focus:ring-primary/20" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Teléfono</label>
-                                <Input name="phone" defaultValue={editingSeller?.phone} placeholder="10 dígitos" />
+                                <label className="text-xs font-bold text-primary/70 uppercase tracking-wider ml-1">Teléfono de contacto</label>
+                                <Input name="phone" defaultValue={editingSeller?.phone} placeholder="+52 33 ..." className="rounded-xl border-secondary focus:ring-primary/20" />
                             </div>
-                            <div className="flex justify-end pt-4">
-                                <Button type="submit">Guardar</Button>
+                            <div className="flex justify-end pt-4 gap-3">
+                                <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl">Cancelar</Button>
+                                <Button type="submit" className="rounded-xl px-8">Confirmar Guardado</Button>
                             </div>
                         </form>
                     </DialogContent>
                 </Dialog>
             </div>
 
-            <div className="border rounded-lg bg-white overflow-hidden shadow-sm">
+            <div className="bg-white rounded-3xl border border-secondary shadow-xl shadow-primary/5 overflow-hidden transition-all duration-300 hover:shadow-primary/10">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-muted/30">
-                            <TableHead className="font-semibold text-primary">Nombre</TableHead>
-                            <TableHead className="font-semibold text-primary">Email</TableHead>
-                            <TableHead className="font-semibold text-primary">Teléfono</TableHead>
-                            <TableHead className="text-right font-semibold text-primary">Acciones</TableHead>
+                        <TableRow className="bg-secondary/20 hover:bg-secondary/20 border-b border-secondary">
+                            <TableHead className="py-5 font-bold text-primary/80 uppercase text-[10px] tracking-widest pl-8">Vendedor</TableHead>
+                            <TableHead className="py-5 font-bold text-primary/80 uppercase text-[10px] tracking-widest">Contacto Digital</TableHead>
+                            <TableHead className="py-5 font-bold text-primary/80 uppercase text-[10px] tracking-widest">Línea Directa</TableHead>
+                            <TableHead className="py-5 text-right font-bold text-primary/80 uppercase text-[10px] tracking-widest pr-8">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow><TableCell colSpan={4} className="text-center h-24">Cargando...</TableCell></TableRow>
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-40">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                        <span className="text-sm font-medium text-muted-foreground">Sincronizando equipo...</span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
                         ) : sellers.length === 0 ? (
-                            <TableRow><TableCell colSpan={4} className="text-center h-24 text-muted-foreground">No hay vendedores registrados</TableCell></TableRow>
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-64">
+                                    <div className="max-w-[280px] mx-auto space-y-3 opacity-60">
+                                        <Users className="w-12 h-12 mx-auto text-primary/20" />
+                                        <p className="text-lg font-brand-header text-primary">No hay vendedores todavía</p>
+                                        <p className="text-xs leading-relaxed text-muted-foreground">Comienza agregando al primer integrante de tu equipo para personalizar las cotizaciones.</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
                         ) : (
                             sellers.map((seller) => (
-                                <TableRow key={seller.id}>
-                                    <TableCell className="font-medium">{seller.name}</TableCell>
-                                    <TableCell>{seller.email || '-'}</TableCell>
-                                    <TableCell>{seller.phone || '-'}</TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => openEdit(seller)}>
-                                                <Edit className="w-4 h-4 text-primary" />
+                                <TableRow key={seller.id} className="group hover:bg-secondary/10 transition-colors">
+                                    <TableCell className="py-6 pl-8">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                                {seller.name.charAt(0)}
+                                            </div>
+                                            <span className="font-semibold text-primary">{seller.name}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">{seller.email || <span className="text-xs italic opacity-40">Sin correo</span>}</TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">{seller.phone || <span className="text-xs italic opacity-40">Sin teléfono</span>}</TableCell>
+                                    <TableCell className="text-right pr-8">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" onClick={() => openEdit(seller)} className="rounded-lg hover:bg-primary/10 hover:text-primary transition-all">
+                                                <Edit className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(seller.id)}>
-                                                <Trash2 className="w-4 h-4 text-destructive" />
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(seller.id)} className="rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all">
+                                                <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -149,6 +173,11 @@ export default function SellersPage() {
                         )}
                     </TableBody>
                 </Table>
+            </div>
+            <div className="text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium opacity-50">
+                    SISTEMA DE GESTIÓN INTERNA • KUNST & DESIGN
+                </p>
             </div>
         </div>
     )

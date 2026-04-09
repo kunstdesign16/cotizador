@@ -17,6 +17,7 @@ export async function GET(
             include: {
                 client: true,
                 user: true,
+                seller: true,
                 quotes: {
                     where: { isApproved: true },
                     include: {

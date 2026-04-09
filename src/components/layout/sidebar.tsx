@@ -27,6 +27,7 @@ const navigation = [
     { name: 'Cotizaciones', href: '/quotes/new', icon: FileText, match: '/quotes' },
     { name: 'Clientes', href: '/clients', icon: Users },
     { name: 'Proveedores', href: '/suppliers', icon: Truck },
+    { name: 'Vendedores', href: '/sellers', icon: Users },
 ]
 
 const adminNavigation = [
