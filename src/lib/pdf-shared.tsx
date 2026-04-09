@@ -162,7 +162,7 @@ export const PDFHeader = ({ date }: { date: string | Date }) => (
     </View>
 );
 
-export const PDFFooter = ({ seller }: { seller?: { name?: string, email?: string, phone?: string } | null }) => (
+export const PDFFooter = ({ seller }: { seller?: { name?: string | null, email?: string | null, phone?: string | null } | null }) => (
     <View style={sharedStyles.footerContainer} fixed>
         {!IS_GENERIC ? (
             <>
