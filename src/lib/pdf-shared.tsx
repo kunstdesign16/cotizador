@@ -22,7 +22,7 @@ const getBase64Image = (filePath: string) => {
     }
 };
 
-const LOGO_BASE64 = getBase64Image(LOGO_PATH);
+// const LOGO_BASE64 = getBase64Image(LOGO_PATH);
 const WATERMARK_BASE64 = getBase64Image(WATERMARK_PATH);
 
 const IS_GENERIC = process.env.NEXT_PUBLIC_GENERIC_PDF === 'true';

@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
-import { prisma } from '@/lib/prisma'
 
 async function checkAdmin() {
     const cookieStore = await cookies()
@@ -14,7 +13,11 @@ export async function toggleUserStatus(userId: string, currentStatus: boolean) {
     const isAdmin = await checkAdmin()
     if (!isAdmin) return { success: false, error: 'No autorizado' }
 
+    const { prisma } = await import('@/lib/prisma')
     try {
+        // Prevent deactivating oneself (optional but good UX)
+        // We'd need to know current user ID, but for now we skip that check unless critical
+
         await prisma.user.update({
             where: { id: userId },
             data: { isActive: !currentStatus }
@@ -30,6 +33,7 @@ export async function updateUserRole(userId: string, newRole: string) {
     const isAdmin = await checkAdmin()
     if (!isAdmin) return { success: false, error: 'No autorizado' }
 
+    const { prisma } = await import('@/lib/prisma')
     try {
         await prisma.user.update({
             where: { id: userId },

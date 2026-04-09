@@ -68,6 +68,7 @@ export default function CustomizationDialog({ isOpen, onClose, onConfirm, defaul
         if (selectedServiceName && quantity > 0) {
             handleCalculate()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedServiceName, quantity, time])
 
     const handleConfirm = () => {

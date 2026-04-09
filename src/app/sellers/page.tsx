@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { getSellers, createSeller, updateSeller, deleteSeller } from "@/actions/sellers"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
 export default function SellersPage() {

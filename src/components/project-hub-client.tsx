@@ -16,12 +16,6 @@ import {
     Plus,
     History as HistoryIcon,
     Info,
-    X,
-    ExternalLink,
-    Construction,
-    Hammer,
-    Package,
-    Save,
     Loader2
 } from 'lucide-react'
 import { BackButton } from "@/components/ui/back-button"

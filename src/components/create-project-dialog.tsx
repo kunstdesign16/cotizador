@@ -63,7 +63,7 @@ export function CreateProjectDialog({ clients }: CreateProjectDialogProps) {
                     variant: "destructive"
                 })
             }
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: "Error",
                 description: "Error de red al crear el proyecto.",
