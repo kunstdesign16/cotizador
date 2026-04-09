@@ -92,7 +92,7 @@ export async function getCustomizationServices() {
  * Admin action to seed or update services
  */
 export async function upsertCustomizationService(data: any) {
-    const { id, name, label, machineCostPerMin, wearCost, setupFee, defaultMargin, ranges } = data
+    const { id: _id, name, label, machineCostPerMin, wearCost, setupFee, defaultMargin, ranges } = data
 
     const service = await (prisma as any).customizationService.upsert({
         where: { name: name },

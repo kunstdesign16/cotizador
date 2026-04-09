@@ -17,7 +17,7 @@ export async function getSellers() {
             orderBy: { name: 'asc' }
         });
         return sellers;
-    } catch (error) {
+    } catch (_error) {
         console.error("Error fetching sellers:", error);
         return [];
     }
@@ -52,7 +52,7 @@ export async function updateSeller(id: string, data: unknown) {
 
         if (!result.success) {
             return {
-                error: result.error.errors[0]?.message || 'Error de validación'
+                error: result.error.issues[0]?.message || 'Error de validación'
             }
         }
 
@@ -64,7 +64,7 @@ export async function updateSeller(id: string, data: unknown) {
         revalidatePath('/sellers')
         revalidatePath('/quotes/[id]', 'layout')
         return { success: true, seller }
-    } catch (error) {
+    } catch (_error) {
         console.error("Error updating seller:", error)
         return { error: 'No se pudo actualizar el vendedor' }
     }
@@ -80,7 +80,7 @@ export async function deleteSeller(id: string) {
         revalidatePath('/sellers')
         revalidatePath('/quotes/new')
         return { success: true }
-    } catch (error) {
+    } catch (_error) {
         console.error("Error deleting seller:", error)
         return { error: 'No se pudo eliminar el vendedor' }
     }
