@@ -29,7 +29,7 @@ export async function createSeller(data: unknown) {
 
         if (!result.success) {
             return {
-                error: result.error.errors[0]?.message || 'Error de validación'
+                error: result.error.issues[0]?.message || 'Error de validación'
             }
         }
 

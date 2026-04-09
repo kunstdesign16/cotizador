@@ -330,6 +330,7 @@ export async function approveQuote(quoteId: string) {
     }
 }
 
+/*
 async function syncIncomeFromQuote(quoteId: string) {
     const { prisma } = await import('@/lib/prisma')
 
@@ -360,6 +361,7 @@ async function syncIncomeFromQuote(quoteId: string) {
         })
     }
 }
+*/
 
 export async function deleteQuote(id: string) {
     const { prisma } = await import('@/lib/prisma')
