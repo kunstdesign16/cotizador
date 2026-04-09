@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import DeleteQuoteButton from '@/components/delete-quote-button'
+// import { ArrowLeft } from 'lucide-react'
+// import DeleteQuoteButton from '@/components/delete-quote-button'
 import { QuoteProjectManager } from '@/components/quote-project-manager'
 import { BackButton } from "@/components/ui/back-button"
 import { getCurrentUser } from '@/lib/auth-utils'

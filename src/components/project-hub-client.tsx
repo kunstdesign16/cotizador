@@ -16,6 +16,8 @@ import {
     Plus,
     History as HistoryIcon,
     Info,
+    X,
+    ExternalLink,
     Loader2
 } from 'lucide-react'
 import { BackButton } from "@/components/ui/back-button"

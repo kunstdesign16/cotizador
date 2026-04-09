@@ -83,7 +83,7 @@ export default async function DashboardPage() {
         })
         const serializedOrders = JSON.parse(JSON.stringify(recentOrders))
 
-        const pendingTasksCount = 0
+        // const pendingTasksCount = 0
 
         return (
             <div className="min-h-screen bg-background p-4 sm:p-8">

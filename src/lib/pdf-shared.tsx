@@ -8,7 +8,7 @@ Font.registerHyphenationCallback(word => [word]);
 
 // Base64 Image loading for robust rendering
 const SITIO_ROOT = process.cwd();
-const LOGO_PATH = path.join(SITIO_ROOT, 'public/brand/logo.png');
+// const LOGO_PATH = path.join(SITIO_ROOT, 'public/brand/logo.png');
 const WATERMARK_PATH = path.join(SITIO_ROOT, 'public/brand/bg_quote_final.png');
 
 // Helper to get base64 image
