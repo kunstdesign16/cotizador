@@ -229,6 +229,30 @@ export async function deleteProject(projectId: string) {
     }
 }
 
+export async function updateProject(projectId: string, data: { name: string; clientId: string; description?: string }) {
+    try {
+        const { prisma } = await import('@/lib/prisma')
+        
+        const project = await (prisma as any).project.update({
+            where: { id: projectId },
+            data: {
+                name: data.name,
+                clientId: data.clientId,
+                description: data.description,
+            }
+        })
+
+        revalidatePath(`/projects/${projectId}`)
+        revalidatePath('/projects')
+        revalidatePath('/dashboard')
+
+        return { success: true, data: project }
+    } catch (err: any) {
+        console.error('Error updating project:', err)
+        return { success: false, error: err.message || 'Error al actualizar el proyecto' }
+    }
+}
+
 export async function updateProjectStatus(projectId: string, status: 'draft' | 'active' | 'closed' | 'cancelled') {
     const { prisma } = await import('@/lib/prisma')
 

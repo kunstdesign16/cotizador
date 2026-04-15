@@ -33,6 +33,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { RegisterOrderPaymentDialog } from './register-order-payment-dialog'
 import { closeProject, getProjectClosureEligibility, updateProjectStatus, updateDeliveryInfo, updateDeliveryItemDimensions, fixLegacyProjectNumbers } from '@/actions/projects'
+import { EditProjectDialog } from './edit-project-dialog'
 import {
     Select,
     SelectContent,
@@ -43,9 +44,10 @@ import {
 
 interface ProjectHubClientProps {
     project: any
+    clients: any[]
 }
 
-export function ProjectHubClient({ project }: ProjectHubClientProps) {
+export function ProjectHubClient({ project, clients }: ProjectHubClientProps) {
     const router = useRouter()
     const [isApproving, setIsApproving] = useState<string | null>(null)
     const [isClosing, setIsClosing] = useState(false)
@@ -320,9 +322,7 @@ export function ProjectHubClient({ project }: ProjectHubClientProps) {
                                         </Button>
                                     </Link>
                                 )}
-                                <Button variant="outline" size="sm" className="rounded-xl border-secondary text-primary font-brand-header uppercase tracking-wider text-xs">
-                                    Editar Proyecto
-                                </Button>
+                                <EditProjectDialog project={project} clients={clients} />
                             </>
                         )}
                         {!isFinancialmenteCerrado && project.status !== 'draft' && (

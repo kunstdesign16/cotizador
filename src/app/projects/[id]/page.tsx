@@ -60,8 +60,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         }
 
         const serializedProject = JSON.parse(JSON.stringify(project))
+        const clients = await (prisma as any).client.findMany({
+            orderBy: { name: 'asc' }
+        })
 
-        return <ProjectHubClient project={serializedProject} />
+        return <ProjectHubClient project={serializedProject} clients={JSON.parse(JSON.stringify(clients))} />
     } catch (error: any) {
         console.error('Error in ProjectPage:', error)
         return (
