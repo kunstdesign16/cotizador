@@ -176,10 +176,10 @@ export default function QuoteForm({ initialData, clients = [], sellers = [], act
                 if (field === 'profit_margin') newMargin = Number(value)
                 if (field === 'quantity') newQuantity = Number(value)
 
-                // Calculate Unit Price = Internal / (1 - Margin/100) -- This is Gross Margin
-                // User might mean Markup? "Costo + 30%". Let's use Markup: Cost * (1 + Margin/100). It's safer and easier.
-                const markup = 1 + (newMargin / 100)
-                const newUnitCost = newInternalCost * markup
+                // Calculate Unit Price = Internal / (1 - Margin/100) -- Gross Margin (Utilidad Real)
+                const safeMargin = Math.min(newMargin, 99.9)
+                const marginFactor = 1 - (safeMargin / 100)
+                const newUnitCost = marginFactor > 0 ? (newInternalCost / marginFactor) : (newInternalCost * 1000) // Fallback if margin is somehow 100%
 
                 const newSubtotal = newQuantity * newUnitCost
 
@@ -201,9 +201,10 @@ export default function QuoteForm({ initialData, clients = [], sellers = [], act
             if (item.id === id) {
                 const newInternalCost = (costs.cost_article || 0) + (costs.cost_workforce || 0) + (costs.cost_packaging || 0) + (costs.cost_other || 0) + (costs.cost_transport || 0) + (costs.cost_equipment || 0)
 
-                // Recalculate with new cost
-                const markup = 1 + (item.profit_margin / 100)
-                const newUnitCost = newInternalCost * markup
+                // Recalculate with new cost using Gross Margin
+                const safeMargin = Math.min(item.profit_margin, 99.9)
+                const marginFactor = 1 - (safeMargin / 100)
+                const newUnitCost = marginFactor > 0 ? (newInternalCost / marginFactor) : (newInternalCost * 1000)
                 const newSubtotal = item.quantity * newUnitCost
 
                 return {
@@ -224,8 +225,9 @@ export default function QuoteForm({ initialData, clients = [], sellers = [], act
 
         if (enabled) {
             setItems(items.map(item => {
-                const markup = 1 + (newMargin / 100)
-                const newUnitCost = item.internal_unit_cost * markup
+                const safeMargin = Math.min(newMargin, 99.9)
+                const marginFactor = 1 - (safeMargin / 100)
+                const newUnitCost = marginFactor > 0 ? (item.internal_unit_cost / marginFactor) : (item.internal_unit_cost * 1000)
                 const newSubtotal = item.quantity * newUnitCost
                 return {
                     ...item,

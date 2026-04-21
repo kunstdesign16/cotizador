@@ -43,9 +43,10 @@ export async function calculateCustomizationCost(input: CustomizationCalculation
 
     const unitCost = machineCost + laborCost + wearCost
 
-    // unitPrice = unitCost * marginMultiplier
-    const marginMultiplier = 1 + (service.defaultMargin / 100)
-    const unitPrice = unitCost * marginMultiplier
+    // unitPrice = unitCost / (1 - margin / 100) -- Gross Margin (Utilidad Real)
+    const safeMargin = Math.min(service.defaultMargin, 99.9)
+    const marginFactor = 1 - (safeMargin / 100)
+    const unitPrice = marginFactor > 0 ? (unitCost / marginFactor) : (unitCost * 1000)
 
     // total = (unitPrice * quantity) + setupFee (solo si quantity <= 50)
     const applySetupFee = quantity <= 50
