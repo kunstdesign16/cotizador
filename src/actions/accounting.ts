@@ -230,7 +230,19 @@ export async function getAccountingTrends() {
             return sum + (i.amount - iva)
         }, 0)
 
-        const totalExpense = variableExpenses.reduce((sum, e) => sum + e.amount, 0) + fixedExpenses.reduce((sum, e) => sum + e.amount, 0)
+        // IVA cobrado (de ingresos)
+        const totalIVACobrado = incomes.reduce((sum, i) => {
+            return sum + ((i.iva || 0) > 0 ? (i.iva || 0) : (i.amount - (i.amount / 1.16)))
+        }, 0)
+
+        // IVA pagado (de egresos variables) — amount en VariableExpense es el SUBTOTAL
+        const totalIVAPagado = variableExpenses.reduce((sum, e) => sum + (e.iva || 0), 0)
+
+        // Egresos = subtotales (sin IVA) de variables + gastos fijos
+        const totalExpenseVariable = variableExpenses.reduce((sum, e) => sum + e.amount, 0)
+        const totalExpenseFixed = fixedExpenses.reduce((sum, e) => sum + e.amount, 0)
+        const totalExpense = totalExpenseVariable + totalExpenseFixed
+
         const totalISR = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
 
         return {
@@ -238,7 +250,10 @@ export async function getAccountingTrends() {
             label: format(startDate, 'MMM yy', { locale: es }),
             income: totalIncome,
             expense: totalExpense,
-            utilidad: totalIncome - totalExpense - totalISR
+            utilidad: totalIncome - totalExpense - totalISR,
+            ivaCobrado: totalIVACobrado,
+            ivaPagado: totalIVAPagado,
+            ivaBalance: totalIVACobrado - totalIVAPagado
         }
     }))
 

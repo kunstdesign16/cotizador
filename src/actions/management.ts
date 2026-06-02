@@ -39,14 +39,15 @@ export async function getManagementDashboardData() {
                 return sum + (i.amount - iva)
             }, 0)
 
-            const expenseTotal = expenses.reduce((sum, e) => sum + e.amount, 0)
+            // expense.amount = subtotal (sin IVA) — consistent after migration
+            const expenseSubtotal = expenses.reduce((sum, e) => sum + e.amount, 0)
             const isrTotal = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
 
             monthlyStats.push({
                 month: monthLabel,
                 ingresos: incomeSubtotal,
-                egresos: expenseTotal,
-                utilidad: incomeSubtotal - expenseTotal - isrTotal
+                egresos: expenseSubtotal,
+                utilidad: incomeSubtotal - expenseSubtotal - isrTotal
             })
         }
 

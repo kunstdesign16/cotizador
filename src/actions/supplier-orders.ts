@@ -177,10 +177,21 @@ export async function duplicateSupplierOrder(id: string) {
 }
 
 /**
- * NEW: Register a payment for an order and sync status.
+ * Register a payment for an order and sync status.
  * This is the ONLY source of truth for order payments.
+ * @param orderId - ID of the supplier order
+ * @param amount - Subtotal del pago (SIN IVA)
+ * @param iva - IVA del pago (16% del subtotal por defecto)
+ * @param description - Descripción del pago
+ * @param paymentMethod - Método de pago
  */
-export async function registerOrderPayment(orderId: string, amount: number, description?: string, paymentMethod?: string) {
+export async function registerOrderPayment(
+    orderId: string,
+    amount: number,       // Subtotal (sin IVA)
+    iva: number,          // IVA del pago
+    description?: string,
+    paymentMethod?: string
+) {
     const { prisma } = await import('@/lib/prisma')
     try {
         const order = await prisma.supplierOrder.findUnique({
@@ -197,19 +208,19 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
             if (project?.status === 'CERRADO') return { success: false, error: 'El proyecto está CERRADO. No se pueden registrar pagos.' }
         }
 
-        // 1. Calculate Total Ordered
+        // 1. Calculate Total Ordered (subtotal de ítems, sin IVA)
         const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items as any[])
         const totalOrdered = Array.isArray(items) ? items.reduce((sum: number, item: any) =>
             sum + (item.unitCost || 0) * (item.quantity || 0), 0
         ) : 0
 
-        // 2. Calculate Total already paid (from VariableExpense)
+        // 2. Calculate Total already paid subtotals (from VariableExpense.amount = subtotal)
         const totalPaidSoFar = order.expenses.reduce((sum: number, exp: any) => sum + exp.amount, 0)
         const pendingBalance = totalOrdered - totalPaidSoFar
 
         // 3. Validation
         if (amount <= 0) return { success: false, error: 'El monto debe ser mayor a cero' }
-        if (amount > pendingBalance + 0.01) { // Small epsilon
+        if (amount > pendingBalance + 0.01) { // Small epsilon for floating point
             return {
                 success: false,
                 error: `El pago ($${amount}) excede el saldo pendiente ($${pendingBalance.toFixed(2)})`
@@ -218,12 +229,12 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
 
         // 4. Create the expense in a transaction
         await prisma.$transaction(async (tx) => {
-            // A. Create Expense
+            // A. Create Expense — amount = subtotal, iva = IVA explícito
             await tx.variableExpense.create({
                 data: {
                     description: description || `Pago Orden: ${order.supplier.name}`,
-                    amount: amount,
-                    iva: amount - (amount / 1.16),
+                    amount: amount,   // Subtotal (sin IVA)
+                    iva: iva,         // IVA explícito del pago
                     category: 'Material',
                     date: new Date(),
                     supplierId: order.supplierId,
@@ -234,7 +245,7 @@ export async function registerOrderPayment(orderId: string, amount: number, desc
                 } as any
             })
 
-            // B. Determine new status
+            // B. Determine new payment status based on subtotals
             const newTotalPaid = totalPaidSoFar + amount
             let newStatus = 'PARTIAL'
             if (newTotalPaid >= totalOrdered - 0.01) {

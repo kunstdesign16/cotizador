@@ -88,6 +88,7 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
 
     const totalISR = uniqueApprovedQuotes.reduce((sum: number, q: any) => sum + (q.isr_amount || 0), 0)
 
+    // netProfit: ingresos(s/IVA) - egresos variables(s/IVA ya almacenados como subtotal) - gastos fijos - ISR
     const netProfit = totalIncomeSubtotal - totalExpenses - totalISR
 
     return (
@@ -227,7 +228,7 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Comparativa Mensual</CardTitle>
+                            <CardTitle>Comparativa Mensual (Valores Netos s/IVA)</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="rounded-md border overflow-hidden">
@@ -235,9 +236,12 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                                     <thead className="bg-muted">
                                         <tr>
                                             <th className="p-3 text-left">Mes</th>
-                                            <th className="p-3 text-right">Ingresos</th>
-                                            <th className="p-3 text-right">Egresos</th>
-                                            <th className="p-3 text-right">Utilidad</th>
+                                            <th className="p-3 text-right">Ingresos (s/IVA)</th>
+                                            <th className="p-3 text-right">Egresos (s/IVA)</th>
+                                            <th className="p-3 text-right">IVA Cobrado</th>
+                                            <th className="p-3 text-right">IVA Pagado</th>
+                                            <th className="p-3 text-right">Balance IVA</th>
+                                            <th className="p-3 text-right">Utilidad Real</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -246,7 +250,12 @@ export function AccountingDashboard({ summary, trends, projects, suppliers, mont
                                                 <td className="p-3 font-medium capitalize">{t.label}</td>
                                                 <td className="p-3 text-right text-green-600">${t.income.toLocaleString()}</td>
                                                 <td className="p-3 text-right text-red-600">${t.expense.toLocaleString()}</td>
-                                                <td className="p-3 text-right font-bold">${t.utilidad.toLocaleString()}</td>
+                                                <td className="p-3 text-right text-green-700 text-xs">${(t.ivaCobrado || 0).toLocaleString()}</td>
+                                                <td className="p-3 text-right text-red-700 text-xs">${(t.ivaPagado || 0).toLocaleString()}</td>
+                                                <td className={`p-3 text-right text-xs font-medium ${(t.ivaBalance || 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                                    ${(t.ivaBalance || 0).toLocaleString()}
+                                                </td>
+                                                <td className={`p-3 text-right font-bold ${t.utilidad >= 0 ? '' : 'text-red-600'}`}>${t.utilidad.toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -283,7 +292,7 @@ function CashFlowChart({ incomes, expenses }: { incomes: any[], expenses: any[] 
                     className="w-full bg-red-500 rounded-t-lg transition-all duration-500"
                     style={{ height: `${(totalExp / max) * 100}%`, minHeight: '4px' }}
                 />
-                <span className="text-xs font-medium">Egresos (c/IVA)</span>
+                <span className="text-xs font-medium">Egresos (s/IVA)</span>
                 <span className="text-[10px] text-muted-foreground">${totalExp.toLocaleString()}</span>
             </div>
         </div>
@@ -299,7 +308,7 @@ function ExpenseDistributionChart({ variable, fixed }: { variable: any[], fixed:
         <div className="h-full flex flex-col justify-center space-y-6">
             <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                    <span>Gastos Variables (c/IVA)</span>
+                    <span>Gastos Variables (s/IVA)</span>
                     <span className="font-medium">${totalVar.toLocaleString()}</span>
                 </div>
                 <div className="w-full h-4 bg-muted rounded-full overflow-hidden">

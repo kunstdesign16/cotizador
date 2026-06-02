@@ -29,7 +29,7 @@ export async function registerPayment({
         if (orderId) {
             // Redirect to the specialized order payment logic
             const { registerOrderPayment } = await import('./supplier-orders')
-            return await registerOrderPayment(orderId, amount, description)
+            return await registerOrderPayment(orderId, amount, iva, description)
         }
 
         if (finalQuoteId) {

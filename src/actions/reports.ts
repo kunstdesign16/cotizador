@@ -111,6 +111,7 @@ export async function getProjectReport(projectId: string) {
             const iva = income.iva > 0 ? income.iva : (income.amount - (income.amount / 1.16))
             return sum + (income.amount - iva)
         }, 0)
+        // expense.amount = subtotal (sin IVA) — consistent after migration
         const totalEgresos = project.expenses.reduce((sum, expense) => sum + expense.amount, 0)
         const isrRetenido = approvedQuote?.isr_amount || 0
         const utilidad = totalIngresos - totalEgresos - isrRetenido
@@ -361,7 +362,7 @@ export async function getClientReport(clientId: string) {
             return sum + (income.amount - iva)
         }, 0)
 
-        // Calculate total expenses from projects
+        // Calculate total expenses from projects — expense.amount = subtotal (sin IVA)
         const totalEgresos = client.projects.reduce((sum, project) => {
             return sum + project.expenses.reduce((expSum, exp) => expSum + exp.amount, 0)
         }, 0)

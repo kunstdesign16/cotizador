@@ -90,8 +90,8 @@ export function ProjectHubClient({ project, clients }: ProjectHubClientProps) {
         return sum + (e.amount - expenseIva)
     }, 0) || 0
 
-    // Utilidad Real = Ingresos (sin IVA) - Egresos (Con IVA) - ISR Retenido
-    const utilidad = totalIngresadoSubtotal - totalEgresado - isrRetenido
+    // Utilidad Real = Ingresos (sin IVA) - Egresos (sin IVA) - ISR Retenido
+    const utilidad = totalIngresadoSubtotal - totalEgresadoSubtotal - isrRetenido
     const totalCobrado = totalIngresado // Alias for clarity in financials tab
 
     const isFinancialmenteCerrado = project.financialStatus === 'CERRADO'

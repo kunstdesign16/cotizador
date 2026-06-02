@@ -2,6 +2,8 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
 const ADMIN_EMAILS = [
     'direccion@kunstdesign.com.mx',
@@ -9,12 +11,6 @@ const ADMIN_EMAILS = [
 ]
 
 export async function login(prevState: any, formData: FormData) {
-    let bcrypt;
-    try {
-        bcrypt = await import('bcryptjs');
-    } catch (_e) {
-        console.error('Failed to load bcryptjs');
-    }
 
     const emailInput = formData.get('email') as string
     const password = formData.get('password') as string
@@ -26,7 +22,6 @@ export async function login(prevState: any, formData: FormData) {
     const email = emailInput.toLowerCase().trim()
 
     try {
-        const { prisma } = await import('@/lib/prisma')
         const user = await prisma.user.findUnique({
             where: { email }
         })
@@ -79,18 +74,15 @@ export async function login(prevState: any, formData: FormData) {
         cookieStore.set('user_name', user.name || 'Usuario', cookieOptions)
         cookieStore.set('auth_refresh', Date.now().toString(), cookieOptions)
 
-        redirect('/dashboard')
     } catch (_error: any) {
-        if (_error.message === 'NEXT_REDIRECT') {
-            throw _error
-        }
         console.error('Login error:', _error)
         return { error: 'Ocurrió un error: ' + _error.message }
     }
+
+    redirect('/dashboard')
 }
 
 export async function register(prevState: any, formData: FormData) {
-    const bcrypt = await import('bcryptjs')
     const name = formData.get('name') as string
     const emailInput = formData.get('email') as string
     const password = formData.get('password') as string
@@ -102,7 +94,6 @@ export async function register(prevState: any, formData: FormData) {
     const email = emailInput.toLowerCase().trim()
 
     try {
-        const { prisma } = await import('@/lib/prisma')
         const existingUser = await prisma.user.findUnique({
             where: { email }
         })
@@ -124,14 +115,12 @@ export async function register(prevState: any, formData: FormData) {
             }
         })
 
-        redirect('/login')
     } catch (_error: any) {
-        if (_error.message === 'NEXT_REDIRECT') {
-            throw _error
-        }
         console.error('Register error:', _error)
         return { error: 'Error: ' + _error.message }
     }
+
+    redirect('/login')
 }
 
 export async function logout() {
