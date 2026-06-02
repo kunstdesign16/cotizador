@@ -6,59 +6,61 @@ export async function getManagementDashboardData() {
     try {
         const { prisma } = await import('@/lib/prisma')
 
-        // 1. Get Monthly Stats (Last 6 months)
-        const monthlyStats = []
+        // 1. Prepare Monthly Stats promises (Last 6 months)
+        const monthlyStatsPromises = []
         for (let i = 5; i >= 0; i--) {
             const date = subMonths(new Date(), i)
             const start = startOfMonth(date)
             const end = endOfMonth(date)
             const monthLabel = format(date, 'MMM yy')
 
-            const [incomes, expenses, quotes] = await Promise.all([
-                prisma.income.findMany({
-                    where: { date: { gte: start, lte: end } },
-                    select: { amount: true, iva: true }
-                }),
-                prisma.variableExpense.findMany({
-                    where: { date: { gte: start, lte: end } },
-                    select: { amount: true, iva: true }
-                }),
-                prisma.quote.findMany({
-                    where: {
-                        isApproved: true,
-                        project: {
-                            createdAt: { gte: start, lte: end }
-                        }
-                    },
-                    select: { isr_amount: true }
+            monthlyStatsPromises.push(
+                Promise.all([
+                    prisma.income.findMany({
+                        where: { date: { gte: start, lte: end } },
+                        select: { amount: true, iva: true }
+                    }),
+                    prisma.variableExpense.findMany({
+                        where: { date: { gte: start, lte: end } },
+                        select: { amount: true, iva: true }
+                    }),
+                    prisma.quote.findMany({
+                        where: {
+                            isApproved: true,
+                            project: {
+                                createdAt: { gte: start, lte: end }
+                            }
+                        },
+                        select: { isr_amount: true }
+                    })
+                ]).then(([incomes, expenses, quotes]) => {
+                    const incomeSubtotal = incomes.reduce((sum, i) => {
+                        const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
+                        return sum + (i.amount - iva)
+                    }, 0)
+
+                    // expense.amount = subtotal (sin IVA) — consistent after migration
+                    const expenseSubtotal = expenses.reduce((sum, e) => sum + e.amount, 0)
+                    const isrTotal = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
+
+                    return {
+                        month: monthLabel,
+                        ingresos: incomeSubtotal,
+                        egresos: expenseSubtotal,
+                        utilidad: incomeSubtotal - expenseSubtotal - isrTotal
+                    }
                 })
-            ])
-
-            const incomeSubtotal = incomes.reduce((sum, i) => {
-                const iva = (i.iva || 0) > 0 ? i.iva : (i.amount - (i.amount / 1.16))
-                return sum + (i.amount - iva)
-            }, 0)
-
-            // expense.amount = subtotal (sin IVA) — consistent after migration
-            const expenseSubtotal = expenses.reduce((sum, e) => sum + e.amount, 0)
-            const isrTotal = quotes.reduce((sum, q) => sum + (q.isr_amount || 0), 0)
-
-            monthlyStats.push({
-                month: monthLabel,
-                ingresos: incomeSubtotal,
-                egresos: expenseSubtotal,
-                utilidad: incomeSubtotal - expenseSubtotal - isrTotal
-            })
+            )
         }
 
-        // 2. Project Counts
-        const activeProjects = await (prisma as any).project.count({
+        // 2. Prepare other promises
+        const activeProjectsPromise = (prisma as any).project.count({
             where: {
                 status: { notIn: ['closed', 'cancelled'] },
                 financialStatus: 'ABIERTO'
             }
         })
-        const closedProjects = await (prisma as any).project.count({
+        const closedProjectsPromise = (prisma as any).project.count({
             where: {
                 OR: [
                     { financialStatus: 'CERRADO' },
@@ -67,11 +69,7 @@ export async function getManagementDashboardData() {
                 status: { not: 'cancelled' }
             }
         })
-
-        // 3. Control Lists
-
-        // Projects with negative utility (Real expenses > Real income)
-        const negativeUtilityProjects = await (prisma as any).project.findMany({
+        const negativeUtilityProjectsPromise = (prisma as any).project.findMany({
             where: {
                 status: { in: ['active', 'closed'] },
                 financialStatus: 'ABIERTO',
@@ -79,10 +77,7 @@ export async function getManagementDashboardData() {
             },
             include: { client: true }
         })
-        const filteredNegativeProjects = negativeUtilityProjects.filter((p: any) => p.totalEgresado > p.totalIngresado)
-
-        // Orders with pending balance
-        const pendingOrders = await prisma.supplierOrder.findMany({
+        const pendingOrdersPromise = prisma.supplierOrder.findMany({
             where: {
                 paymentStatus: { not: 'PAID' }
             },
@@ -91,6 +86,37 @@ export async function getManagementDashboardData() {
                 expenses: true
             }
         })
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const agedProjectsPromise = (prisma as any).project.findMany({
+            where: {
+                status: { in: ['active'] },
+                financialStatus: 'ABIERTO',
+                createdAt: { lt: thirtyDaysAgo }
+            },
+            include: { client: true },
+            orderBy: { createdAt: 'asc' }
+        })
+
+        // 3. Resolve everything in parallel
+        const [
+            monthlyStats,
+            activeProjects,
+            closedProjects,
+            negativeUtilityProjects,
+            pendingOrders,
+            agedProjects
+        ] = await Promise.all([
+            Promise.all(monthlyStatsPromises),
+            activeProjectsPromise,
+            closedProjectsPromise,
+            negativeUtilityProjectsPromise,
+            pendingOrdersPromise,
+            agedProjectsPromise
+        ])
+
+        const filteredNegativeProjects = negativeUtilityProjects.filter((p: any) => p.totalEgresado > p.totalIngresado)
+
         // Manually calculate remaining balance for each order
         const ordersWithBalance = pendingOrders.map((order: any) => {
             const totalItems = (order.items as any[] || []).reduce((acc, item) => acc + (item.quantity * (item.unitCost || 0)), 0)
@@ -102,20 +128,6 @@ export async function getManagementDashboardData() {
                 balance: totalItems - paid
             }
         }).filter(o => o.balance > 0)
-
-        // Aged Projects (> 30 days in non-closed status)
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-        const agedProjects = await (prisma as any).project.findMany({
-            where: {
-                status: { in: ['active'] },
-                financialStatus: 'ABIERTO',
-                createdAt: { lt: thirtyDaysAgo }
-            },
-            include: { client: true },
-            orderBy: { createdAt: 'asc' }
-        })
 
         return {
             monthlyStats,
